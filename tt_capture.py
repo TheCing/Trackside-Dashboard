@@ -177,11 +177,15 @@ def run_analyzer() -> dict:
     """Run tt_analyze.py as a subprocess and report how many trials
     were newly added."""
     try:
+        env = os.environ.copy()
+        env["PYTHONIOENCODING"] = "utf-8"
         proc = subprocess.run(
             [sys.executable, str(BASE / "tt_analyze.py")],
-            cwd=str(BASE), capture_output=True, text=True, timeout=300,
+            cwd=str(BASE), capture_output=True, timeout=300,
+            env=env,
         )
-        out = (proc.stdout or "") + (proc.stderr or "")
+        out = (proc.stdout or b"").decode("utf-8", errors="replace") + \
+              (proc.stderr or b"").decode("utf-8", errors="replace")
         added = 0
         import re
         m = re.search(r"Added (\d+) new trial", out)
