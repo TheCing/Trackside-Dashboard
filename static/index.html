@@ -342,6 +342,21 @@
   .odds-star-p2{background:#2a1c30;color:var(--pink)}
   .odds-val{font-size:11px;font-weight:800;min-width:38px;text-align:right;flex-shrink:0}
   .odds-ge2{font-size:8.5px;color:var(--mut);white-space:nowrap;min-width:44px;flex-shrink:0}
+  .odds-row.expandable{cursor:pointer} .odds-row.expandable:hover{border-color:var(--accent)}
+  .odds-expand-icon{font-size:8px;color:var(--mut);margin-left:auto;transition:transform .15s;flex-shrink:0}
+  .odds-row.expanded .odds-expand-icon{transform:rotate(90deg);color:var(--accent)}
+  .odds-detail{grid-column:1/-1;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 10px;
+               animation:odds-detail-in .15s ease;margin:-1px 0 2px}
+  @keyframes odds-detail-in{from{opacity:0;max-height:0}to{opacity:1;max-height:200px}}
+  .odds-src-row{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:11px;border-bottom:1px solid #1a1c22}
+  .odds-src-row:last-child{border-bottom:none}
+  .odds-src-label{min-width:100px;font-weight:600;color:var(--mut);font-size:10.5px}
+  .odds-src-stars{font-weight:700;min-width:28px;font-size:11px}
+  .odds-src-aff{font-size:10px;color:var(--mut);min-width:42px}
+  .odds-src-formula{flex:1;font-size:10px;color:#555;font-family:'SF Mono',Consolas,monospace}
+  .odds-src-rate{font-weight:700;min-width:44px;text-align:right;font-size:11px}
+  .odds-src-bar{width:40px;height:4px;background:#1a1c22;border-radius:2px;overflow:hidden;flex-shrink:0}
+  .odds-src-bar-fill{height:100%;border-radius:2px}
   @media(max-width:900px){.odds-grid{grid-template-columns:repeat(3,1fr)}}
   @media(max-width:600px){.odds-grid{grid-template-columns:repeat(2,1fr)}}
   /* ---- lineage tree ---- */
@@ -1789,32 +1804,55 @@ function parentCol(p,label){
     ${note}${tg?`<div style="margin-top:4px">${tg}</div>`:''}
     <div style="margin-top:6px">${chipsList(p.sparks)}</div></div>`;
 }
+const SRC_LABELS = {p1:'Parent 1',p2:'Parent 2',p1_gp1:'P1 GP1',p1_gp2:'P1 GP2',p2_gp1:'P2 GP1',p2_gp2:'P2 GP2'};
+const SRC_COLOR = {p1:'var(--accent)',p2:'var(--pink)',p1_gp1:'var(--accent)',p1_gp2:'var(--accent)',p2_gp1:'var(--pink)',p2_gp2:'var(--pink)'};
+
 function sparkOddsGrid(odds, mode){
   const items = odds[mode] || [];
   if(!items.length) return '<span class="muted">No spark data</span>';
-  // Group by type
   const typeLabel = {aptitude:'Aptitude',pink:'Aptitude',unique:'Unique/Green',green:'Unique/Green',
                      skill:'White Skills',white:'White Skills',scenario:'Scenario',race:'Race Wins'};
   const typeColor = {aptitude:'var(--pink)',pink:'var(--pink)',unique:'var(--green)',green:'var(--green)',
                      skill:'var(--txt)',white:'var(--txt)',scenario:'var(--txt)',race:'var(--white)'};
   let lastType = '';
-  return items.map(s=>{
+  return items.map((s,idx)=>{
     const cat = s.cat || s.type;
     let header = '';
     const tl = typeLabel[cat] || cat;
     if(tl !== lastType){ lastType = tl; header = `<div class="odds-type-header" style="color:${typeColor[cat]||'var(--txt)'}">${tl}</div>`; }
-    const ge2 = s.ge2_pct != null ? `<span class="odds-ge2">&ge;2: ${s.ge2_pct}%</span>` : '';
-    const bar = Math.min(100, s.ge1_pct);
     const barColor = s.ge1_pct >= 50 ? 'var(--ok)' : s.ge1_pct >= 20 ? 'var(--accent)' : 'var(--mut)';
     const stars1 = s.stars_p1 ? `<span class="odds-star odds-star-p1">${s.stars_p1}★</span>` : '';
     const stars2 = s.stars_p2 ? `<span class="odds-star odds-star-p2">${s.stars_p2}★</span>` : '';
     const oddsHi = _isBreedMatch(s.name);
     const hiStyle = oddsHi ? 'background:rgba(218,165,32,0.12);border-radius:4px' : '';
     const hiName = oddsHi ? 'color:#f0d060;font-weight:600' : '';
-    return `${header}<div class="odds-row" style="${hiStyle}">
+    const hasSrc = s.sources && s.sources.length > 0;
+    const expandCls = hasSrc ? ' expandable' : '';
+    const expandIcon = hasSrc ? '<span class="odds-expand-icon">&#9654;</span>' : '';
+    // Build source detail (hidden by default)
+    let detailHtml = '';
+    if(hasSrc){
+      const srcRows = s.sources.map(src=>{
+        const lbl = SRC_LABELS[src.src]||src.src;
+        const clr = SRC_COLOR[src.src]||'var(--mut)';
+        const srcBarColor = src.ge1_pct >= 50 ? 'var(--ok)' : src.ge1_pct >= 20 ? 'var(--accent)' : 'var(--mut)';
+        const starStr = '★'.repeat(Math.min(src.stars,3));
+        return `<div class="odds-src-row">
+          <span class="odds-src-label" style="color:${clr}">${lbl}</span>
+          <span class="odds-src-stars" style="color:${clr}">${src.stars}${starStr}</span>
+          <span class="odds-src-aff">${src.aff} aff</span>
+          <span class="odds-src-formula">${src.base_pct}% × (1+${src.aff}/100)</span>
+          <div class="odds-src-bar"><div class="odds-src-bar-fill" style="width:${Math.min(100,src.ge1_pct)}%;background:${srcBarColor}"></div></div>
+          <span class="odds-src-rate" style="color:${srcBarColor}">${src.ge1_pct}%</span>
+        </div>`;
+      }).join('');
+      detailHtml = `<div class="odds-detail hide" data-detail="${idx}">${srcRows}</div>`;
+    }
+    return `${header}<div class="odds-row${expandCls}" style="${hiStyle}" data-idx="${idx}">
       <div class="odds-name" style="${hiName}">${esc(s.name)} ${stars1}${stars2}</div>
       <div class="odds-val" style="color:${barColor}">${s.ge1_pct}%</div>
-    </div>`;
+      ${expandIcon}
+    </div>${detailHtml}`;
   }).join('');
 }
 
@@ -1870,6 +1908,24 @@ function lineageTree(d){
   </div>`;
 }
 
+function _bindOddsExpand(){
+  $('#oddsGrid').querySelectorAll('.odds-row.expandable').forEach(row=>{
+    row.onclick=()=>{
+      const idx = row.dataset.idx;
+      const detail = $('#oddsGrid').querySelector(`.odds-detail[data-detail="${idx}"]`);
+      if(!detail) return;
+      const isOpen = !detail.classList.contains('hide');
+      // Close all others first
+      $('#oddsGrid').querySelectorAll('.odds-detail').forEach(d=>d.classList.add('hide'));
+      $('#oddsGrid').querySelectorAll('.odds-row.expanded').forEach(r=>r.classList.remove('expanded'));
+      if(!isOpen){
+        detail.classList.remove('hide');
+        row.classList.add('expanded');
+      }
+    };
+  });
+}
+
 function openPairDetail(d){
   // Highlight: WANT list + universal high-act% skills + style/distance keywords
   _BREED_HI = new Set(WANT.map(w=>w.toLowerCase()));
@@ -1896,7 +1952,7 @@ function openPairDetail(d){
     </div>
     <div class="odds-grid" id="oddsGrid">${sparkOddsGrid(d.spark_odds, 'full_run')}</div>
     <p class="muted" style="font-size:9px;margin-top:4px">
-      P(&ge;1 proc) per spark. <b>Full run</b> = 2 events. Stars: <span style="color:var(--accent)">P1</span> / <span style="color:var(--pink)">P2</span>. Individual affinity model (Hakuraku/Polaris).
+      P(&ge;1 proc) per spark. <b>Full run</b> = 2 events. Stars: <span style="color:var(--accent)">P1</span> / <span style="color:var(--pink)">P2</span>. Click any spark to see which tree entity contributes what.
     </p>` : '';
 
   const treeHtml = lineageTree(d);
@@ -1912,15 +1968,17 @@ function openPairDetail(d){
     <div class="dmain" style="margin-top:8px;gap:8px">${parentCol(d.p1,'P1')}${parentCol(d.p2,'P2')}</div>
     </details>`;
   $('#dClose').onclick=()=>{_BREED_HI=new Set();_BREED_HI_KW=[];$('#detail').classList.add('hide');};
-  // Odds toggle
+  // Odds toggle + expandable source details
   if(hasOdds){
     $$('.odds-btn').forEach(btn=>{
       btn.onclick=()=>{
         $$('.odds-btn').forEach(b=>{b.classList.remove('active');b.classList.add('ghost');});
         btn.classList.add('active');btn.classList.remove('ghost');
         $('#oddsGrid').innerHTML = sparkOddsGrid(d.spark_odds, btn.dataset.mode);
+        _bindOddsExpand();
       };
     });
+    _bindOddsExpand();
   }
   $('#detail').classList.remove('hide');
 }

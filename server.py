@@ -444,6 +444,27 @@ def compute_spark_odds(p1: dict, p2: dict, compatibility: dict,
             s_p1 = sum(sp["sources"].get(k, 0) for k in ("p1", "p1_gp1", "p1_gp2"))
             s_p2 = sum(sp["sources"].get(k, 0) for k in ("p2", "p2_gp1", "p2_gp2"))
 
+            # Per-source breakdown (for expandable detail)
+            sources_detail = []
+            for sk, stars in sp["sources"].items():
+                if stars <= 0:
+                    continue
+                base = _base_rate(rate_cat, stars)
+                if base <= 0:
+                    continue
+                aff = src_aff.get(sk, 0)
+                rate = min(1.0, base * (1 + aff / 100))
+                per_event_pct = round(rate * 100, 2)
+                src_ge1 = _binom_ge(1, n_events, rate)
+                sources_detail.append({
+                    "src": sk,
+                    "stars": stars,
+                    "aff": aff,
+                    "base_pct": round(base * 100, 2),
+                    "rate_pct": per_event_pct,
+                    "ge1_pct": round(src_ge1 * 100, 2),
+                })
+
             entries.append({
                 "name": sp["name"],
                 "type": sp["type"],
@@ -452,6 +473,7 @@ def compute_spark_odds(p1: dict, p2: dict, compatibility: dict,
                 "stars_p2": s_p2,
                 "ge1_pct": round(ge1 * 100, 2),
                 "ge2_pct": round(ge2 * 100, 2) if ge2 > 0.001 else None,
+                "sources": sources_detail,
             })
 
         type_order = {"blue": -1, "aptitude": 0, "pink": 0, "unique": 1, "green": 1,
