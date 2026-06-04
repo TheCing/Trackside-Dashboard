@@ -20,23 +20,25 @@
   .src{color:var(--mut);font-size:11px;display:flex;align-items:center;padding-right:12px;border-right:1px solid var(--line);margin-right:4px}
   .tabs{display:flex;gap:0;margin-left:auto;align-items:stretch}
   .tab{padding:0 18px;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;color:var(--mut);
-       font-size:13px;font-weight:600;letter-spacing:0.02em;transition:color .2s,border-color .2s;display:flex;align-items:center}
-  .tab:hover{color:var(--txt)}
-  .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
-  .hdr-actions{display:flex;align-items:center;gap:4px;margin-left:10px;flex-shrink:0}
-  .hdr-actions button{font-size:11px;padding:4px 10px;white-space:nowrap}
+       font-size:13px;font-weight:600;letter-spacing:0.02em;transition:color .2s,border-color .2s,background .2s;display:flex;align-items:center}
+  .tab:hover{color:var(--txt);background:rgba(255,255,255,0.02)}
+  .tab.active{color:var(--accent);border-bottom-color:var(--accent);background:rgba(90,159,212,0.04)}
+  .hdr-actions{display:flex;align-items:center;gap:6px;margin-left:10px;flex-shrink:0}
+  .hdr-actions button{font-size:11px;padding:5px 12px;white-space:nowrap;border-radius:6px}
   main{padding:16px 20px;max-width:1300px;margin:0 auto}
   .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-  input,select,button,textarea{font:inherit;color:var(--txt);background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:6px 10px;transition:border-color .2s,box-shadow .2s}
+  input,select,button,textarea{font:inherit;color:var(--txt);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:7px 12px;transition:border-color .2s,box-shadow .2s}
   input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px var(--glow)}
-  button{cursor:pointer;background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;font-size:12.5px;
-         transition:background .15s,transform .1s,box-shadow .15s}
-  button:hover{background:#6aafe4;box-shadow:0 2px 8px rgba(90,159,212,0.3)}
-  button:active{transform:scale(0.97)}
-  button.ghost{background:var(--panel2);color:var(--mut);border-color:var(--line);font-weight:500}
-  button.ghost:hover{color:var(--txt);border-color:#3a3d46;background:#22252e}
+  button{cursor:pointer;background:linear-gradient(135deg,var(--accent),#4a8fb5);border-color:transparent;color:#fff;font-weight:600;font-size:12.5px;
+         transition:background .15s,transform .1s,box-shadow .15s,border-color .15s}
+  button:hover{background:linear-gradient(135deg,#6aafe4,#5a9fd4);box-shadow:0 2px 10px rgba(90,159,212,0.35);transform:translateY(-1px)}
+  button:active{transform:scale(0.97) translateY(0)}
+  button.ghost{background:var(--panel2);color:var(--mut);border-color:var(--line);font-weight:500;
+               background-image:none}
+  button.ghost:hover{color:var(--txt);border-color:#3a3d46;background:#22252e;background-image:none;box-shadow:0 1px 4px rgba(0,0,0,0.2)}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:10px;
-        box-shadow:var(--card-shadow);transition:border-color .2s}
+        box-shadow:var(--card-shadow);transition:border-color .2s,box-shadow .2s}
+  .card:hover{border-color:#2d3040}
   table{width:100%;border-collapse:collapse}
   th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
   th{color:var(--mut);font-weight:600;font-size:11px;position:sticky;top:0;background:var(--panel);text-transform:uppercase;letter-spacing:.04em}
@@ -61,11 +63,11 @@
   .c-aff{color:#ff5d8f} .c-g1{color:#5fd07a} .c-wh{color:#e0a94a} .c-sc{color:#5aa8ff} .c-target{color:#a98bff}
   .ufoot{display:flex;gap:6px;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);flex-wrap:wrap}
   .ufoot .note-in{flex:2;min-width:160px} .ufoot .tag-in{flex:1;min-width:120px} .ufoot .note-in,.ufoot .tag-in{width:auto}
-  .ufoot button{font-size:11px;padding:4px 10px}
+  .ufoot button{font-size:11px;padding:5px 11px;border-radius:6px}
   /* ---- spark chips (estilo propio) ---- */
   /* pildoras estilo uma.moe: rect redondeada, borde de tipo, "N*" con estrella en color */
   /* pildoras estilo uma.moe: relleno oscuro tintado por tipo, texto del color del tipo */
-  .pl{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:6px;margin:2px;
+  .pl{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:7px;margin:2px;
       font-size:12px;background:#22242a;border:1px solid #30333b;white-space:nowrap;transition:transform .1s,box-shadow .15s}
   .pl:hover{transform:translateY(-1px);box-shadow:0 2px 6px rgba(0,0,0,0.3)}
   .pl .st{font-weight:700;font-size:11.5px}
@@ -151,9 +153,9 @@
   .setup-wrap{display:flex;align-items:center;gap:20px}
   .setup-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:24px 26px;width:480px;max-width:92vw;box-shadow:0 12px 60px rgba(0,0,0,.6);animation:modal-in .25s ease}
   .setup-tabs{display:flex;gap:6px;margin:14px 0 0;border-bottom:1px solid var(--line)}
-  .setup-tab{background:none;border:none;color:var(--mut);padding:8px 14px;cursor:pointer;font:inherit;font-size:13px;border-bottom:2px solid transparent;font-weight:600;border-radius:0}
-  .setup-tab:hover{color:var(--txt)}
-  .setup-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .setup-tab{background:none;border:none;color:var(--mut);padding:8px 14px;cursor:pointer;font:inherit;font-size:13px;border-bottom:2px solid transparent;font-weight:600;border-radius:0;transition:color .2s,border-color .2s,background .2s}
+  .setup-tab:hover{color:var(--txt);background:rgba(255,255,255,0.02)}
+  .setup-tab.active{color:var(--accent);border-bottom-color:var(--accent);background:rgba(90,159,212,0.04)}
   .setup-tab small{font-size:10px;color:var(--ok);font-weight:700;margin-left:6px;letter-spacing:.05em}
   .setup-chibi-col{display:flex;flex-direction:column;align-items:center;gap:10px}
   .setup-chibi{width:240px;height:auto;filter:drop-shadow(0 8px 24px rgba(74,143,181,0.35))}
@@ -182,12 +184,12 @@
   .whiteb{display:inline-block;padding:2px 7px;border-radius:5px;background:#2e2a1c;color:var(--white);border:1px solid #4a432a;font-weight:700;font-size:12px}
   .friendb{background:linear-gradient(135deg,#1a2e28,#1c3430);color:#5fd0a8;border:1px solid #2a4a40;padding:1px 7px;border-radius:5px;font-weight:700;font-size:11px}
   .matchb{display:inline-block;padding:1px 7px;border-radius:5px;background:#1e2c46;color:#7fb2ff;font-size:10px;font-weight:600}
-  .pill{display:inline-block;padding:2px 8px;border-radius:5px;background:#1e2c46;color:var(--blue);font-size:11px;margin-right:5px}
-  .chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;background:var(--panel2);border:1px solid var(--line);font-size:12px;margin:2px;transition:border-color .15s}
-  .chip:hover{border-color:#3a3d46}
+  .pill{display:inline-block;padding:3px 9px;border-radius:6px;background:#1e2c46;color:var(--blue);font-size:11px;margin-right:5px}
+  .chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;background:var(--panel2);border:1px solid var(--line);font-size:12px;margin:2px;transition:border-color .15s,background .15s}
+  .chip:hover{border-color:#3a3d46;background:#22252e}
   .chip .x{cursor:pointer;color:var(--mut);transition:color .15s} .chip .x:hover{color:#e06b6b}
-  .combo{border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin-bottom:8px;background:var(--panel2);
-         box-shadow:0 1px 3px rgba(0,0,0,0.15);transition:border-color .2s,background .2s,transform .15s}
+  .combo{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:8px;background:var(--panel2);
+         box-shadow:0 1px 4px rgba(0,0,0,0.2);transition:border-color .2s,background .2s,transform .15s}
   .cpair{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700;flex-wrap:wrap}
   .cpair .cx{color:var(--mut);font-weight:400}
   .cmeta{margin-top:5px;font-size:12px} .cmeta .c-aff{font-size:14px}
@@ -197,9 +199,9 @@
         backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
   .trayslot{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:4px 10px;font-size:12px}
   .trayslot i{color:var(--accent);font-style:normal;font-weight:700}
-  .bp{font-size:11px;padding:3px 8px}
-  .srcbtn{transition:all .15s}
-  .srcbtn.active{background:#1c2840;border-color:var(--accent);color:var(--accent)}
+  .bp{font-size:11px;padding:4px 9px}
+  .srcbtn{transition:all .15s;border-radius:6px}
+  .srcbtn.active{background:#1c2840;border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 1px rgba(90,159,212,0.2)}
   .pkwrap{position:relative} .pkin{width:240px}
   .pkdrop{position:absolute;z-index:30;top:38px;left:0;width:300px;max-height:260px;overflow:auto;
           background:var(--panel2);border:1px solid var(--line);border-radius:8px;box-shadow:0 12px 30px rgba(0,0,0,.5)}
@@ -209,10 +211,11 @@
   .fcat{border-top:1px solid var(--line);padding:7px 0}
   .fhead{display:flex;justify-content:space-between;align-items:center}
   .fhead .lab{font-size:12px;color:var(--mut)}
-  .frow{display:flex;align-items:center;gap:6px;margin-top:5px;flex-wrap:wrap;padding:4px 8px;background:rgba(255,255,255,0.015);border-radius:6px}
-  .frow select,.frow input{padding:4px 7px;font-size:12px}
+  .frow{display:flex;align-items:center;gap:6px;margin-top:5px;flex-wrap:wrap;padding:5px 10px;background:rgba(255,255,255,0.02);border-radius:8px;border:1px solid transparent;transition:border-color .2s}
+  .frow:hover{border-color:var(--line)}
+  .frow select,.frow input{padding:5px 8px;font-size:12px}
   .frow .x{cursor:pointer;color:#c05050;font-weight:700;padding:0 4px;font-size:14px;transition:color .15s} .frow .x:hover{color:#e06b6b}
-  .addf{font-size:11px;padding:3px 10px}
+  .addf{font-size:11px;padding:4px 11px;border-radius:6px}
   .stars-b{color:var(--blue)} .stars-p{color:var(--pink)} .stars-g{color:var(--green)} .stars-w{color:var(--white)}
   /* ---- detail modal ---- */
   .overlay{position:fixed;inset:0;background:rgba(4,5,8,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
@@ -287,10 +290,10 @@
                border-bottom:1px solid var(--line);font-size:12px;color:var(--mut);flex-wrap:wrap}
   .kofi-banner.hide{display:none}
   .kofi-btn{display:none}
-  .kofi-link{display:inline-flex;padding:4px 12px;border-radius:5px;background:#e04e4b;color:#fff;
+  .kofi-link{display:inline-flex;padding:5px 14px;border-radius:8px;background:linear-gradient(135deg,#e04e4b,#c93f3d);color:#fff;
              font-weight:700;font-size:11px;text-decoration:none;letter-spacing:.04em;
-             transition:background .15s,transform .1s;white-space:nowrap}
-  .kofi-link:hover{background:#ff5e5b;transform:scale(1.03)}
+             transition:background .15s,transform .1s,box-shadow .15s;white-space:nowrap;box-shadow:0 2px 6px rgba(224,78,75,0.2)}
+  .kofi-link:hover{background:linear-gradient(135deg,#ff5e5b,#e04e4b);transform:scale(1.03);box-shadow:0 3px 10px rgba(224,78,75,0.3)}
   .kofi-txt{flex:1;min-width:200px;font-size:11.5px}
   .kofi-txt a{color:var(--accent);text-decoration:none} .kofi-txt a:hover{text-decoration:underline}
   .kofi-x{cursor:pointer;color:var(--mut);font-size:14px;padding:2px 6px;flex-shrink:0;line-height:1;transition:color .15s}
@@ -305,9 +308,9 @@
   .breed-fl{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
   .breed-input{padding:7px 10px;font-size:13px}
   .breed-sel{font-size:12px;padding:6px 8px}
-  .breed-go{padding:8px 22px !important;font-size:13px !important;align-self:end;
-            background:linear-gradient(135deg,var(--accent),#4a8fb5) !important;box-shadow:0 2px 8px rgba(90,159,212,0.3);white-space:nowrap}
-  .breed-go:hover{box-shadow:0 4px 16px rgba(90,159,212,0.45) !important;transform:translateY(-1px)}
+  .breed-go{padding:9px 24px;font-size:13px;align-self:end;
+            box-shadow:0 2px 10px rgba(90,159,212,0.3);white-space:nowrap;letter-spacing:.03em;text-transform:uppercase}
+  .breed-go:hover{box-shadow:0 4px 16px rgba(90,159,212,0.45)}
   .breed-want-row{display:flex;gap:8px;margin-top:8px}
   .breed-adv{margin-top:8px;font-size:11px;color:var(--mut)}
   .breed-adv summary{cursor:pointer;user-select:none;font-weight:600;color:var(--mut);font-size:11px}
@@ -327,13 +330,13 @@
   .combo .cmeta{display:flex;align-items:center;gap:8px}
   /* ---- spark proc odds (compact) ---- */
   .odds-toggle{display:flex;gap:4px}
-  .odds-btn{font-size:11px !important;padding:3px 10px !important;border-radius:5px !important}
-  .odds-btn.active{background:var(--accent) !important;color:#fff !important;border-color:var(--accent) !important}
+  .odds-btn{font-size:11px !important;padding:4px 11px !important;border-radius:6px !important}
+  .odds-btn.active{background:linear-gradient(135deg,var(--accent),#4a8fb5) !important;color:#fff !important;border-color:transparent !important;box-shadow:0 1px 4px rgba(90,159,212,0.25) !important}
   .odds-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:3px 8px;margin-top:6px}
   .odds-type-header{grid-column:1/-1;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
                     padding:4px 0 1px;border-bottom:1px solid var(--line);margin-top:2px}
   .odds-type-header:first-child{margin-top:0}
-  .odds-row{background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:3px 6px;display:flex;align-items:center;gap:4px;
+  .odds-row{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:3px 6px;display:flex;align-items:center;gap:4px;
             transition:border-color .15s;min-height:0}
   .odds-row:hover{border-color:#3a3d46}
   .odds-name{flex:1;min-width:0;font-size:10.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -407,9 +410,10 @@
     padding:6px 12px;border-radius:8px;background:rgba(255,110,126,0.12);border:1px solid rgba(255,110,126,0.35)}
   .tt-capture-badge::before{content:"";width:8px;height:8px;border-radius:50%;background:#ff6e7e;animation:tt-pulse 1.2s ease-in-out infinite}
   @keyframes tt-pulse{0%,100%{opacity:1}50%{opacity:0.3}}
-  .btn-capture{background:linear-gradient(135deg,var(--ok),#3fbf6f);border:1px solid transparent;color:#06210f;font-weight:700;padding:6px 14px;border-radius:6px;cursor:pointer;font:inherit;font-size:12px}
-  .btn-capture:hover{filter:brightness(1.08);transform:translateY(-1px)}
-  .btn-capture.recording{background:linear-gradient(135deg,#ff6e7e,#e0455a);color:#fff}
+  .btn-capture{background:linear-gradient(135deg,var(--ok),#3fbf6f);border:1px solid transparent;color:#06210f;font-weight:700;padding:7px 16px;border-radius:8px;cursor:pointer;font:inherit;font-size:12px;
+               box-shadow:0 2px 8px rgba(67,201,138,0.25);transition:all .15s}
+  .btn-capture:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 4px 14px rgba(67,201,138,0.35)}
+  .btn-capture.recording{background:linear-gradient(135deg,#ff6e7e,#e0455a);color:#fff;box-shadow:0 2px 8px rgba(255,110,126,0.25)}
 
   /* TT player grid */
   .tt-player-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
@@ -518,8 +522,8 @@
   /* Stadium / Track & Condition */
   .tt-category-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
   .tt-cat-pill{background:var(--panel2);border:1px solid var(--line);color:var(--mut);padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;letter-spacing:.03em;transition:all .15s ease;font-family:inherit;display:inline-flex;align-items:center;gap:8px}
-  .tt-cat-pill:hover{color:var(--txt);border-color:#3a3d46}
-  .tt-cat-pill.active{background:rgba(90,159,212,0.12);border-color:rgba(90,159,212,0.4);color:var(--accent)}
+  .tt-cat-pill:hover{color:var(--txt);border-color:#3a3d46;box-shadow:0 1px 4px rgba(0,0,0,0.15)}
+  .tt-cat-pill.active{background:rgba(90,159,212,0.12);border-color:rgba(90,159,212,0.4);color:var(--accent);box-shadow:0 0 0 1px rgba(90,159,212,0.15)}
   .tt-cat-pill .cat-count{font-size:10px;font-weight:700;background:var(--bg);padding:1px 7px;border-radius:10px;font-variant-numeric:tabular-nums}
   .tt-cat-pill.active .cat-count{background:rgba(90,159,212,0.18);color:var(--accent)}
 
@@ -568,19 +572,40 @@
   .tt-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(90,159,212,0.2)}
   .tt-input::placeholder{color:var(--mut)}
   .tt-btn{background:var(--panel2);border:1px solid var(--line);color:var(--txt);padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
-  .tt-btn:hover{border-color:#3a3d46;background:var(--panel)}
+  .tt-btn:hover{border-color:#3a3d46;background:var(--panel);box-shadow:0 1px 4px rgba(0,0,0,0.2)}
   .tt-btn-primary{background:linear-gradient(135deg,var(--accent),#4a8fb5);border:1px solid transparent;color:#fff;text-transform:uppercase;font-weight:700;letter-spacing:.07em;padding:9px 20px;box-shadow:0 4px 14px rgba(90,159,212,0.25)}
-  .tt-btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px)}
+  .tt-btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 6px 20px rgba(90,159,212,0.35)}
   .tt-btn-ghost{background:transparent;border:1px solid var(--line);color:var(--mut)}
-  .tt-btn-ghost:hover{color:var(--txt);border-color:#3a3d46}
+  .tt-btn-ghost:hover{color:var(--txt);border-color:#3a3d46;box-shadow:0 1px 4px rgba(0,0,0,0.15)}
 
   .tt-status-line{font-size:11px;color:var(--mut)}
   .tt-empty{padding:50px 24px;text-align:center;color:var(--mut);font-size:13px}
 
-  .tt-filter-input{background:var(--panel2);border:1px solid var(--line);color:var(--txt);font-size:12px;padding:6px 9px;border-radius:6px;width:64px;font-family:inherit}
+  .tt-filter-input{background:var(--panel2);border:1px solid var(--line);color:var(--txt);font-size:12px;padding:6px 10px;border-radius:8px;width:64px;font-family:inherit}
   .tt-filter-input:focus{outline:none;border-color:var(--accent)}
 
   .tt-sortable{cursor:pointer;user-select:none}
+
+  /* ---- Race Analysis v2 (compact summary rows) ---- */
+  .tt-ra2-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);
+              transition:background .15s,transform .1s;cursor:pointer}
+  .tt-ra2-row:hover{background:var(--panel2);transform:translateX(2px)}
+  .tt-ra2-row:last-child{border-bottom:none}
+  .tt-ra2-uma{display:flex;align-items:center;gap:10px;min-width:180px;flex-shrink:0}
+  .tt-ra2-stats{display:flex;gap:6px;align-items:center;flex-wrap:nowrap}
+  .tt-ra2-stat{text-align:center;min-width:52px;padding:4px 6px;background:var(--bg);border:1px solid var(--line);border-radius:6px}
+  .tt-ra2-stat b{display:block;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+  .tt-ra2-stat small{font-size:8.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
+  .tt-ra2-spark{flex:1;min-width:80px;max-width:180px;height:32px;position:relative}
+  .tt-ra2-spark svg{width:100%;height:100%}
+  .tt-ra2-verdict{flex-shrink:0}
+  /* expanded detail under a row */
+  .tt-ra2-detail{padding:14px 16px 14px 72px;background:var(--bg);border-bottom:1px solid var(--line);animation:odds-detail-in .2s ease}
+  .tt-ra2-heatmap{display:flex;gap:2px;flex-wrap:wrap;margin-top:6px}
+  .tt-ra2-hcell{width:18px;height:18px;border-radius:3px;font-size:7px;display:flex;align-items:center;justify-content:center;
+                color:rgba(255,255,255,0.7);font-weight:700;cursor:default;transition:transform .1s}
+  .tt-ra2-hcell:hover{transform:scale(1.4);z-index:1}
+  @media(max-width:900px){.tt-ra2-uma{min-width:140px} .tt-ra2-stats{gap:4px} .tt-ra2-stat{min-width:42px;padding:3px 4px} .tt-ra2-stat b{font-size:11px}}
 </style>
 </head>
 <body>
@@ -862,32 +887,14 @@
   <div class="tt-card">
     <div class="tt-card-header">
       <h2 class="tt-card-title">Race Analysis</h2>
-      <span class="tt-card-sub">click any row for the full skill breakdown</span>
+      <span class="tt-card-sub">click any row for the full breakdown</span>
       <div class="tt-card-tools">
-        <span class="tt-status-line">Show:</span>
-        <select id="tt-filter-show" class="tt-filter-input" style="width:auto;padding-right:22px" oninput="ttRender()" title="How many recent trials to show">
-          <option value="0" selected>All</option>
-          <option value="5">Last 5</option>
-          <option value="10">Last 10</option>
-          <option value="20">Last 20</option>
-          <option value="30">Last 30</option>
-          <option value="50">Last 50</option>
-        </select>
-        <span class="tt-status-line" style="margin-left:8px">Col:</span>
-        <input type="range" id="tt-col-width" min="28" max="72" value="62" style="width:60px;vertical-align:middle;accent-color:#fbbf24" oninput="document.documentElement.style.setProperty('--trial-col-w',this.value+'px')" title="Trial column width">
-        <span class="tt-status-line" style="margin-left:8px">Act %:</span>
-        <input type="number" id="tt-filter-act-min" min="0" max="100" value="0" step="5" class="tt-filter-input" placeholder="min" title="Min activation %" oninput="ttRender()">
-        <span class="tt-status-line" style="opacity:0.5">—</span>
-        <input type="number" id="tt-filter-act-max" min="0" max="100" value="100" step="5" class="tt-filter-input" placeholder="max" title="Max activation %" oninput="ttRender()">
         <span id="tt-filter-count" class="tt-status-line"></span>
       </div>
     </div>
-    <div class="tt-table-wrap" id="tt-race-table-wrap">
-      <table class="tt-race" id="tt-race-analysis">
-        <thead><tr id="tt-ra-head"></tr></thead>
-        <tbody id="tt-ra-body"></tbody>
-      </table>
-    </div>
+    <!-- hidden selects to keep IDs alive for any external references -->
+    <select id="tt-filter-show" style="display:none"><option value="0" selected>All</option></select>
+    <div id="tt-race-list"></div>
     <div id="tt-skill-area" class="tt-detail-panel" style="display:none"></div>
   </div>
 </section>
@@ -2371,6 +2378,44 @@ async function ttLoad(){
   }catch(e){}
 }
 
+function _ttSparkline(trials, avg, topAvg){
+  if(!trials.length) return '';
+  const scores = trials.map(t=>t.display_score);
+  const mn = Math.min(...scores), mx = Math.max(...scores);
+  const range = mx - mn || 1;
+  const w = 160, h = 30, pad = 2;
+  const pts = scores.map((s,i)=>{
+    const x = pad + (i/(scores.length-1||1))*(w-2*pad);
+    const y = h - pad - ((s-mn)/range)*(h-2*pad);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  });
+  // avg line
+  const avgY = h - pad - ((avg-mn)/range)*(h-2*pad);
+  const avgLine = `<line x1="${pad}" y1="${avgY.toFixed(1)}" x2="${w-pad}" y2="${avgY.toFixed(1)}" stroke="var(--mut)" stroke-width="0.5" stroke-dasharray="2,2" opacity="0.5"/>`;
+  // gradient color based on trend (last 5 vs first 5)
+  const last5 = scores.slice(-Math.min(5,scores.length));
+  const first5 = scores.slice(0,Math.min(5,scores.length));
+  const avgLast = last5.reduce((a,b)=>a+b,0)/last5.length;
+  const avgFirst = first5.reduce((a,b)=>a+b,0)/first5.length;
+  const trendUp = avgLast >= avgFirst;
+  const lineColor = trendUp ? 'var(--ok)' : '#ff6e7e';
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" style="width:100%;height:100%">
+    ${avgLine}
+    <polyline points="${pts.join(' ')}" fill="none" stroke="${lineColor}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${pts[pts.length-1].split(',')[0]}" cy="${pts[pts.length-1].split(',')[1]}" r="2.5" fill="${lineColor}"/>
+  </svg>`;
+}
+
+function _ttHeatmap(trials, topAvg){
+  if(!trials.length) return '';
+  return trials.map(t=>{
+    const ratio = topAvg ? t.display_score / topAvg : 0;
+    const bg = ratio >= 0.92 ? 'rgba(67,201,138,0.6)' : ratio >= 0.75 ? 'rgba(90,159,212,0.5)' : ratio >= 0.6 ? 'rgba(255,206,77,0.45)' : 'rgba(255,110,126,0.5)';
+    const dist = TT_DIST_LABEL[t.distance_type] || '?';
+    return `<div class="tt-ra2-hcell" style="background:${bg}" title="T${t.trial_idx+1}: ${t.display_score.toLocaleString()} (${dist})">${(t.display_score/1000).toFixed(0)}k</div>`;
+  }).join('');
+}
+
 function ttRender(){
   const r = TT_DATA;
   if(!r) return;
@@ -2382,97 +2427,104 @@ function ttRender(){
     sb.style.display='';
   } else sb.style.display='none';
 
-  let _maxIdx=-1;
-  r.umas.forEach(u=>(u.trials||[]).forEach(t=>{if(t.trial_idx>_maxIdx) _maxIdx=t.trial_idx;}));
-  const totalTrials=_maxIdx+1;
-  const showN=parseInt($('#tt-filter-show')?.value||0)||0;
-  const visibleTrials=(showN>0&&showN<totalTrials)?showN:totalTrials;
-  const startTrial=Math.max(0,totalTrials-visibleTrials);
-  const N=visibleTrials;
-
-  const trialW=N>40?32:N>30?38:N>20?44:N>10?50:62;
-  document.documentElement.style.setProperty('--trial-col-w',trialW+'px');
-  const head=$('#tt-ra-head');
-  const TIPS={AVG:'Average score',  'Trim AVG':'Drops lowest if below 80%', 'CV%':'stdev/avg × 100', Ceil:'90th percentile',
-    Floor:'10th percentile', Gap:'Gap to top', 'Act%':'Avg skill activation', Verdict:'Rating'};
-  const sortIcon=col=>TT_SORT_KEY===col?(TT_SORT_DIR>0?' ↑':' ↓'):'';
-  const makeTh=(label,sortKey,extraClass)=>{
-    const tip=TIPS[label]||'';
-    const cls=(extraClass?extraClass+' ':'')+(sortKey?'tt-sortable':'');
-    const click=sortKey?` onclick="ttSetSort('${sortKey}')"`:'';
-    return `<th class="${cls}" title="${tip}"${click}>${label}${sortKey?sortIcon(sortKey):''}</th>`;
-  };
-  let h=makeTh('Uma','chara_name');
-  for(let i=0;i<N;i++) h+=`<th class="trial-col" title="Score in trial ${startTrial+i+1}">T${startTrial+i+1}</th>`;
-  h+=makeTh('SV','sv','stat-col');
-  h+=makeTh('AVG','avg_score','stat-col');
-  h+=makeTh('Trim AVG','trimmed_avg','stat-col');
-  h+=makeTh('CV%','cv','stat-col');
-  h+=makeTh('Ceil','ceiling','stat-col');
-  h+=makeTh('Floor','floor','stat-col');
-  h+=makeTh('Gap','gap_to_top','stat-col');
-  h+=makeTh('Act%','overall_act_pct','stat-col');
-  h+=makeTh('Verdict',null,'verdict-col');
-  head.innerHTML=h;
-
+  const list = $('#tt-race-list');
   if(!r.umas.length){
-    $('#tt-ra-body').innerHTML=`<tr><td colspan="${N+9}" class="tt-empty">
-      <div style="font-size:14px;color:var(--mut);margin-bottom:8px">No Team Trials processed yet</div>
-      <div>Click <b>Start capture</b>, play a trial, then stop.</div>
-    </td></tr>`;
+    list.innerHTML=`<div class="tt-empty"><div style="font-size:14px;color:var(--mut);margin-bottom:8px">No Team Trials data yet</div>
+      <div>Click <b>Start capture</b>, play a trial, then stop.</div></div>`;
     return;
   }
 
-  const minAct=parseFloat($('#tt-filter-act-min').value);
-  const maxAct=parseFloat($('#tt-filter-act-max').value);
-  const lo=isNaN(minAct)?0:minAct, hi=isNaN(maxAct)?100:maxAct;
-  const filterActive=lo>0||hi<100;
-  const filtered=filterActive?r.umas.filter(u=>{const v=u.overall_act_pct??0;return v>=lo&&v<=hi;}):r.umas;
-  const fc=$('#tt-filter-count');
-  if(fc) fc.textContent=(filterActive&&filtered.length!==r.umas.length)?`(showing ${filtered.length} / ${r.umas.length})`:'';
-
-  const sorted=[...filtered].sort((a,b)=>{
+  const sorted=[...r.umas].sort((a,b)=>{
     const av=a[TT_SORT_KEY],bv=b[TT_SORT_KEY];
     if(typeof av==='string') return av.localeCompare(bv)*TT_SORT_DIR;
     return ((av??0)-(bv??0))*TT_SORT_DIR;
   });
 
   const topAvg=Math.max(...r.umas.map(u=>u.avg_score));
-  $('#tt-ra-body').innerHTML=sorted.map(u=>{
-    const byIdx={};
-    (u.trials||[]).forEach(t=>{byIdx[t.trial_idx]=t;});
-    let row=`<tr onclick="ttShowDetail(${u.trained_chara_id})">`;
-    const initial=(u.chara_name||'?').trim().charAt(0).toUpperCase();
-    const sv=u.sv||0;
-    row+=`<td><div class="tt-uma-cell">
-      <div class="tt-uma-badge">
-        <div class="tt-uma-icon-wrap"><span>${initial}</span><img class="tt-uma-icon" src="${ttIconUrl(u.chara_id)}" onerror="this.style.display='none'"/></div>
-        <span class="tt-sv-badge" title="Skill Value: ${sv}">${sv}</span>
+
+  // Header row
+  let html = `<div style="display:flex;align-items:center;gap:12px;padding:8px 16px;border-bottom:1px solid var(--line);font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;font-weight:700">
+    <span style="min-width:180px">Uma</span>
+    <span class="tt-ra2-stats">
+      <span style="min-width:52px;text-align:center;cursor:pointer" onclick="ttSetSort('avg_score')">AVG${TT_SORT_KEY==='avg_score'?(TT_SORT_DIR>0?' &uarr;':' &darr;'):''}</span>
+      <span style="min-width:52px;text-align:center;cursor:pointer" onclick="ttSetSort('cv')">CV%${TT_SORT_KEY==='cv'?(TT_SORT_DIR>0?' &uarr;':' &darr;'):''}</span>
+      <span style="min-width:52px;text-align:center;cursor:pointer" onclick="ttSetSort('ceiling')">BEST${TT_SORT_KEY==='ceiling'?(TT_SORT_DIR>0?' &uarr;':' &darr;'):''}</span>
+      <span style="min-width:52px;text-align:center;cursor:pointer" onclick="ttSetSort('floor')">WORST${TT_SORT_KEY==='floor'?(TT_SORT_DIR>0?' &uarr;':' &darr;'):''}</span>
+      <span style="min-width:52px;text-align:center;cursor:pointer" onclick="ttSetSort('overall_act_pct')">ACT%${TT_SORT_KEY==='overall_act_pct'?(TT_SORT_DIR>0?' &uarr;':' &darr;'):''}</span>
+    </span>
+    <span style="flex:1;min-width:80px;max-width:180px;text-align:center">TREND</span>
+    <span style="min-width:80px;text-align:center;cursor:pointer" onclick="ttSetSort('avg_score')">VERDICT</span>
+  </div>`;
+
+  html += sorted.map(u=>{
+    const sv = u.sv||0;
+    const initial = (u.chara_name||'?').trim().charAt(0).toUpperCase();
+    const [v, vc] = ttVerdictFor(u, topAvg);
+    const actPct = u.overall_act_pct??0;
+    const actCls = actPct>=80?'color:var(--ok)':(actPct>=60?'':'color:#ff6e7e');
+    const trials = (u.trials||[]).slice().sort((a,b)=>a.trial_idx-b.trial_idx);
+    const spark = _ttSparkline(trials, u.avg_score, topAvg);
+
+    return `<div class="tt-ra2-row" data-tcid="${u.trained_chara_id}">
+      <div class="tt-ra2-uma">
+        <div class="tt-uma-badge">
+          <div class="tt-uma-icon-wrap"><span>${initial}</span><img class="tt-uma-icon" src="${ttIconUrl(u.chara_id)}" onerror="this.style.display='none'"/></div>
+          <span class="tt-sv-badge" title="SV ${sv}">${sv}</span>
+        </div>
+        <div><div class="tt-uma-name">${u.chara_name}</div><div class="tt-uma-id">${u.n_appearances} races</div></div>
       </div>
-      <div><div class="tt-uma-name">${u.chara_name}</div><div class="tt-uma-id">SV ${sv}</div></div>
-    </div></td>`;
-    for(let i=0;i<N;i++){
-      const t=byIdx[startTrial+i];
-      if(t){
-        const cls=ttScoreColor(t.display_score,topAvg);
-        row+=`<td class="num trial-col ${cls}" title="Race ${t.race_idx+1} dist=${TT_DIST_LABEL[t.distance_type]||'?'}">${t.display_score.toLocaleString()}</td>`;
-      } else row+=`<td class="num trial-col muted">-</td>`;
-    }
-    const [v,vc]=ttVerdictFor(u,topAvg);
-    row+=`<td class="num" style="color:#fbbf24;font-weight:700">${sv}</td>`;
-    row+=`<td class="num">${u.avg_score.toLocaleString()}</td>`;
-    row+=`<td class="num">${u.trimmed_avg.toLocaleString()}</td>`;
-    row+=`<td class="num ${ttCvColor(u.cv)}">${u.cv}</td>`;
-    row+=`<td class="num">${u.ceiling.toLocaleString()}</td>`;
-    row+=`<td class="num">${u.floor.toLocaleString()}</td>`;
-    row+=`<td class="num">${u.gap_to_top.toLocaleString()}</td>`;
-    const actPct=u.overall_act_pct??0;
-    const actCls=actPct>=80?'tt-score-good':(actPct>=60?'':'tt-score-bad');
-    row+=`<td class="num ${actCls}" title="Avg activation per race">${actPct}%</td>`;
-    row+=`<td class="verdict-col"><span class="tt-verdict-pill ${vc}">${v}</span></td>`;
-    row+=`</tr>`;
-    return row;
+      <div class="tt-ra2-stats">
+        <div class="tt-ra2-stat"><b>${u.avg_score.toLocaleString()}</b><small>avg</small></div>
+        <div class="tt-ra2-stat"><b class="${ttCvColor(u.cv)}">${u.cv}%</b><small>cv</small></div>
+        <div class="tt-ra2-stat"><b>${u.ceiling.toLocaleString()}</b><small>best</small></div>
+        <div class="tt-ra2-stat"><b>${u.floor.toLocaleString()}</b><small>worst</small></div>
+        <div class="tt-ra2-stat"><b style="${actCls}">${actPct}%</b><small>act</small></div>
+      </div>
+      <div class="tt-ra2-spark" title="Score trend across ${trials.length} trials">${spark}</div>
+      <div class="tt-ra2-verdict"><span class="tt-verdict-pill ${vc}">${v}</span></div>
+    </div>`;
   }).join('');
+
+  list.innerHTML = html;
+
+  // Bind click → expand detail
+  let _expandedTcid = null;
+  list.querySelectorAll('.tt-ra2-row').forEach(row=>{
+    row.onclick = ()=>{
+      const tcid = +row.dataset.tcid;
+      // Remove any existing detail
+      list.querySelectorAll('.tt-ra2-detail').forEach(d=>d.remove());
+      list.querySelectorAll('.tt-ra2-row').forEach(r=>r.style.background='');
+      if(_expandedTcid === tcid){ _expandedTcid = null; return; }
+      _expandedTcid = tcid;
+      row.style.background = 'var(--panel2)';
+      const uma = r.umas.find(u=>u.trained_chara_id===tcid);
+      if(!uma) return;
+      const trials = (uma.trials||[]).slice().sort((a,b)=>a.trial_idx-b.trial_idx);
+      const detail = document.createElement('div');
+      detail.className = 'tt-ra2-detail';
+      // Heatmap + key stats
+      detail.innerHTML = `
+        <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+          <div style="flex:1;min-width:200px">
+            <div style="font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;font-weight:600">Score history (${trials.length} races)</div>
+            <div class="tt-ra2-heatmap">${_ttHeatmap(trials, topAvg)}</div>
+            <div style="display:flex;gap:12px;margin-top:8px;font-size:11px;color:var(--mut)">
+              <span>Trimmed avg: <b style="color:var(--txt)">${uma.trimmed_avg.toLocaleString()}</b></span>
+              <span>Gap to top: <b style="color:var(--txt)">${uma.gap_to_top.toLocaleString()}</b></span>
+              <span>StDev: <b style="color:var(--txt)">${uma.stdev}</b></span>
+            </div>
+          </div>
+          <div style="flex-shrink:0;text-align:center">
+            <div style="font-size:11px;color:var(--mut);margin-bottom:2px">Skill activation</div>
+            <div style="font-size:28px;font-weight:800;color:var(--accent);line-height:1">${uma.overall_act_pct}%</div>
+            <div style="font-size:10px;color:var(--mut);margin-top:2px">${uma.avg_activated} of ${uma.owned_total} / race</div>
+            <button class="ghost" style="margin-top:6px;font-size:10px;padding:4px 10px" onclick="event.stopPropagation();ttShowDetail(${tcid})">Full skill breakdown</button>
+          </div>
+        </div>`;
+      row.after(detail);
+    };
+  });
 }
 
 function ttShowDetail(tcid){
