@@ -11,8 +11,7 @@ data/raw_full.jsonl
 data/skill_export.json
 notes.json
 
-# Image cache (downloaded from gametora)
-data/images/
+# Icon cache (auto-downloaded)
 data/icons/
 
 # Large assets
