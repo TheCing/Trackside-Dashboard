@@ -197,8 +197,21 @@
   #tray{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--panel);border-top:1px solid var(--line);
         padding:8px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 -4px 20px rgba(0,0,0,.5);
         backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-  .trayslot{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:4px 10px;font-size:12px}
-  .trayslot i{color:var(--accent);font-style:normal;font-weight:700}
+  .trayslot{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 12px;font-size:12px;
+            display:flex;align-items:center;gap:8px;min-width:0;transition:border-color .15s}
+  .trayslot:hover{border-color:#3a3d46}
+  .trayslot i{color:var(--accent);font-style:normal;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .trayslot .tray-label{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;font-weight:600;flex-shrink:0}
+  .trayslot .tray-port{width:24px;height:24px;border-radius:50%;object-fit:cover;border:2px solid var(--line);flex-shrink:0}
+  .trayslot .tray-port.p1-border{border-color:var(--accent)}
+  .trayslot .tray-port.p2-border{border-color:var(--pink)}
+  .tray-target-btn{display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--panel2);border:1px solid var(--line);
+                   border-radius:8px;cursor:pointer;min-width:140px;max-width:220px;transition:border-color .15s,box-shadow .15s}
+  .tray-target-btn:hover{border-color:var(--accent);box-shadow:0 0 0 2px var(--glow)}
+  .tray-target-btn .tray-port{width:22px;height:22px;border-radius:50%;object-fit:cover;border:1px solid var(--line);flex-shrink:0}
+  .tray-target-btn .tray-tname{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--mut)}
+  .tray-target-btn .tray-tname.picked{color:var(--txt);font-weight:600}
+  .tray-target-btn .tp-arrow{color:var(--mut);font-size:9px;flex-shrink:0}
   .bp{font-size:11px;padding:4px 9px}
   .srcbtn{transition:all .15s;border-radius:6px}
   .srcbtn.active{background:#1c2840;border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 1px rgba(90,159,212,0.2)}
@@ -606,6 +619,45 @@
                 color:rgba(255,255,255,0.7);font-weight:700;cursor:default;transition:transform .1s}
   .tt-ra2-hcell:hover{transform:scale(1.4);z-index:1}
   @media(max-width:900px){.tt-ra2-uma{min-width:140px} .tt-ra2-stats{gap:4px} .tt-ra2-stat{min-width:42px;padding:3px 4px} .tt-ra2-stat b{font-size:11px}}
+
+  /* ---- Inventory improvements ---- */
+  /* Source toggle pills (All / Yours / Friends) */
+  .inv-src-pills{display:flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+  .inv-src-pill{padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;background:var(--panel2);color:var(--mut);
+                border:none;border-right:1px solid var(--line);transition:all .15s;font-family:inherit;border-radius:0}
+  .inv-src-pill:last-child{border-right:none}
+  .inv-src-pill:hover{color:var(--txt);background:#22252e}
+  .inv-src-pill.active{background:rgba(90,159,212,0.15);color:var(--accent);font-weight:700}
+  .inv-src-pill .pill-count{font-size:10px;font-weight:700;background:var(--bg);padding:1px 6px;border-radius:10px;margin-left:5px;font-variant-numeric:tabular-nums}
+  .inv-src-pill.active .pill-count{background:rgba(90,159,212,0.2);color:var(--accent)}
+
+  /* Collapsible factors panel */
+  .inv-factors-toggle{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:2px 0}
+  .inv-factors-toggle:hover .inv-factors-arrow{color:var(--accent)}
+  .inv-factors-arrow{font-size:10px;color:var(--mut);transition:transform .2s,color .2s;margin-right:8px}
+  .inv-factors-toggle.open .inv-factors-arrow{transform:rotate(90deg);color:var(--accent)}
+  .inv-factors-body{overflow:hidden;max-height:0;opacity:0;transition:max-height .3s ease,opacity .2s ease}
+  .inv-factors-body.open{max-height:600px;opacity:1}
+  .inv-factors-count{font-size:10px;color:var(--ok);font-weight:700;margin-left:8px}
+
+  /* Friend card distinction */
+  .ucard.ucard-friend{border-left:3px solid rgba(95,208,168,0.4)}
+  .ucard.ucard-friend .uhead{padding-bottom:10px}
+
+  /* White skills collapse */
+  .fg-white-truncated .pl-overflow{display:none}
+  .fg-white-more{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:7px;margin:2px;
+                 font-size:11px;background:#1e2028;border:1px solid var(--line);color:var(--mut);cursor:pointer;
+                 transition:all .15s;font-weight:600}
+  .fg-white-more:hover{color:var(--accent);border-color:var(--accent);background:#1a2030}
+
+  /* Show more button */
+  .inv-show-more{display:flex;justify-content:center;padding:16px 0}
+  .inv-show-more button{padding:10px 32px;font-size:13px;letter-spacing:.03em}
+
+  /* Better footer layout */
+  .ufoot-actions{display:flex;gap:4px;align-items:center;margin-left:auto;flex-shrink:0}
+  .ufoot-actions button{font-size:10.5px;padding:4px 10px;border-radius:6px;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -729,19 +781,22 @@
 <!-- ===== INVENTORY ===== -->
 <section id="inv">
   <div class="card">
-    <div class="row">
-      <input id="filter" placeholder="Filter by name, note, tag or owner..." style="flex:1;min-width:220px">
-      <label class="muted">min. white <input id="minWhite" type="number" min="0" value="0" style="width:64px"></label>
-      <button id="srcMine" type="button" class="ghost srcbtn" title="Show only your umas">Yours</button>
-      <button id="srcFriend" type="button" class="ghost srcbtn" title="Show only friends">Friends</button>
-      <select id="sortBy" class="ghost" title="sort">
+    <div class="row" style="gap:8px">
+      <input id="filter" placeholder="Filter by name, note, tag or owner..." style="flex:1;min-width:200px">
+      <label class="muted" style="white-space:nowrap;font-size:12px">min. white <input id="minWhite" type="number" min="0" value="0" style="width:56px;padding:5px 8px;font-size:12px"></label>
+      <div class="inv-src-pills">
+        <button id="srcAll" type="button" class="inv-src-pill active">All</button>
+        <button id="srcMine" type="button" class="inv-src-pill">Yours</button>
+        <button id="srcFriend" type="button" class="inv-src-pill">Friends</button>
+      </div>
+      <select id="sortBy" class="ghost" title="sort" style="font-size:12px;padding:6px 8px">
         <option value="affinity">Affinity</option>
         <option value="g1">G1 Wins</option>
         <option value="white">White Count</option>
         <option value="score">Score</option>
         <option value="newest">Newest First</option>
       </select>
-      <span class="muted" id="invCount"></span>
+      <span class="muted" id="invCount" style="font-size:11px;white-space:nowrap"></span>
     </div>
     <div class="target-pick-row">
       <label class="muted" style="font-weight:600;color:var(--accent);white-space:nowrap">TARGET:</label>
@@ -755,11 +810,18 @@
     </div>
   </div>
   <div class="card">
-    <div class="row" style="justify-content:space-between">
-      <b style="color:var(--accent);font-size:12px;text-transform:uppercase;letter-spacing:.05em">Inheritance Factors <span class="muted" style="font-size:10px;font-weight:400;text-transform:none;letter-spacing:0">(uma.moe style)</span></b>
-      <button class="ghost" id="clearF" style="font-size:11px;padding:3px 10px">Clear factors</button>
+    <div class="inv-factors-toggle" id="factorsToggle">
+      <div style="display:flex;align-items:center">
+        <span class="inv-factors-arrow">▶</span>
+        <b style="color:var(--accent);font-size:12px;text-transform:uppercase;letter-spacing:.05em">Inheritance Factors</b>
+        <span class="muted" style="font-size:10px;margin-left:6px">(uma.moe style)</span>
+        <span class="inv-factors-count hide" id="factorsActiveCount"></span>
+      </div>
+      <button class="ghost" id="clearF" style="font-size:11px;padding:3px 10px" onclick="event.stopPropagation()">Clear factors</button>
     </div>
-    <div id="fcats"></div>
+    <div class="inv-factors-body" id="factorsBody">
+      <div id="fcats"></div>
+    </div>
     <datalist id="whitelist"></datalist>
   </div>
   <div id="invList"></div>
@@ -991,13 +1053,18 @@
 </div>
 
 <div id="tray" class="hide">
-  <span class="muted">Breeding tray:</span>
-  <input id="trayTarget" list="targetlist" placeholder="target uma..." style="width:170px">
-  <span class="trayslot" id="trayP1">P1: <i>—</i></span>
-  <span class="trayslot" id="trayP2">P2: <i>—</i></span>
+  <span class="muted" style="font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase">Breed</span>
+  <div class="tray-target-btn" id="trayTargetBtn">
+    <img class="tray-port hide" id="trayTargetPortrait" src="" alt="">
+    <span class="tray-tname" id="trayTargetName">pick target...</span>
+    <span class="tp-arrow">▾</span>
+  </div>
+  <input id="trayTarget" list="targetlist" type="hidden">
+  <span class="trayslot" id="trayP1"><span class="tray-label">P1</span><img class="tray-port p1-border hide" id="trayP1Port" src=""><i>—</i></span>
+  <span class="trayslot" id="trayP2"><span class="tray-label">P2</span><img class="tray-port p2-border hide" id="trayP2Port" src=""><i>—</i></span>
   <button id="trayGo">Show pair</button>
-  <button class="ghost" id="trayClear">clear</button>
-  <span class="muted" id="trayMsg"></span>
+  <button class="ghost" id="trayClear" style="font-size:11px;padding:5px 10px">Clear</button>
+  <span class="muted" id="trayMsg" style="font-size:11px"></span>
 </div>
 <div id="detail" class="overlay hide"><div class="modal" id="detailBody"></div></div>
 
@@ -1129,14 +1196,31 @@ function matchUma(u){
 }
 
 // ---- uma.moe-style result card ----
+const WHITE_TRUNCATE_LIMIT = 8;
 function factorGrid(u){
   const agg=u.agg||[];
   return TYPE_ORDER.map(t=>{
-    // scenario sparks (TS Climax, MANT, etc.) are shown under white
     const items=agg.filter(a=>_displayType(a.type)===t);
     if(!items.length)return '';
+    if(t==='white' && items.length > WHITE_TRUNCATE_LIMIT){
+      const visible = items.slice(0, WHITE_TRUNCATE_LIMIT);
+      const hidden = items.slice(WHITE_TRUNCATE_LIMIT);
+      const uid = u.trained_chara_id;
+      return `<div class="fg fg-${t} fg-white-truncated" id="wg-${uid}">${
+        visible.map(a=>pill(a.name,a.total,t,a.pct,a.own)).join('')}${
+        hidden.map(a=>`<span class="pl-overflow">${pill(a.name,a.total,t,a.pct,a.own)}</span>`).join('')
+      }<span class="fg-white-more" onclick="toggleWhiteSkills(${uid})" id="wm-${uid}">+${hidden.length} more</span></div>`;
+    }
     return `<div class="fg fg-${t}">${items.map(a=>pill(a.name,a.total,t,a.pct,a.own)).join('')}</div>`;
   }).join('');
+}
+function toggleWhiteSkills(uid){
+  const g=document.getElementById('wg-'+uid);
+  const m=document.getElementById('wm-'+uid);
+  if(!g)return;
+  const wasOpen=!g.classList.contains('fg-white-truncated');
+  g.classList.toggle('fg-white-truncated');
+  if(m) m.textContent=wasOpen ? `+${g.querySelectorAll('.pl-overflow').length} more` : 'show less';
 }
 function portraitTree(u){
   const ph=u.parents||[];
@@ -1164,7 +1248,8 @@ function portraitTree(u){
 }
 function affinityOf(u){ return (u.parents||[]).reduce((s,p)=>s+(p.stars||0),0); }
 function umaCard(u){
-  const owner=u.src==='friend'?`<span class="friendb">friend</span> <small>${esc(u.owner_name||'')}</small>`:`<small>${(u.fans||0).toLocaleString()} fans</small>`;
+  const isFriend = u.src==='friend';
+  const owner=isFriend?`<span class="friendb">friend</span> <small>${esc(u.owner_name||'')}</small>`:`<small>${(u.fans||0).toLocaleString()} fans</small>`;
   const mb=(u._pref||u._lin)?`<span class="matchb">${u._pref?'pref '+u._pref:''}${u._pref&&u._lin?' · ':''}${u._lin?'lin '+u._lin:''}</span>`:'';
   const tScore = TARGET_AFFINITY[tkey(u)];
   const tBd = TARGET_BREAKDOWN[tkey(u)];
@@ -1176,7 +1261,8 @@ function umaCard(u){
       ` | WSB: +${tBd.wsb}` +
       ` | Total: ${tBd.total}`
     : 'Sum of parent spark stars (lineage potential). Pick a target to see exact affinity.';
-  return `<div class="ucard" data-id="${u.trained_chara_id}">
+  const friendCls = isFriend ? ' ucard-friend' : '';
+  return `<div class="ucard${friendCls}" data-id="${u.trained_chara_id}">
     <div class="uhead">
       <div><span class="uname">${esc(u.name)}</span> ${owner} ${mb}</div>
       <div class="ustats">
@@ -1191,10 +1277,12 @@ function umaCard(u){
     <div class="ufoot">
       <input class="note-in" placeholder="note for this uma..." value="${esc(u.note||'')}">
       <input class="tag-in" placeholder="tags: keep, speed, sell..." value="${esc((u.tags||[]).join(', '))}">
-      <button class="ghost bp bp1" data-id="${u.trained_chara_id}">→ P1</button>
-      <button class="ghost bp bp2" data-id="${u.trained_chara_id}">→ P2</button>
-      <button class="ghost bviewraces" data-id="${u.trained_chara_id}">View races</button>
-      <button class="ghost bfilter" data-name="${esc(u.name)}">Show all</button>
+      <div class="ufoot-actions">
+        <button class="ghost bp bp1" data-id="${u.trained_chara_id}" title="Use as Parent 1 in Breed">Parent 1</button>
+        <button class="ghost bp bp2" data-id="${u.trained_chara_id}" title="Use as Parent 2 in Breed">Parent 2</button>
+        <button class="ghost bviewraces" data-id="${u.trained_chara_id}">Races</button>
+        <button class="ghost bfilter" data-name="${esc(u.name)}" title="Show all copies of this uma">All copies</button>
+      </div>
     </div>
     <div class="races-panel hide" data-id="${u.trained_chara_id}"></div>
   </div>`;
@@ -1208,7 +1296,7 @@ function saveCardField(e){
   const u=allUmas().find(x=>x.trained_chara_id===id); if(u){u.note=note;u.tags=tags;}
   refreshTagSelects();
 }
-const LIST_LIMIT=50;
+const LIST_LIMIT=25;
 let SRC_FILTER=''; // '' = all, 'mine' = yours only, 'friend' = friends only
 let TARGET_AFFINITY={}, TARGET_BREAKDOWN={}, TARGET_CARD=null, TARGET_EXCLUDED=new Set();
 let _targetCardId=null, _targetCardIdForPortrait=null, _targetWins=[];
@@ -1307,11 +1395,25 @@ $('#invTargetBtn').addEventListener('click', ()=>{ _affPickerCb = null; openChar
 $('#charaPickerClose').addEventListener('click', closeCharaPicker);
 $('#charaPickerBg').addEventListener('click', e=>{ if(e.target===e.currentTarget) closeCharaPicker(); });
 $('#charaPickerSearch').addEventListener('input', buildCharaPicker);
-$('#srcMine').onclick=(e)=>{ e.preventDefault(); const sy=window.scrollY; SRC_FILTER=SRC_FILTER==='mine'?'':'mine'; updateSrcBtns(); renderInv(); window.scrollTo(0, sy); };
-$('#srcFriend').onclick=(e)=>{ e.preventDefault(); const sy=window.scrollY; SRC_FILTER=SRC_FILTER==='friend'?'':'friend'; updateSrcBtns(); renderInv(); window.scrollTo(0, sy); };
+$('#srcAll').onclick=(e)=>{ e.preventDefault(); const sy=window.scrollY; SRC_FILTER=''; updateSrcBtns(); renderInv(); window.scrollTo(0, sy); };
+$('#srcMine').onclick=(e)=>{ e.preventDefault(); const sy=window.scrollY; SRC_FILTER='mine'; updateSrcBtns(); renderInv(); window.scrollTo(0, sy); };
+$('#srcFriend').onclick=(e)=>{ e.preventDefault(); const sy=window.scrollY; SRC_FILTER='friend'; updateSrcBtns(); renderInv(); window.scrollTo(0, sy); };
 function updateSrcBtns(){
+  $('#srcAll').classList.toggle('active', SRC_FILTER==='');
   $('#srcMine').classList.toggle('active', SRC_FILTER==='mine');
   $('#srcFriend').classList.toggle('active', SRC_FILTER==='friend');
+}
+// Factors panel toggle
+$('#factorsToggle').onclick=(e)=>{
+  if(e.target.closest('#clearF')) return;
+  const toggle=$('#factorsToggle'), body=$('#factorsBody');
+  toggle.classList.toggle('open'); body.classList.toggle('open');
+};
+function updateFactorsCount(){
+  const total = Object.values(FILTERS).reduce((s,arr)=>s+arr.length,0);
+  const el=$('#factorsActiveCount');
+  if(total>0){ el.textContent=total+' active'; el.classList.remove('hide'); }
+  else el.classList.add('hide');
 }
 function renderInv(){
   _rebuildHighlight();
@@ -1370,14 +1472,50 @@ function renderInv(){
     rows.sort((a,b)=>base(a,b)||(b._lin-a._lin)||(b._pref-a._pref));
   }
   const nMine=rows.filter(u=>u.src!=='friend').length, nFr=rows.length-nMine;
-  const shown=rows.slice(0,LIST_LIMIT);
-  $('#invCount').textContent=`${rows.length} umas (${nMine} yours, ${nFr} friends)`+(rows.length>LIST_LIMIT?` — showing ${LIST_LIMIT}`:'');
-  $('#invList').innerHTML=shown.map(umaCard).join('');
+  _invRows = rows; _invShown = Math.min(LIST_LIMIT, rows.length);
+  const shown=rows.slice(0, _invShown);
+  const suffix = rows.length > _invShown ? ` — showing ${_invShown}` : '';
+  $('#invCount').textContent=`${rows.length} umas (${nMine} yours, ${nFr} friends)${suffix}`;
+  const showMoreHtml = rows.length > _invShown
+    ? `<div class="inv-show-more"><button class="ghost" id="invShowMore">Show ${Math.min(LIST_LIMIT, rows.length - _invShown)} more of ${rows.length - _invShown} remaining</button></div>` : '';
+  $('#invList').innerHTML=shown.map(umaCard).join('') + showMoreHtml;
+  _bindInvList();
+  updateFactorsCount();
+}
+let _invRows=[], _invShown=0;
+function _showMoreInv(){
+  const next = Math.min(_invShown + LIST_LIMIT, _invRows.length);
+  const batch = _invRows.slice(_invShown, next);
+  _invShown = next;
+  const moreBtn = document.getElementById('invShowMore');
+  if(moreBtn) moreBtn.closest('.inv-show-more').remove();
+  const frag = document.createElement('div');
+  frag.innerHTML = batch.map(umaCard).join('');
+  const remaining = _invRows.length - _invShown;
+  if(remaining > 0){
+    frag.innerHTML += `<div class="inv-show-more"><button class="ghost" id="invShowMore">Show ${Math.min(LIST_LIMIT, remaining)} more of ${remaining} remaining</button></div>`;
+  }
+  $('#invList').appendChild(frag);
+  // re-bind only new elements
+  frag.querySelectorAll('.note-in,.tag-in').forEach(el=>el.addEventListener('blur',saveCardField));
+  frag.querySelectorAll('.bfilter').forEach(b=>b.onclick=()=>{$('#filter').value=b.dataset.name;renderInv();});
+  frag.querySelectorAll('.bp1').forEach(b=>b.onclick=()=>setParent(1,allUmas().find(x=>x.trained_chara_id===+b.dataset.id)));
+  frag.querySelectorAll('.bp2').forEach(b=>b.onclick=()=>setParent(2,allUmas().find(x=>x.trained_chara_id===+b.dataset.id)));
+  frag.querySelectorAll('.bviewraces').forEach(b=>b.onclick=()=>toggleRaces(+b.dataset.id, b));
+  const sm2=document.getElementById('invShowMore');
+  if(sm2) sm2.onclick=_showMoreInv;
+  const nMine=_invRows.filter(u=>u.src!=='friend').length, nFr=_invRows.length-nMine;
+  const suffix = _invRows.length > _invShown ? ` — showing ${_invShown}` : '';
+  $('#invCount').textContent=`${_invRows.length} umas (${nMine} yours, ${nFr} friends)${suffix}`;
+}
+function _bindInvList(){
   $$('#invList .note-in,#invList .tag-in').forEach(el=>el.addEventListener('blur',saveCardField));
   $$('#invList .bfilter').forEach(b=>b.onclick=()=>{$('#filter').value=b.dataset.name;renderInv();});
   $$('#invList .bp1').forEach(b=>b.onclick=()=>setParent(1,allUmas().find(x=>x.trained_chara_id===+b.dataset.id)));
   $$('#invList .bp2').forEach(b=>b.onclick=()=>setParent(2,allUmas().find(x=>x.trained_chara_id===+b.dataset.id)));
   $$('#invList .bviewraces').forEach(b=>b.onclick=()=>toggleRaces(+b.dataset.id, b));
+  const sm=document.getElementById('invShowMore');
+  if(sm) sm.onclick=_showMoreInv;
 }
 
 const _RACES_CACHE = {};
@@ -1415,14 +1553,44 @@ async function toggleRaces(id, btn){
 }
 function setParent(slot,u){ if(!u)return; SELP['p'+slot]=u; updateTray(); }
 function updateTray(){
-  const nm=u=>u?esc(u.name)+(u.owner_name?` [${esc(u.owner_name)}]`:''):'—';
-  $('#trayP1').innerHTML=`P1: <i>${nm(SELP.p1)}</i>`;
-  $('#trayP2').innerHTML=`P2: <i>${nm(SELP.p2)}</i>`;
+  const nm=u=>u?esc(u.name)+(u.owner_name?` <small>${esc(u.owner_name)}</small>`:''):'—';
+  const showPort=(el,u,cls)=>{
+    if(u){ el.src=`/img/${u.card_id}`; el.classList.remove('hide'); el.classList.add(cls); el.onerror=()=>el.classList.add('hide'); }
+    else { el.classList.add('hide'); }
+  };
+  $('#trayP1').innerHTML=`<span class="tray-label">P1</span><img class="tray-port p1-border hide" id="trayP1Port" src=""><i>${nm(SELP.p1)}</i>`;
+  $('#trayP2').innerHTML=`<span class="tray-label">P2</span><img class="tray-port p2-border hide" id="trayP2Port" src=""><i>${nm(SELP.p2)}</i>`;
+  showPort($('#trayP1Port'), SELP.p1, 'p1-border');
+  showPort($('#trayP2Port'), SELP.p2, 'p2-border');
   $('#tray').classList.toggle('hide',!(SELP.p1||SELP.p2));
+  // Sync target from breed tab
   if(!$('#trayTarget').value && $('#target').value) $('#trayTarget').value=$('#target').value;
   if(!$('#trayTarget').value && _breedTargetCard){
     const bt=DATA.targets.find(x=>x.card_id===_breedTargetCard);
     if(bt) $('#trayTarget').value=bt.name;
+  }
+  // Update tray target button display
+  _updateTrayTargetDisplay();
+}
+function _updateTrayTargetDisplay(){
+  const val = $('#trayTarget').value.trim();
+  const t = val ? DATA.targets.find(x=>x.name===val) : null;
+  const nameEl = $('#trayTargetName');
+  const portEl = $('#trayTargetPortrait');
+  if(t){
+    nameEl.textContent = t.name;
+    nameEl.classList.add('picked');
+    portEl.src = `/img/${t.card_id}`;
+    portEl.classList.remove('hide');
+    portEl.onerror = ()=>portEl.classList.add('hide');
+  } else if(val){
+    nameEl.textContent = val;
+    nameEl.classList.add('picked');
+    portEl.classList.add('hide');
+  } else {
+    nameEl.textContent = 'pick target...';
+    nameEl.classList.remove('picked');
+    portEl.classList.add('hide');
   }
 }
 
@@ -1943,9 +2111,9 @@ $('#minWhite').addEventListener('input',renderInv);
 $('#sortBy').addEventListener('change',renderInv);
 $('#fcats').addEventListener('click',e=>{
   const add=e.target.closest('.addf');
-  if(add){const k=add.dataset.k;FILTERS[k].push({name:'',min:1,max:CATS.find(c=>c.k===k).max});renderFcats();renderInv();return;}
+  if(add){const k=add.dataset.k;FILTERS[k].push({name:'',min:1,max:CATS.find(c=>c.k===k).max});renderFcats();renderInv();updateFactorsCount();return;}
   const x=e.target.closest('.x');
-  if(x){const r=x.closest('.frow');FILTERS[r.dataset.k].splice(+r.dataset.i,1);renderFcats();renderInv();}
+  if(x){const r=x.closest('.frow');FILTERS[r.dataset.k].splice(+r.dataset.i,1);renderFcats();renderInv();updateFactorsCount();}
 });
 $('#fcats').addEventListener('change',e=>{
   const r=e.target.closest('.frow'); if(!r)return;
@@ -1957,7 +2125,7 @@ $('#fcats').addEventListener('change',e=>{
 });
 $('#fcats').addEventListener('input',e=>{if(e.target.classList.contains('fname')&&e.target.tagName==='INPUT'){
   const r=e.target.closest('.frow');FILTERS[r.dataset.k][+r.dataset.i].name=e.target.value;renderInv();}});
-$('#clearF').onclick=()=>{for(const k in FILTERS)FILTERS[k]=[];renderFcats();renderInv();};
+$('#clearF').onclick=()=>{for(const k in FILTERS)FILTERS[k]=[];renderFcats();renderInv();updateFactorsCount();};
 $('#run').onclick=runBreed;
 $('#trayGo').onclick=()=>{
   const t=DATA.targets.find(x=>x.name===$('#trayTarget').value.trim());
@@ -1968,7 +2136,16 @@ $('#trayGo').onclick=()=>{
   else $('#trayMsg').textContent='';
   showPair(SELP.p1.trained_chara_id,SELP.p2.trained_chara_id);
 };
-$('#trayClear').onclick=()=>{SELP.p1=null;SELP.p2=null;updateTray();};
+$('#trayClear').onclick=()=>{SELP.p1=null;SELP.p2=null;$('#trayTarget').value='';updateTray();};
+$('#trayTargetBtn').onclick=()=>{
+  _affPickerCb = (cardId, name) => {
+    $('#trayTarget').value = name;
+    const t = DATA.targets.find(x=>x.name===name);
+    if(t) CUR_TARGET = t.card_id;
+    _updateTrayTargetDisplay();
+  };
+  openCharaPicker();
+};
 $('#export').onclick=()=>{
   // Trigger browser download of the UmaExtractor-format data.json so it can
   // be uploaded to https://hakuraku.moe/veterans or any tool that accepts it.
