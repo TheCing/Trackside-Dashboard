@@ -4,25 +4,46 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Heaven - Breeding & Team Trials</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Archivo+Narrow:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#0a0b0e;--panel:#13151a;--panel2:#1a1c22;--line:#252830;--txt:#e4e6eb;--mut:#7d8290;
-        --blue:#5aadff;--pink:#ff7ac0;--green:#8bd450;--white:#d9c27a;--ok:#43c98a;--accent:#5a9fd4;
-        --glow:rgba(90,159,212,0.12);--card-shadow:0 2px 8px rgba(0,0,0,0.3),0 1px 3px rgba(0,0,0,0.2)}
+  :root{--bg:#0a0e14;--bg2:#0d1219;--panel:#10161f;--panel2:#141c27;--line:#1d2733;--line2:#27323f;
+        --txt:#e9eef4;--mut:#7d8aa0;
+        --blue:#4ea0ff;--pink:#ff5d8f;--green:#5cdb7a;--white:#cdd9e6;--ok:#5cdb7a;--accent:#ffb627;
+        --glow:rgba(255,182,39,0.12);--card-shadow:0 2px 8px rgba(0,0,0,0.3),0 1px 3px rgba(0,0,0,0.2);
+        /* ==== Racing Telemetry palette ==== */
+        --ink:#e9eef4;--ink2:#9fb0c0;--ink3:#5e6f80;--grid:#16202b;
+        --amber:#ffb627;--amber-dk:#c98208;--cyan:#36e3c8;--magenta:#ff5d8f;--white-s:#cdd9e6;--red:#ff5747;
+        --g-s:#ffd34d;--g-a:#ff8a3d;--g-b:#ff5d8f;--g-c:#36e3c8;--g-d:#6f86ff;--g-e:#7d8aa0;--g-f:#566273;--g-g:#3c4756}
+  .mono{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
   *{box-sizing:border-box;margin:0}
-  body{font:13.5px/1.45 'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--txt)}
+  body{font:13.5px/1.45 'Archivo','Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--txt);
+       background-image:radial-gradient(1200px 600px at 80% -10%,rgba(255,182,39,.05),transparent 60%),radial-gradient(900px 500px at -5% 110%,rgba(54,227,200,.045),transparent 60%);
+       -webkit-font-smoothing:antialiased}
   /* custom scrollbar */
   ::-webkit-scrollbar{width:8px;height:8px} ::-webkit-scrollbar-track{background:var(--bg)}
   ::-webkit-scrollbar-thumb{background:#2a2d35;border-radius:4px} ::-webkit-scrollbar-thumb:hover{background:#383c46}
-  /* header */
-  header{padding:0 20px;background:var(--panel);border-bottom:1px solid var(--line);display:flex;align-items:stretch;gap:0;height:48px}
-  header h1{font-size:17px;margin:0;display:flex;align-items:center;padding-right:16px;letter-spacing:-0.02em;
-            background:linear-gradient(135deg,var(--accent),#8b7adf);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800}
-  .src{color:var(--mut);font-size:11px;display:flex;align-items:center;padding-right:12px;border-right:1px solid var(--line);margin-right:4px}
-  .tabs{display:flex;gap:0;margin-left:auto;align-items:stretch}
-  .tab{padding:0 18px;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;color:var(--mut);
-       font-size:13px;font-weight:600;letter-spacing:0.02em;transition:color .2s,border-color .2s,background .2s;display:flex;align-items:center}
-  .tab:hover{color:var(--txt);background:rgba(255,255,255,0.02)}
-  .tab.active{color:var(--accent);border-bottom-color:var(--accent);background:rgba(90,159,212,0.04)}
+  /* header — telemetry bar */
+  header{padding:8px 26px 7px;background:linear-gradient(180deg,rgba(10,14,20,.96),rgba(10,14,20,.82) 70%);
+         border-bottom:1px solid var(--line);display:flex;align-items:center;gap:22px;height:56px;
+         position:sticky;top:0;z-index:40;backdrop-filter:blur(8px)}
+  header h1{font-size:20px;margin:0;display:flex;align-items:center;letter-spacing:.5px;color:var(--ink);
+            font-weight:900;-webkit-text-fill-color:initial;background:none;flex:none}
+  header h1::before{content:"";width:34px;height:34px;margin-right:11px;flex:none;border-radius:50%;
+    background:radial-gradient(circle at 60% 35%,var(--amber) 0 18%,transparent 19%),conic-gradient(from -40deg,var(--amber),var(--cyan) 55%,transparent 56%);
+    -webkit-mask:radial-gradient(circle,transparent 30%,#000 31%);mask:radial-gradient(circle,transparent 30%,#000 31%);
+    box-shadow:0 0 12px -2px var(--amber)}
+  .src{color:var(--ink2);font-size:10px;font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:7px;
+       padding:6px 11px;border:1px solid var(--line);border-radius:20px;background:var(--panel);white-space:nowrap}
+  .src::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:tt-pulse 2.4s infinite}
+  .tabs{display:flex;gap:2px;margin-left:8px;align-items:stretch;flex:1;overflow:hidden}
+  .tab{position:relative;padding:9px 14px 11px;border:none;border-radius:7px 7px 0 0;background:none;cursor:pointer;color:var(--ink3);
+       font-size:12.5px;font-weight:600;letter-spacing:.3px;transition:color .15s;display:flex;align-items:center;white-space:nowrap}
+  .tab:hover{color:var(--ink2);background:none}
+  .tab.active{color:var(--ink);background:none;border-bottom-color:transparent}
+  .tab.active::after{content:"";position:absolute;left:10px;right:10px;bottom:-1px;height:2px;
+    background:linear-gradient(90deg,var(--amber),var(--amber-dk));box-shadow:0 0 10px rgba(255,182,39,.6);border-radius:2px}
   .hdr-actions{display:flex;align-items:center;gap:6px;margin-left:10px;flex-shrink:0}
   .hdr-actions button{font-size:11px;padding:5px 12px;white-space:nowrap;border-radius:6px}
   main{padding:16px 20px;max-width:1300px;margin:0 auto}
@@ -658,11 +679,192 @@
   /* Better footer layout */
   .ufoot-actions{display:flex;gap:4px;align-items:center;margin-left:auto;flex-shrink:0}
   .ufoot-actions button{font-size:10.5px;padding:4px 10px;border-radius:6px;white-space:nowrap}
+
+  /* ============================================================
+     RACING TELEMETRY — inventory / breed / dossier
+     ============================================================ */
+  main{max-width:1440px;padding:16px 26px 90px}
+  /* view header */
+  .viewhead{display:flex;align-items:flex-end;gap:18px;margin:6px 0 16px;flex-wrap:wrap}
+  .viewhead h1{font-size:24px;font-weight:900;letter-spacing:-.5px;display:flex;align-items:center;gap:13px;color:var(--ink);background:none;-webkit-text-fill-color:initial;padding:0}
+  .viewhead h1::before{display:none}
+  .viewhead h1 .tag{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:2px;color:var(--bg);background:var(--amber);padding:4px 9px;border-radius:4px;transform:translateY(-2px)}
+  .viewhead .meta{display:flex;gap:22px;margin-left:auto;flex-wrap:wrap}
+  .viewhead .meta .m{display:flex;flex-direction:column;gap:2px}
+  .viewhead .meta .m .k{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--ink3);text-transform:uppercase}
+  .viewhead .meta .m .v{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--ink)}
+  .viewhead .meta .m .v small{font-size:11px;color:var(--ink3);font-weight:500}
+
+  /* build-filter console */
+  .console{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line2);border-radius:14px;
+    padding:14px 18px;margin-bottom:14px;position:relative;overflow:hidden}
+  .console::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--amber),transparent);opacity:.5}
+  .console-grid{display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap}
+  .cfield{display:flex;flex-direction:column;gap:6px}
+  .cfield .clab{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--ink3);text-transform:uppercase;display:flex;align-items:center;gap:7px}
+  .cfield .clab::before{content:"";width:5px;height:5px;background:var(--amber);border-radius:50%}
+  .console select{background:var(--bg);border:1px solid var(--line);border-radius:9px;color:var(--ink);font-size:12px;padding:8px 12px;font-family:'Archivo Narrow',sans-serif;font-weight:600;cursor:pointer}
+  .console select:focus{border-color:var(--amber);box-shadow:0 0 0 2px var(--glow)}
+  .cdivide{width:1px;align-self:stretch;background:var(--line);margin:0 2px}
+  .fit-readout{margin-left:auto;display:flex;align-items:center;gap:14px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 16px}
+  .fit-readout .frlab{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--ink3);text-transform:uppercase}
+  .fit-readout .frval{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:800;color:var(--amber);line-height:1.1}
+  .fit-readout .frval.off{color:var(--ink3)}
+
+  /* inventory toolbar */
+  .inv-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .inv-count{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink3)}
+
+  /* form-sheet rows */
+  .rows{display:flex;flex-direction:column;gap:9px}
+  #invList{display:flex;flex-direction:column;gap:9px}
+  .ucard{position:relative;display:flex;flex-direction:column;cursor:pointer;padding:0;margin:0;
+    background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:13px;overflow:hidden;
+    box-shadow:none;transition:border-color .18s,transform .18s,box-shadow .18s}
+  .ucard:hover{border-color:var(--line2);transform:translateX(2px);box-shadow:-6px 0 0 -2px var(--accent)}
+  .ucard.ucard-friend{border-left:1px solid var(--line)}
+  .ucard.ucard-friend::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--cyan);opacity:.7;z-index:2}
+  .ucard.open{border-color:var(--amber);box-shadow:0 0 0 1px rgba(255,182,39,.12),0 18px 44px -22px rgba(0,0,0,.8)}
+  .umarow-main{display:grid;grid-template-columns:264px 1fr 230px 158px;align-items:stretch}
+  /* col 1 identity */
+  .u-id{display:flex;align-items:center;gap:13px;padding:14px 16px;border-right:1px solid var(--line);min-width:0}
+  .av{width:54px;height:54px;border-radius:50%;flex:none;position:relative;display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:16px;color:#fff;background:radial-gradient(circle at 32% 28%,#3a4655,#1a222d);
+    box-shadow:0 3px 10px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.2);letter-spacing:.5px;overflow:hidden}
+  .av::after{content:"";position:absolute;inset:-3px;border-radius:50%;border:1.5px solid var(--accent);opacity:.4;z-index:2}
+  .av .avimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 12%;border-radius:50%;z-index:1}
+  .av .avinit{position:relative;z-index:0}
+  .av.dav{width:60px;height:60px;font-size:18px}
+  .av.tav{width:38px;height:38px;font-size:13px}
+  .u-id .who{display:flex;flex-direction:column;gap:4px;min-width:0}
+  .u-id .nm{font-weight:700;font-size:15px;letter-spacing:-.2px;display:flex;align-items:center;gap:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .u-id .nm .own{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--ink3);border:1px solid var(--line2);border-radius:4px;padding:1px 5px;letter-spacing:.3px;flex:none}
+  .u-id .subline{display:flex;align-items:center;gap:9px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink3);flex-wrap:wrap}
+  .gradechip{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:12px;padding:2px 8px;border-radius:5px;letter-spacing:.5px;
+    color:#0a0e14;background:var(--gc,var(--amber));box-shadow:0 0 12px -2px var(--gc,var(--amber))}
+  .matchb{font-family:'JetBrains Mono',monospace;font-size:9px;background:rgba(92,219,122,.12);color:var(--green);border:1px solid rgba(92,219,122,.3);border-radius:4px;padding:1px 6px}
+  /* col 2 telemetry */
+  .u-tel{display:flex;align-items:center;padding:10px 16px;border-right:1px solid var(--line);min-width:0}
+  .gauges{display:flex;gap:2px;align-items:flex-end;flex:none}
+  .gauge{display:flex;flex-direction:column;align-items:center;gap:4px;width:44px}
+  .gauge svg{display:block}
+  .gauge .gv{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700}
+  .gauge .gl{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--ink3);text-transform:uppercase}
+  .spark-wrap{margin-left:16px;flex:1;display:flex;flex-direction:column;gap:5px;align-self:stretch;justify-content:center;min-width:110px}
+  .spark-lab{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:1px;color:var(--ink3);text-transform:uppercase}
+  /* col 3 aptitude */
+  .u-apt{padding:10px 14px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:8px;justify-content:center;min-width:0}
+  .apt-grp{display:flex;align-items:center;gap:6px}
+  .apt-grp .ag-h{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.5px;color:var(--ink3);width:30px;flex:none;text-transform:uppercase}
+  .apt-pips{display:flex;gap:5px;flex-wrap:wrap}
+  .apt{display:flex;align-items:center;gap:3px;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--ink3)}
+  .apt .ad{width:7px;height:7px;border-radius:2px;transform:rotate(45deg);background:var(--magenta);opacity:.35}
+  .apt.has{color:var(--ink2)} .apt.has .ad{opacity:1}
+  .apt.bmatch{color:var(--amber);font-weight:700} .apt.bmatch .ad{background:var(--amber);opacity:1;box-shadow:0 0 5px var(--amber)}
+  .apt .an{font-size:8px;letter-spacing:.3px}
+  .spark-pips{display:flex;gap:9px;flex-wrap:wrap;margin-top:1px}
+  .spk{display:flex;align-items:center;gap:4px}
+  .spk .sdot{width:7px;height:7px;border-radius:2px;transform:rotate(45deg)}
+  .spk .sn{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--ink2)}
+  /* col 4 score/fit */
+  .u-score{padding:12px 16px;display:flex;flex-direction:column;justify-content:center;gap:8px;position:relative;min-width:0}
+  .scoreline{display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding-right:30px}
+  .scoreline .sc-lab{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:1.5px;color:var(--ink3)}
+  .scoreline .sc-val{font-family:'JetBrains Mono',monospace;font-size:19px;font-weight:800;letter-spacing:-.5px;line-height:1;color:var(--ink)}
+  .fitbar-wrap{display:flex;flex-direction:column;gap:4px}
+  .fitbar-head{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:1px;color:var(--ink3)}
+  .fitbar-head b{color:var(--green);font-size:11px;font-weight:800}
+  .fitbar-head .mono{font-size:11px}
+  .fitbar{height:5px;background:var(--bg);border-radius:3px;overflow:hidden;position:relative;border:1px solid var(--line)}
+  .fitbar i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--green),#9bf0ab);border-radius:3px;box-shadow:0 0 8px var(--green)}
+  .expand-btn{position:absolute;top:11px;right:13px;width:22px;height:22px;border-radius:6px;border:1px solid var(--line2);
+    background:var(--panel);color:var(--ink3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;
+    transition:all .15s;background-image:none;font-weight:400}
+  .expand-btn:hover{color:var(--amber);border-color:var(--amber);background:var(--panel);box-shadow:none;transform:none}
+  /* white-skills lane */
+  .umarow-skills{display:flex;align-items:center;gap:11px;padding:8px 16px;border-top:1px solid var(--line);background:rgba(0,0,0,.22)}
+  .umarow-skills .ws-lab{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:1.5px;color:var(--ink3);text-transform:uppercase;white-space:nowrap;display:flex;align-items:center;gap:6px;flex:none}
+  .umarow-skills .ws-lab::before{content:"";width:8px;height:8px;border-radius:2px;transform:rotate(45deg);background:var(--white-s)}
+  .ws-chips{display:flex;gap:5px;flex-wrap:wrap;flex:1;align-items:center}
+  .ws-chip{font-size:10.5px;padding:2px 8px;border-radius:5px;background:rgba(205,217,230,.06);border:1px solid var(--line2);color:var(--ink2);white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
+  .ws-chip .wst{font-family:'JetBrains Mono',monospace;font-size:8.5px;opacity:.65}
+  .ws-chip.match{background:rgba(255,182,39,.13);border-color:var(--amber);color:var(--amber)}
+  .ws-chip.match .wst{opacity:.9}
+  .ws-more{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--ink3);padding:2px 7px;border:1px dashed var(--line2);border-radius:5px;white-space:nowrap;cursor:pointer}
+  .ws-more:hover{color:var(--amber);border-color:var(--amber)}
+  .ws-chip.lg{font-size:11.5px;padding:3px 11px}
+  .ws-more.lg{font-size:10.5px;padding:3px 10px}
+
+  /* expanded dossier (inline detail under a row) */
+  .dossier{background:linear-gradient(180deg,var(--panel2),var(--bg2));border-top:1px solid var(--line);position:relative}
+  .dbody{display:grid;grid-template-columns:1.1fr 1fr;gap:0}
+  .dcell{padding:16px 20px;border-right:1px solid var(--line)}
+  .dcell:last-child{border-right:none}
+  .dcell h4{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:2px;color:var(--ink3);text-transform:uppercase;margin-bottom:13px;display:flex;align-items:center;gap:8px}
+  .dcell h4::before{content:"";width:14px;height:1px;background:var(--amber)}
+  .dcell h4 .ws-sub{margin-left:auto;font-size:9px;color:var(--amber);letter-spacing:.5px;text-transform:none;font-weight:700}
+  .white-section{padding:14px 20px 18px;border-top:1px solid var(--line)}
+  .white-section h4{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:2px;color:var(--ink3);text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:9px}
+  .white-section h4::before{content:"";width:9px;height:9px;border-radius:2px;transform:rotate(45deg);background:var(--white-s);flex:none}
+  .white-section h4 .ws-sub{margin-left:auto;font-size:9px;color:var(--amber);letter-spacing:.5px;text-transform:none;font-weight:700}
+  .white-grid{display:flex;flex-wrap:wrap;gap:6px}
+  .ws-chip.ws-hidden{display:none}
+  .white-grid.expanded .ws-chip.ws-hidden{display:inline-flex}
+  /* lineage tree in dossier */
+  .lineage{display:flex;flex-direction:column;gap:0}
+  .tree-node{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;background:var(--panel);border:1px solid var(--line);position:relative}
+  .tree-node.self{border-color:var(--amber);background:linear-gradient(90deg,rgba(255,182,39,.08),var(--panel))}
+  .tree-node .tinfo{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}
+  .tree-node .tinfo .tn{font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tree-node .tinfo .tr{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink3);letter-spacing:.5px}
+  .tree-node .heart{display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:800}
+  .parents-wrap{display:flex;flex-direction:column;gap:8px;margin:8px 0 8px 28px;position:relative}
+  .parents-wrap::before{content:"";position:absolute;left:-16px;top:-8px;bottom:50%;width:2px;background:var(--line2)}
+  .parents-wrap .tree-node::before{content:"";position:absolute;left:-16px;top:50%;width:14px;height:2px;background:var(--line2)}
+  .affinity-total{margin-top:8px;display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:var(--bg);border:1px solid var(--line);border-radius:10px}
+  .affinity-total .at-lab{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--ink3)}
+  .affinity-total .at-val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:800;color:var(--magenta)}
+  /* spark breakdown table */
+  .spark-table{display:flex;flex-direction:column;gap:13px}
+  .spark-group{display:flex;flex-direction:column;gap:6px}
+  .spark-group .sg-head{display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--ink2)}
+  .spark-group .sg-head .sg-ic{width:9px;height:9px;border-radius:2px;transform:rotate(45deg)}
+  .spark-group .sg-head .sg-ct{margin-left:auto;color:var(--ink3)}
+  .spark-item{display:flex;align-items:center;gap:10px}
+  .spark-item .si-name{font-size:12px;color:var(--ink2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .spark-item .si-stars{display:flex;gap:2px;flex:none}
+  .spark-item .si-stars i{width:8px;height:8px;border-radius:50%}
+  .spark-item .si-odds{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--ink3);width:42px;text-align:right;flex:none}
+  /* dossier edit + actions */
+  .dedit3{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:12px 20px;border-top:1px solid var(--line);background:rgba(0,0,0,.15)}
+  .dedit3 input{background:var(--bg);border:1px solid var(--line);border-radius:7px;font-size:12px;padding:6px 10px}
+  .dedit3 .note-in{flex:2;min-width:160px;width:auto}.dedit3 .tag-in{flex:1;min-width:120px;width:auto}
+  .dedit3 .ufoot-actions{display:flex;gap:4px;align-items:center;margin-left:auto;flex-wrap:wrap}
+  .ucard .races-panel{background:var(--bg);border-radius:0}
+
+  @media(max-width:1240px){
+    .umarow-main{grid-template-columns:230px 1fr 200px}
+    .u-score{grid-column:1/-1;border-top:1px solid var(--line);flex-direction:row;align-items:center;gap:24px}
+    .scoreline{padding-right:0}
+    .dbody{grid-template-columns:1fr}
+    .dcell{border-right:none;border-bottom:1px solid var(--line)}
+  }
+  @media(max-width:980px){.umarow-main{grid-template-columns:1fr}.u-id,.u-tel,.u-apt{border-right:none;border-bottom:1px solid var(--line)}}
+
+  /* breed combo telemetry card */
+  .combo{position:relative;overflow:hidden;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:0;padding:0;margin-bottom:9px;
+    background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:13px;box-shadow:none}
+  .combo::before{content:"";position:absolute;top:0;left:0;right:0;bottom:auto;width:auto;height:1px;background:linear-gradient(90deg,transparent,var(--magenta),transparent);opacity:.4;transition:none}
+  .combo.clickable:hover{border-color:var(--accent);background:linear-gradient(180deg,var(--panel),var(--bg2));transform:translateX(2px)}
+  .combo.clickable:hover::before{opacity:.7}
+  .combo .cpair{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;font-size:13px;font-weight:700;padding:13px 16px;grid-column:1/-1}
+  .combo .cmeta{display:flex;align-items:center;gap:14px;padding:11px 16px;border-top:1px solid var(--line);background:rgba(0,0,0,.18);grid-column:1/-1}
+
 </style>
 </head>
 <body>
 <header>
-  <h1>Heaven</h1>
+  <h1>HEAVEN</h1>
   <span class="src" id="src">loading...</span>
   <div class="tabs">
     <div class="tab active" data-tab="inv">Inventory</div>
@@ -780,16 +982,61 @@
 
 <!-- ===== INVENTORY ===== -->
 <section id="inv">
-  <div class="card">
-    <div class="row" style="gap:8px">
-      <input id="filter" placeholder="Filter by name, note, tag or owner..." style="flex:1;min-width:200px">
-      <label class="muted" style="white-space:nowrap;font-size:12px">min. white <input id="minWhite" type="number" min="0" value="0" style="width:56px;padding:5px 8px;font-size:12px"></label>
+  <div class="viewhead">
+    <h1><span class="tag">VIEW 01</span>Inventory</h1>
+  </div>
+
+  <!-- BUILD-FILTER CONSOLE -->
+  <div class="console">
+    <div class="console-grid">
+      <div class="cfield">
+        <span class="clab">Running Style</span>
+        <select id="invStyle">
+          <option value="">All styles</option>
+          <option>Front Runner</option><option>Pace Chaser</option><option>Late Surger</option><option>End Closer</option>
+        </select>
+      </div>
+      <div class="cdivide"></div>
+      <div class="cfield">
+        <span class="clab">Distance / Surface</span>
+        <select id="invDistance">
+          <option value="">All distances</option>
+          <option>Sprint</option><option>Mile</option><option>Medium</option><option>Long</option><option>Dirt</option>
+        </select>
+      </div>
+      <div class="cfield">
+        <span class="clab">Target · Affinity</span>
+        <div class="target-pick-btn" id="invTargetBtn" style="min-width:220px">
+          <img class="tp-portrait hide" id="invTargetPortrait" src="" alt="">
+          <span class="tp-name" id="invTargetName">Pick a target uma...</span>
+          <span class="tp-arrow">▾</span>
+        </div>
+      </div>
+      <button id="invTargetClear" type="button" class="ghost hide" style="font-size:11px;align-self:end">Clear</button>
+      <div class="fit-readout">
+        <div>
+          <div class="frlab">SORT · BUILD FIT</div>
+          <div class="frval off" id="invFitReadout">—</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:14px;align-items:center;margin-top:8px;flex-wrap:wrap">
+      <span class="muted" id="invBuildMsg" style="font-size:10px;font-family:'JetBrains Mono',monospace"></span>
+      <span class="muted" id="invTargetMsg" style="font-size:11px;font-family:'JetBrains Mono',monospace"></span>
+    </div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="console" style="padding:12px 18px">
+    <div class="inv-toolbar">
+      <input id="filter" placeholder="Filter by name, note, tag or owner..." style="flex:1;min-width:180px;background:var(--bg);border-color:var(--line)">
+      <label class="muted" style="white-space:nowrap;font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--ink3)">MIN WHITE <input id="minWhite" type="number" min="0" value="0" style="width:54px;padding:5px 8px;font-size:12px;background:var(--bg)"></label>
       <div class="inv-src-pills">
         <button id="srcAll" type="button" class="inv-src-pill active">All</button>
         <button id="srcMine" type="button" class="inv-src-pill">Yours</button>
         <button id="srcFriend" type="button" class="inv-src-pill">Friends</button>
       </div>
-      <select id="sortBy" class="ghost" title="sort" style="font-size:12px;padding:6px 8px">
+      <select id="sortBy" title="sort" style="font-size:12px;padding:6px 10px;background:var(--bg);border:1px solid var(--line);border-radius:8px;color:var(--ink)">
         <option value="affinity">Affinity</option>
         <option value="build">Build Fit</option>
         <option value="g1">G1 Wins</option>
@@ -797,32 +1044,11 @@
         <option value="score">Score</option>
         <option value="newest">Newest First</option>
       </select>
-      <span class="muted" id="invCount" style="font-size:11px;white-space:nowrap"></span>
-    </div>
-    <div class="row" style="gap:8px;align-items:center;margin-top:6px">
-      <label class="muted" style="font-weight:700;color:var(--accent);white-space:nowrap;font-size:10px;text-transform:uppercase;letter-spacing:.06em">BUILD</label>
-      <select id="invStyle" class="ghost" style="font-size:11px;padding:5px 8px;min-width:100px">
-        <option value="">Style...</option>
-        <option>Front Runner</option><option>Pace Chaser</option><option>Late Surger</option><option>End Closer</option>
-      </select>
-      <select id="invDistance" class="ghost" style="font-size:11px;padding:5px 8px;min-width:80px">
-        <option value="">Distance...</option>
-        <option>Sprint</option><option>Mile</option><option>Medium</option><option>Long</option><option>Dirt</option>
-      </select>
-      <span class="muted" id="invBuildMsg" style="font-size:10px"></span>
-    </div>
-    <div class="target-pick-row">
-      <label class="muted" style="font-weight:600;color:var(--accent);white-space:nowrap">TARGET:</label>
-      <div class="target-pick-btn" id="invTargetBtn">
-        <img class="tp-portrait hide" id="invTargetPortrait" src="" alt="">
-        <span class="tp-name" id="invTargetName">Pick a target uma to score parent affinity...</span>
-        <span class="tp-arrow">▾</span>
-      </div>
-      <button id="invTargetClear" type="button" class="ghost hide">Clear</button>
-      <span class="muted" id="invTargetMsg" style="font-size:12px"></span>
+      <span class="inv-count" id="invCount"></span>
     </div>
   </div>
-  <div class="card">
+
+  <div class="card" style="background:var(--panel);border-color:var(--line)">
     <div class="inv-factors-toggle" id="factorsToggle">
       <div style="display:flex;align-items:center">
         <span class="inv-factors-arrow">▶</span>
@@ -843,6 +1069,9 @@
 <!-- ===== AFFINITY (exact formula + WSB) ===== -->
 <!-- ===== BREED ===== -->
 <section id="breed" class="hide">
+  <div class="viewhead">
+    <h1><span class="tag">VIEW 02</span>Breed</h1>
+  </div>
   <!-- Target & weights -->
   <div class="card breed-top">
     <div class="breed-header">
@@ -1133,6 +1362,101 @@ function _isBreedMatch(name){
   if(_BREED_HI_KW.length && _BREED_HI_KW.some(k=>nl.includes(k))) return true;
   return false;
 }
+// ===== RACING TELEMETRY render helpers =====
+// Fixed per-stat hue (Speed/Stamina/Power/Guts/Wit) — comparable across umas.
+const STAT_COL={speed:'#ffb627',stamina:'#36e3c8',power:'#ff5d8f',guts:'#ff7a45',wiz:'#6f86ff'};
+const STAT_KEYS=['speed','stamina','power','guts','wiz'];
+const STAT_LAB={speed:'SPD',stamina:'STA',power:'PWR',guts:'GTS',wiz:'WIT'};
+const STAR_COL={blue:'#4ea0ff',pink:'#ff5d8f',green:'#5cdb7a',white:'#cdd9e6'};
+const GAUGE_MAX=1200;
+// Grade chip color from rank_label (S-tier gold, A orange, etc.). Falls back to amber.
+function gradeCol(label){
+  if(!label) return 'var(--amber)';
+  const c=String(label).trim().charAt(0).toUpperCase();
+  const m={S:'#ffd34d',U:'#ff8a3d',A:'#ff8a3d',B:'#ff5d8f',C:'#36e3c8',D:'#6f86ff',E:'#7d8aa0',F:'#566273',G:'#3c4756'};
+  return m[c]||'var(--amber)';
+}
+// Build keyword test reusing BUILD_SKILL_KW for the currently selected build.
+function _buildKWs(){
+  const style=$('#invStyle')?.value, dist=$('#invDistance')?.value;
+  const kws=[...(style&&BUILD_SKILL_KW[style]?BUILD_SKILL_KW[style]:[]),...(dist&&BUILD_SKILL_KW[dist]?BUILD_SKILL_KW[dist]:[])];
+  return kws;
+}
+function isBuildSkill(name){const k=_buildKWs();if(!k.length)return false;const n=name.toLowerCase();return k.some(x=>n.includes(x));}
+// portrait <img> with initials fallback (kept inside .av)
+function avInner(cardId,name){
+  const init=String(name||'?').split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const img=cardId?`<img class="avimg" src="/img/${cardId}" alt="" onerror="this.remove()">`:'';
+  return `${img}<span class="avinit">${init}</span>`;
+}
+function avHtml(u,cls){return `<div class="av ${cls||''}">${avInner(u.card_id,u.name)}</div>`;}
+// half-ring gauge for one raw stat (0..GAUGE_MAX). Shows the raw number; no letter grade.
+function gauge(key,val){
+  val=val||0;
+  const pct=Math.min(val/GAUGE_MAX,1), R=18, C=Math.PI*R, dash=pct*C, col=STAT_COL[key];
+  return `<div class="gauge">
+    <svg width="44" height="29" viewBox="0 0 46 30">
+      <path d="M5 27 A18 18 0 0 1 41 27" fill="none" stroke="#1d2733" stroke-width="4" stroke-linecap="round"/>
+      <path d="M5 27 A18 18 0 0 1 41 27" fill="none" stroke="${col}" stroke-width="4" stroke-linecap="round"
+            stroke-dasharray="${dash.toFixed(1)} ${C.toFixed(1)}" style="filter:drop-shadow(0 0 3px ${col})"/>
+    </svg>
+    <div class="gv mono" style="color:${col}">${val}</div>
+    <div class="gl">${STAT_LAB[key]}</div>
+  </div>`;
+}
+// stat-trace sparkline through the 5 real stats
+function sparkline(u){
+  const s=u.stats||{}, vals=STAT_KEYS.map(k=>s[k]||0);
+  const W=128,H=30,pad=3,step=(W-pad*2)/(STAT_KEYS.length-1);
+  const pts=vals.map((v,i)=>[pad+i*step, H-pad-(Math.min(v/GAUGE_MAX,1))*(H-pad*2)]);
+  const path=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  const area=path+` L${pts[pts.length-1][0].toFixed(1)} ${H} L${pts[0][0].toFixed(1)} ${H} Z`;
+  const dots=pts.map((p,i)=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2" fill="${STAT_COL[STAT_KEYS[i]]}"/>`).join('');
+  const gid='sg'+Math.random().toString(36).slice(2,7);
+  let grid='';for(let g=1;g<5;g++){const y=H-pad-(g/5)*(H-pad*2);grid+=`<line x1="0" y1="${y.toFixed(1)}" x2="${W}" y2="${y.toFixed(1)}" stroke="#16202b" stroke-width="1"/>`;}
+  const peak=Math.max(...vals),trough=Math.min(...vals);
+  return `<div class="spark-wrap">
+    <div class="spark-lab"><span>STAT TRACE</span><span style="color:var(--amber)">▲${peak} ▼${trough}</span></div>
+    <svg width="100%" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="display:block">
+      <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb627" stop-opacity="0.32"/><stop offset="1" stop-color="#ffb627" stop-opacity="0"/></linearGradient></defs>
+      ${grid}<path d="${area}" fill="url(#${gid})"/><path d="${path}" fill="none" stroke="#ffb627" stroke-width="1.8" stroke-linejoin="round"/>${dots}
+    </svg>
+    <div class="spark-lab"><span>SPD</span><span>STA</span><span>PWR</span><span>GTS</span><span>WIT</span></div>
+  </div>`;
+}
+// Aptitude column from PINK sparks (no letter grades exist). Grouped Surface/Distance/Style as star counts.
+const APT_SURF=['Turf','Dirt'], APT_DIST=['Sprint','Mile','Medium','Long'], APT_STYLE=['Front Runner','Pace Chaser','Late Surger','End Closer'];
+const APT_SHORT={Turf:'Tf',Dirt:'Dt',Sprint:'Sp',Mile:'Mi',Medium:'Md',Long:'Lg','Front Runner':'F','Pace Chaser':'P','Late Surger':'L','End Closer':'E'};
+function _pinkTotal(u,name){const a=(u.agg||[]).find(x=>x.type==='pink'&&x.name===name);return a?(a.total||0):0;}
+function _buildAptMatch(name){
+  const style=$('#invStyle')?.value, dist=$('#invDistance')?.value;
+  if(style && name===BUILD_STYLE_FACTOR[style]) return true;
+  if(dist && name===BUILD_DIST_FACTOR[dist]) return true;
+  return false;
+}
+function aptColumn(u){
+  const grp=(label,names)=>{
+    const pips=names.map(n=>{
+      const t=_pinkTotal(u,n), has=t>0, bm=_buildAptMatch(n);
+      const cls='apt'+(has?' has':'')+(bm?' bmatch':'');
+      return `<span class="${cls}" title="${esc(n)} ${t}★"><span class="ad"></span><span class="an">${APT_SHORT[n]||n}</span>${has?t:''}</span>`;
+    }).join('');
+    return `<div class="apt-grp"><span class="ag-h">${label}</span><div class="apt-pips">${pips}</div></div>`;
+  };
+  return grp('SURF',APT_SURF)+grp('DIST',APT_DIST)+grp('STYLE',APT_STYLE);
+}
+// Top blue/green spark pips + white count badge for the row's aptitude cell footer.
+function sparkPips(u){
+  const items=[];
+  (u.agg||[]).forEach(a=>{const t=_displayType(a.type);if(t==='blue'||t==='green')items.push([t,a.name,a.total||0]);});
+  items.sort((a,b)=>b[2]-a[2]);
+  let html='<div class="spark-pips">';
+  items.slice(0,4).forEach(([t,nm,n])=>{html+=`<div class="spk" title="${esc(nm)}"><span class="sdot" style="background:${STAR_COL[t]}"></span><span class="sn">${n}</span></div>`;});
+  html+=`<div class="spk" title="white sparks"><span class="sdot" style="background:var(--white-s)"></span><span class="sn">${u.white_count||0}</span></div>`;
+  return html+'</div>';
+}
+function heartSvg(col){return `<svg width="13" height="12" viewBox="0 0 13 12"><path d="M6.5 11 L1.5 5.8 C-0.3 4 0.4 1.2 2.8 1 C4.1 0.9 5.6 1.6 6.5 3 C7.4 1.6 8.9 0.9 10.2 1 C12.6 1.2 13.3 4 11.5 5.8 Z" fill="${col}"/></svg>`;}
+
 function pill(name,stars,type,pct,you){
   const st=`<span class="st st-${type}">${stars}★</span>`;
   const v=(pct!=null)?`<span class="val">${pct}%</span>`:'';
@@ -1208,87 +1532,99 @@ function matchUma(u){
   return {pref,lin:Math.round(lin*100)/100};
 }
 
-// ---- uma.moe-style result card ----
-const WHITE_TRUNCATE_LIMIT = 8;
-function factorGrid(u){
-  const agg=u.agg||[];
-  return TYPE_ORDER.map(t=>{
-    const items=agg.filter(a=>_displayType(a.type)===t);
-    if(!items.length)return '';
-    if(t==='white' && items.length > WHITE_TRUNCATE_LIMIT){
-      const visible = items.slice(0, WHITE_TRUNCATE_LIMIT);
-      const hidden = items.slice(WHITE_TRUNCATE_LIMIT);
-      const uid = u.trained_chara_id;
-      return `<div class="fg fg-${t} fg-white-truncated" id="wg-${uid}">${
-        visible.map(a=>pill(a.name,a.total,t,a.pct,a.own)).join('')}${
-        hidden.map(a=>`<span class="pl-overflow">${pill(a.name,a.total,t,a.pct,a.own)}</span>`).join('')
-      }<span class="fg-white-more" onclick="toggleWhiteSkills(${uid})" id="wm-${uid}">+${hidden.length} more</span></div>`;
-    }
-    return `<div class="fg fg-${t}">${items.map(a=>pill(a.name,a.total,t,a.pct,a.own)).join('')}</div>`;
-  }).join('');
+// ---- white-skills sources (agg entries displaying as white) ----
+function whiteAggOf(u){
+  return (u.agg||[]).filter(a=>_displayType(a.type)==='white')
+    .slice().sort((a,b)=>(isBuildSkill(b.name)?1:0)-(isBuildSkill(a.name)?1:0)||(b.total||0)-(a.total||0));
 }
-function toggleWhiteSkills(uid){
-  const g=document.getElementById('wg-'+uid);
-  const m=document.getElementById('wm-'+uid);
-  if(!g)return;
-  const wasOpen=!g.classList.contains('fg-white-truncated');
-  g.classList.toggle('fg-white-truncated');
-  if(m) m.textContent=wasOpen ? `+${g.querySelectorAll('.pl-overflow').length} more` : 'show less';
-}
-function portraitTree(u){
-  const ph=u.parents||[];
-  const tBd = TARGET_CARD ? TARGET_BREAKDOWN[tkey(u)] : null;
-  // When target is set: show exact affinity (CR + WSB)
-  const mainHeart = tBd ? tBd.total : ph.reduce((s,p)=>s+(p.stars||0),0);
-  const heartColor = tBd ? 'var(--accent)' : 'var(--pink)';
-  const wsbTag = tBd && tBd.wsb > 0
-    ? `<div style="font-size:10px;color:var(--ok)">+${tBd.wsb} race</div>` : '';
-  const nodeHeart = (p)=>{
-    if(!tBd) return `<span class="ph2">♥ ${p.stars}</span>`;
-    const n = (tBd.nodes||[]).find(n=>n.card_id===p.card_id);
-    const val = n ? n.total : 0;
-    return `<span class="ph2" style="color:var(--accent)">♥ ${val}</span>`;
-  };
-  return `<div class="ptcol">
-    <div class="pcell"><img class="rport" src="/img/${u.card_id}" onerror="this.style.visibility='hidden'">
-      <div class="ph2" style="color:${heartColor}">♥ ${mainHeart}</div>${wsbTag}</div>
-    <div class="pconn">▼</div>
-    <div class="prow">${ph.map(p=>`<div class="pcell">
-      <img class="rport sm" src="/img/${p.card_id}" onerror="this.style.visibility='hidden'">
-      <div class="nm">${esc(p.name)}</div>
-      ${nodeHeart(p)}</div>`).join('')}</div>
+// Full-width white-skills lane under a row: build-matches first, capped, gold-highlighted.
+function whiteStrip(u){
+  const ws=whiteAggOf(u), SHOWN=7, show=ws.slice(0,SHOWN);
+  const chips=show.map(a=>{const m=isBuildSkill(a.name);
+    return `<span class="ws-chip${m?' match':''}" title="${esc(a.name)} · ${a.total}★">${esc(a.name)}<span class="wst">${a.total}★</span></span>`;}).join('');
+  const remaining=Math.max(0,(u.white_count||ws.length)-show.length);
+  const more=remaining>0?`<span class="ws-more">+${remaining} in dossier</span>`:'';
+  return `<div class="umarow-skills">
+    <span class="ws-lab">White Skills</span>
+    <div class="ws-chips">${chips||'<span class="muted" style="font-size:10px">none</span>'}${more}</div>
   </div>`;
 }
+// Full white-skills grid in the dossier: every skill named, matches first + gold.
+function whiteGrid(u){
+  const ws=whiteAggOf(u);
+  const matchCount=ws.filter(a=>isBuildSkill(a.name)).length;
+  const VIS=Math.max(matchCount,16);
+  const chips=ws.map((a,i)=>{const m=isBuildSkill(a.name);const hide=i>=VIS?' ws-hidden':'';
+    return `<span class="ws-chip lg${m?' match':''}${hide}" title="${esc(a.name)} · ${a.total}★">${m?'★ ':''}${esc(a.name)}<span class="wst">${a.total}★</span></span>`;}).join('');
+  const hidden=Math.max(0,ws.length-VIS);
+  const more=hidden>0?`<span class="ws-more lg ws-toggle" data-n="${hidden}">+${hidden} more ▾</span>`:'';
+  const sub=matchCount?`${matchCount} match build`:'';
+  return `<div class="white-section">
+    <h4>White Skills · ${u.white_count||ws.length}${sub?`<span class="ws-sub">${sub}</span>`:''}</h4>
+    <div class="white-grid">${chips||'<span class="muted">none</span>'}${more}</div>
+  </div>`;
+}
+// dossier "+N more" toggle (delegated). Keeps the toggleWhiteSkills name; new signature is element-based.
+function toggleWhiteSkills(el){
+  const grid=el.closest('.white-grid'); if(!grid) return;
+  const exp=grid.classList.toggle('expanded');
+  el.innerHTML=exp?'show less ▴':`+${el.dataset.n} more ▾`;
+}
 function affinityOf(u){ return (u.parents||[]).reduce((s,p)=>s+(p.stars||0),0); }
-function umaCard(u){
-  const isFriend = u.src==='friend';
-  const owner=isFriend?`<span class="friendb">friend</span> <small>${esc(u.owner_name||'')}</small>`:`<small>${(u.fans||0).toLocaleString()} fans</small>`;
-  const mb=(u._pref||u._lin)?`<span class="matchb">${u._pref?'pref '+u._pref:''}${u._pref&&u._lin?' · ':''}${u._lin?'lin '+u._lin:''}</span>`:'';
-  const tScore = TARGET_AFFINITY[tkey(u)];
-  const tBd = TARGET_BREAKDOWN[tkey(u)];
-  const targeted = TARGET_CARD && tScore!=null;
-  const affVal = targeted ? tScore : affinityOf(u);
-  const affLabel = targeted ? 'AFFINITY' : 'LINEAGE';
-  const affTip = targeted && tBd
-    ? `CR: ${tBd.cr} (base ${tBd.cr_base} + GP bonus ${tBd.cr_gp})` +
-      ` | WSB: +${tBd.wsb}` +
-      ` | Total: ${tBd.total}`
-    : 'Sum of parent spark stars (lineage potential). Pick a target to see exact affinity.';
-  const friendCls = isFriend ? ' ucard-friend' : '';
-  return `<div class="ucard${friendCls}" data-id="${u.trained_chara_id}">
-    <div class="uhead">
-      <div><span class="uname">${esc(u.name)}</span> ${owner} ${mb}</div>
-      <div class="ustats">
-        ${u._buildFit?`<span class="us" title="Build fit score (stats + aptitude + skills for selected style/distance)"><b style="color:var(--ok)">${u._buildFit}</b><i>BUILD FIT</i></span>`:''}
-        <span class="us" title="${esc(affTip)}"><b class="c-aff">${affVal}</b><i>${affLabel}</i></span>
-        <span class="us"><b class="c-g1">${u.g1||0}</b><i>G1 WINS</i></span>
-        <span class="us"><b class="c-wh">${u.white_count||0}</b><i>WHITE</i></span>
-        <span class="us"><b class="c-sc">${(u.rank_score||0).toLocaleString()}</b><i>SCORE</i></span>
-        <span class="rankb" title="Trained grade (R${u.rank??'?'}). Score: ${(u.rank_score||0).toLocaleString()}">${u.rank_label||('R'+(u.rank??'?'))}</span>
+
+// ---- DOSSIER (inline expanded detail): Lineage·Affinity + Spark Breakdown + white grid ----
+function dossierLineage(u){
+  const ph=u.parents||[];
+  const tBd = TARGET_CARD ? TARGET_BREAKDOWN[tkey(u)] : null;
+  const mainHeart = tBd ? tBd.total : ph.reduce((s,p)=>s+(p.stars||0),0);
+  const mainCol = tBd ? 'var(--amber)' : 'var(--magenta)';
+  const nodeVal=(p)=>{ if(!tBd) return p.stars||0; const n=(tBd.nodes||[]).find(n=>n.card_id===p.card_id); return n?n.total:0; };
+  const parents=ph.map(p=>`<div class="tree-node">
+      ${avHtml(p,'tav')}
+      <div class="tinfo"><div class="tn">${esc(p.name)}</div><div class="tr">PARENT</div></div>
+      <div class="heart" style="color:var(--magenta)">${heartSvg('#ff5d8f')}${nodeVal(p)}</div>
+    </div>`).join('');
+  const wsbTag = tBd && tBd.wsb>0 ? `<span class="at-lab" style="color:var(--green)">+${tBd.wsb} race</span>` : '';
+  return `<div class="dcell">
+    <h4>Lineage · Affinity</h4>
+    <div class="lineage">
+      <div class="tree-node self">
+        ${avHtml(u,'tav')}
+        <div class="tinfo"><div class="tn">${esc(u.name)}</div><div class="tr">${tBd?'TARGET AFFINITY':'SELF · LINEAGE'}</div></div>
+        <div class="heart mono" style="color:${mainCol}">${mainHeart}</div>
       </div>
+      <div class="parents-wrap">${parents}</div>
     </div>
-    <div class="dmain">${portraitTree(u)}<div class="fgrid">${factorGrid(u)}</div></div>
-    <div class="ufoot">
+    <div class="affinity-total">
+      <span class="at-lab">${tBd?'EXACT AFFINITY (CR + WSB)':'TOTAL LINEAGE HEARTS'}</span>
+      <span class="at-val">${heartSvg('#ff5d8f')}${mainHeart}</span>
+    </div>
+    ${wsbTag?`<div style="margin-top:6px;text-align:right">${wsbTag}</div>`:''}
+  </div>`;
+}
+function dossierSparks(u){
+  const grp=(t,label)=>{
+    const arr=(u.agg||[]).filter(a=>_displayType(a.type)===t&&t!=='white');
+    if(!arr.length) return '';
+    const total=arr.reduce((a,x)=>a+(x.total||0),0);
+    const items=arr.map(a=>{
+      const n=Math.min(a.total||0,9);
+      const stars=Array.from({length:n},()=>`<i style="background:${STAR_COL[t]};box-shadow:0 0 3px ${STAR_COL[t]}"></i>`).join('');
+      const odds=(a.pct!=null)?a.pct+'%':'';
+      return `<div class="spark-item"><span class="si-name">${esc(a.name)}</span><span class="si-stars">${stars}</span><span class="si-odds">${odds}</span></div>`;
+    }).join('');
+    return `<div class="spark-group"><div class="sg-head"><span class="sg-ic" style="background:${STAR_COL[t]}"></span>${label}<span class="sg-ct">${total}★</span></div>${items}</div>`;
+  };
+  return `<div class="dcell">
+    <h4>Spark Breakdown<span class="ws-sub" style="color:var(--ink3)">total ★ = trainee + 2 parents</span></h4>
+    <div class="spark-table">${grp('blue','Blue · Stat')}${grp('pink','Pink · Aptitude')}${grp('green','Green · Unique')||''}</div>
+  </div>`;
+}
+function dossierHtml(u){
+  return `<div class="dossier">
+    <div class="dbody">${dossierLineage(u)}${dossierSparks(u)}</div>
+    ${whiteGrid(u)}
+    <div class="dedit3">
       <input class="note-in" placeholder="note for this uma..." value="${esc(u.note||'')}">
       <input class="tag-in" placeholder="tags: keep, speed, sell..." value="${esc((u.tags||[]).join(', '))}">
       <div class="ufoot-actions">
@@ -1299,6 +1635,64 @@ function umaCard(u){
       </div>
     </div>
     <div class="races-panel hide" data-id="${u.trained_chara_id}"></div>
+  </div>`;
+}
+
+// ---- THE FORM-SHEET ROW (.ucard) ----
+function umaCard(u){
+  const isFriend = u.src==='friend';
+  const s=u.stats||{};
+  const tScore = TARGET_AFFINITY[tkey(u)];
+  const tBd = TARGET_BREAKDOWN[tkey(u)];
+  const targeted = TARGET_CARD && tScore!=null;
+  const affVal = targeted ? tScore : affinityOf(u);
+  const affLabel = targeted ? 'AFFINITY' : 'LINEAGE';
+  const affTip = targeted && tBd
+    ? `CR: ${tBd.cr} (base ${tBd.cr_base} + GP bonus ${tBd.cr_gp}) | WSB: +${tBd.wsb} | Total: ${tBd.total}`
+    : 'Sum of parent spark stars (lineage potential). Pick a target to see exact affinity.';
+  const mb=(u._pref||u._lin)?`<span class="matchb">${u._pref?'pref '+u._pref:''}${u._pref&&u._lin?' · ':''}${u._lin?'lin '+u._lin:''}</span>`:'';
+  const grade=u.rank_label||('R'+(u.rank??'?'));
+  const score=u.rank_score||0;
+  const scoreCol = score>20000?'var(--g-s)':(score>19000?'var(--g-a)':'var(--ink)');
+  const hasBuild = !!($('#invStyle')?.value || $('#invDistance')?.value);
+  const gauges=STAT_KEYS.map(k=>gauge(k,s[k])).join('');
+  // build-fit % bar (relative to a soft cap so the bar reads sensibly)
+  const fitPct = u._buildFit!=null ? Math.min(100, Math.round((u._buildFit/120)*100)) : 0;
+  const friendCls = isFriend ? ' ucard-friend' : '';
+  return `<div class="ucard${friendCls}" data-id="${u.trained_chara_id}">
+    <div class="umarow-main">
+      <div class="u-id">
+        ${avHtml(u)}
+        <div class="who">
+          <div class="nm">${esc(u.name)}${isFriend?`<span class="own">@${esc(u.owner_name||'friend')}</span>`:''}</div>
+          <div class="subline">
+            <span class="gradechip" style="--gc:${gradeCol(grade)}" title="Trained grade (R${u.rank??'?'})">${esc(grade)}</span>
+            <span>G1·${u.g1||0}</span>
+            <span>WS·${u.white_count||0}</span>
+            ${isFriend?'':`<span>${(u.fans||0).toLocaleString()} fans</span>`}
+            ${mb}
+          </div>
+        </div>
+      </div>
+      <div class="u-tel">
+        <div class="gauges">${gauges}</div>
+        ${sparkline(u)}
+      </div>
+      <div class="u-apt">
+        ${aptColumn(u)}
+        ${sparkPips(u)}
+      </div>
+      <div class="u-score">
+        <button class="expand-btn" type="button" aria-label="expand">+</button>
+        <div class="scoreline"><span class="sc-lab">SCORE</span><span class="sc-val mono" style="color:${scoreCol}">${score.toLocaleString()}</span></div>
+        ${hasBuild?`<div class="fitbar-wrap">
+          <div class="fitbar-head"><span>BUILD FIT</span><b>${u._buildFit||0}</b></div>
+          <div class="fitbar"><i style="width:${fitPct}%"></i></div>
+        </div>`:''}
+        <div class="fitbar-head" title="${esc(affTip)}"><span>${affLabel}</span><span class="mono" style="color:${targeted?'var(--amber)':'var(--magenta)'}">${affVal}</span></div>
+      </div>
+    </div>
+    ${whiteStrip(u)}
   </div>`;
 }
 function saveCardField(e){
@@ -1547,6 +1941,12 @@ function renderInv(){
   const showMoreHtml = rows.length > _invShown
     ? `<div class="inv-show-more"><button class="ghost" id="invShowMore">Show ${Math.min(LIST_LIMIT, rows.length - _invShown)} more of ${rows.length - _invShown} remaining</button></div>` : '';
   $('#invList').innerHTML=shown.map(umaCard).join('') + showMoreHtml;
+  // top build-fit readout (best fit in the list)
+  const fr=$('#invFitReadout');
+  if(fr){
+    if(hasBuild && rows.length){ const top=Math.max(...rows.map(u=>u._buildFit||0)); fr.textContent=top; fr.classList.remove('off'); }
+    else { fr.textContent='—'; fr.classList.add('off'); }
+  }
   _bindInvList();
   updateFactorsCount();
 }
@@ -1564,27 +1964,48 @@ function _showMoreInv(){
     frag.innerHTML += `<div class="inv-show-more"><button class="ghost" id="invShowMore">Show ${Math.min(LIST_LIMIT, remaining)} more of ${remaining} remaining</button></div>`;
   }
   $('#invList').appendChild(frag);
-  // re-bind only new elements
-  frag.querySelectorAll('.note-in,.tag-in').forEach(el=>el.addEventListener('blur',saveCardField));
-  frag.querySelectorAll('.bfilter').forEach(b=>b.onclick=()=>{$('#filter').value=b.dataset.name;renderInv();});
-  frag.querySelectorAll('.bp1').forEach(b=>b.onclick=()=>setParent(1,allUmas().find(x=>x.trained_chara_id===+b.dataset.id)));
-  frag.querySelectorAll('.bp2').forEach(b=>b.onclick=()=>setParent(2,allUmas().find(x=>x.trained_chara_id===+b.dataset.id)));
-  frag.querySelectorAll('.bviewraces').forEach(b=>b.onclick=()=>toggleRaces(+b.dataset.id, b));
+  _bindRows(frag);
   const sm2=document.getElementById('invShowMore');
   if(sm2) sm2.onclick=_showMoreInv;
   const nMine=_invRows.filter(u=>u.src!=='friend').length, nFr=_invRows.length-nMine;
   const suffix = _invRows.length > _invShown ? ` — showing ${_invShown}` : '';
   $('#invCount').textContent=`${_invRows.length} umas (${nMine} yours, ${nFr} friends)${suffix}`;
 }
-function _bindInvList(){
-  $$('#invList .note-in,#invList .tag-in').forEach(el=>el.addEventListener('blur',saveCardField));
-  $$('#invList .bfilter').forEach(b=>b.onclick=()=>{$('#filter').value=b.dataset.name;renderInv();});
-  $$('#invList .bp1').forEach(b=>b.onclick=()=>setParent(1,allUmas().find(x=>x.trained_chara_id===+b.dataset.id)));
-  $$('#invList .bp2').forEach(b=>b.onclick=()=>setParent(2,allUmas().find(x=>x.trained_chara_id===+b.dataset.id)));
-  $$('#invList .bviewraces').forEach(b=>b.onclick=()=>toggleRaces(+b.dataset.id, b));
-  const sm=document.getElementById('invShowMore');
-  if(sm) sm.onclick=_showMoreInv;
+// Bind the dossier controls (note/tag/parent/races/all-copies) after a row expands.
+function _bindDossier(dossier, u){
+  dossier.querySelectorAll('.note-in,.tag-in').forEach(el=>el.addEventListener('blur',saveCardField));
+  dossier.querySelectorAll('.bfilter').forEach(b=>b.onclick=()=>{$('#filter').value=b.dataset.name;renderInv();});
+  dossier.querySelectorAll('.bp1').forEach(b=>b.onclick=()=>setParent(1,allUmas().find(x=>x.trained_chara_id===+b.dataset.id)));
+  dossier.querySelectorAll('.bp2').forEach(b=>b.onclick=()=>setParent(2,allUmas().find(x=>x.trained_chara_id===+b.dataset.id)));
+  dossier.querySelectorAll('.bviewraces').forEach(b=>b.onclick=()=>toggleRaces(+b.dataset.id, b));
 }
+// Toggle the inline dossier for a row. Whole row is clickable; ignore interactive controls.
+function _toggleDossier(card){
+  const id=+card.dataset.id;
+  const open=card.classList.contains('open');
+  const btn=card.querySelector('.expand-btn');
+  if(open){
+    const d=card.querySelector('.dossier'); if(d) d.remove();
+    card.classList.remove('open'); if(btn) btn.textContent='+';
+  } else {
+    const u=allUmas().find(x=>x.trained_chara_id===id); if(!u) return;
+    card.insertAdjacentHTML('beforeend', dossierHtml(u));
+    card.classList.add('open'); if(btn) btn.textContent='–';
+    _bindDossier(card.querySelector('.dossier'), u);
+  }
+}
+function _bindRows(scope){
+  scope.querySelectorAll('.ucard').forEach(card=>{
+    card.addEventListener('click', e=>{
+      // don't toggle when clicking an interactive control inside the row/dossier
+      if(e.target.closest('input,button,select,textarea,a,.ws-toggle,.races-panel,.target-pick-btn')) return;
+      _toggleDossier(card);
+    });
+  });
+}
+function _bindInvList(){ _bindRows($('#invList')); }
+// delegated "+N more" white-skills toggle in dossiers
+document.addEventListener('click', e=>{ const t=e.target.closest('.ws-toggle'); if(t){ e.stopPropagation(); toggleWhiteSkills(t); } });
 
 const _RACES_CACHE = {};
 async function toggleRaces(id, btn){
@@ -1944,24 +2365,24 @@ async function runBreed(){
   bindResultClicks('ownRes'); bindResultClicks('rentRes');
 }
 function combo(c, idx){
-  const blue=Object.entries(c.blue||{}).map(([k,v])=>`<span class="stat">${k} ${v}</span>`).join('  ');
+  const blue=Object.entries(c.blue||{}).map(([k,v])=>`<span style="color:var(--ink2)">${esc(k)} <b class="mono" style="color:var(--blue)">${v}</b></span>`).join('  ');
   const own=c.p2.owner_name?` <span class="friendb">${esc(c.p2.owner_name)}</span>`:'';
-  const rank = idx != null ? `<span style="color:var(--mut);font-size:10px;font-weight:700;margin-right:4px">#${idx+1}</span>` : '';
+  const rank = idx != null ? `<span class="mono" style="color:var(--ink3);font-size:10px;font-weight:700">#${idx+1}</span>` : '';
+  const av=(p)=>`<span class="av" style="width:40px;height:40px;font-size:13px;flex:none">${avInner(p.card_id,p.name)}</span>`;
+  const grd=(p)=>`<span class="gradechip" style="--gc:${gradeCol(p.rank_label)};font-size:9px;padding:1px 5px">${esc(p.rank_label||'R'+(p.rank||'?'))}</span>`;
   return `<div class="combo clickable" data-p1="${c.p1.trained_chara_id}" data-p2="${c.p2.trained_chara_id}">
     <div class="cpair">
-      ${rank}<img class="port sm" src="/img/${c.p1.card_id}" onerror="this.style.visibility='hidden'" style="border-radius:50%;border:2px solid var(--line)">
-      <span>${esc(c.p1.name)} <span class="rankb" style="font-size:9px;padding:1px 4px">${c.p1.rank_label||'R'+(c.p1.rank||'?')}</span></span>
-      <span class="cx" style="font-size:14px;color:#3a4050">×</span>
-      <img class="port sm" src="/img/${c.p2.card_id}" onerror="this.style.visibility='hidden'" style="border-radius:50%;border:2px solid var(--line)">
-      <span>${esc(c.p2.name)} <span class="rankb" style="font-size:9px;padding:1px 4px">${c.p2.rank_label||'R'+(c.p2.rank||'?')}</span></span>${own}
+      <span style="display:flex;align-items:center;gap:9px;min-width:0">${rank}${av(c.p1)}<span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.p1.name)} ${grd(c.p1)}</span></span>
+      <span class="cx mono" style="font-size:16px;color:var(--magenta);font-weight:300">×</span>
+      <span style="display:flex;align-items:center;gap:9px;min-width:0;justify-content:flex-end;text-align:right">${av(c.p2)}<span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.p2.name)} ${grd(c.p2)}${own}</span></span>
     </div>
     <div class="cmeta">
-      <b style="font-size:14px;color:var(--ok)">${c.eproc!=null?c.eproc+'%':c.obj}</b>
-      <span class="muted" style="font-size:10px">${c.eproc!=null?'avg proc'+(c.eproc_n?' ('+c.eproc_n+')':''):'score'}</span>
-      <span class="muted" style="font-size:11px;margin-left:8px">affinity <b style="color:var(--accent)">${c.affinity}</b></span>
-      ${c.eblue!=null?`<span class="muted" style="font-size:11px;margin-left:6px">blue <b style="color:var(--blue)">${c.eblue}%</b></span>`:''}
+      <span class="mono" style="font-size:16px;font-weight:800;color:var(--green)">${c.eproc!=null?c.eproc+'%':c.obj}</span>
+      <span class="mono" style="font-size:9px;color:var(--ink3);letter-spacing:1px;text-transform:uppercase">${c.eproc!=null?'avg proc'+(c.eproc_n?' ('+c.eproc_n+')':''):'score'}</span>
+      <span class="mono" style="font-size:11px;color:var(--ink3);margin-left:auto">AFF <b style="color:var(--amber)">${c.affinity}</b></span>
+      ${c.eblue!=null?`<span class="mono" style="font-size:11px;color:var(--ink3)">BLUE <b style="color:var(--blue)">${c.eblue}%</b></span>`:''}
+      ${blue?`<span style="font-size:11px;color:var(--ink3)">·&nbsp; ${blue}</span>`:''}
     </div>
-    ${blue?`<div style="font-size:11px;margin-top:3px;color:var(--mut)">stats: ${blue}</div>`:''}
   </div>`;
 }
 
