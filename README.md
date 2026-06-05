@@ -22,11 +22,13 @@ Offline dashboard for Uma Musume: breeding optimizer + Team Trials analysis.
 ```bash
 git clone https://github.com/Nighty3333/Heaven.git
 cd Heaven
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 .\start.bat
 ```
 
 Opens at **http://127.0.0.1:1620**
+
+> Use `python -m pip` (not bare `pip`) so every dependency installs into the **same** Python that runs the app. On a PC with more than one Python, a bare `pip` can install into a different environment, which later breaks Team Trials capture.
 
 ---
 
@@ -94,8 +96,10 @@ Also houses the **capture controls** — start/stop the proxy from here without 
 ```bash
 git clone https://github.com/Nighty3333/Heaven.git
 cd Heaven
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
+
+This installs **everything** in one go — the web server, the data decoder (`msgpack` + `pycryptodome`), and `mitmproxy` — all into the same Python environment. Using `python -m pip` (not bare `pip`) guarantees they land in the Python that `start.bat` actually runs.
 
 ### Step 2: Import your umas
 
@@ -132,14 +136,15 @@ Steam credentials are stored locally, encrypted via Windows DPAPI (bound to your
 
 The Team Trials features need live match data captured through mitmproxy. This is a **one-time setup**.
 
-#### 3a. Install mitmproxy and generate its certificate
+#### 3a. Generate the mitmproxy certificate
+
+`mitmproxy` was already installed in Step 1 — **do not install it separately** (a second install can land in a different Python and break capture). Just run `mitmdump` once to generate the CA certificate, then close it immediately with `Ctrl+C`:
 
 ```bash
-pip install mitmproxy
 mitmdump
 ```
 
-Run `mitmdump` once and close it immediately with `Ctrl+C`. This generates the CA certificate. You only need to do this once.
+You only need to do this once.
 
 #### 3b. Install the certificate
 
@@ -193,7 +198,7 @@ The proxy auto-detects your `udid` from game request headers on first capture. I
 |---------|----------|
 | `Import-Certificate : The certificate file could not be found` | A backslash got dropped from the path. Use exactly `"$env:USERPROFILE\.mitmproxy\mitmproxy-ca-cert.cer"` — note the `\` before `.mitmproxy`. Or just double-click the `.cer` file and use the GUI steps instead |
 | SSL errors or `SEC_ERROR` in the game | Certificate not installed correctly. Redo step 3b — make sure you select **Local Machine** and the **Trusted Root** store, not Current User |
-| `mitmdump exited immediately` | Something is already using port 8080, or the certificate isn't installed. Try `mitmdump --listen-port 8080` in a terminal to see the real error |
+| `mitmdump exited immediately` / `Error logged during startup, exiting…` | The capture addon failed to load — almost always because `msgpack`/`pycryptodome` aren't installed in the **same** Python as `mitmdump`. Fix: `python -m pip install -r requirements.txt`. To see the exact error, open `data\mitmdump_stderr.log`, or run `mitmdump -s discover_addon.py --listen-port 8080 --set block_global=false` (the `-s discover_addon.py` is essential — without it mitmdump starts fine and hides the real problem) |
 | Capture running but no data appears | Game traffic isn't going through the proxy. Check Windows Settings > Proxy — it should be set to `127.0.0.1:8080` |
 | 0 trials added after processing | Data might already be processed. Run `python tt_analyze.py` manually to see full output |
 | Game can't connect to servers | Stop capture first, verify your internet works without the proxy, then try again |
