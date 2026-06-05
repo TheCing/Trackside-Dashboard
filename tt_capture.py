@@ -80,13 +80,49 @@ def _find_mitmdump() -> str | None:
     p = shutil.which("mitmdump")
     if p:
         return p
-    # Same Python's Scripts dir
-    cand = Path(sys.executable).parent / "Scripts" / "mitmdump.exe"
-    if cand.exists():
-        return str(cand)
-    cand = Path(sys.executable).parent / "mitmdump.exe"
-    if cand.exists():
-        return str(cand)
+
+    names = ("mitmdump.exe", "mitmdump")
+    cand_dirs: list[Path] = [
+        # Same Python's Scripts dir (standard install)
+        Path(sys.executable).parent / "Scripts",
+        # venv layout: exe lives next to python.exe
+        Path(sys.executable).parent,
+    ]
+
+    # User-site Scripts dir. Critical for the Microsoft Store build of Python,
+    # where sys.executable is a stub under WindowsApps\... and pip actually
+    # installs scripts under %LOCALAPPDATA%\Packages\...\LocalCache\
+    # local-packages\PythonXY\Scripts — which neither PATH nor sys.executable's
+    # own Scripts dir points at.
+    try:
+        import sysconfig
+        for scheme in ("nt_user", "nt"):
+            try:
+                s = sysconfig.get_path("scripts", scheme)
+                if s:
+                    cand_dirs.append(Path(s))
+            except Exception:
+                pass
+    except Exception:
+        pass
+    try:
+        import site
+        usersite = site.getusersitepackages()
+        if usersite:
+            # ...\site-packages -> ...\Scripts
+            cand_dirs.append(Path(usersite).parent / "Scripts")
+    except Exception:
+        pass
+
+    seen: set = set()
+    for d in cand_dirs:
+        if not d or str(d) in seen:
+            continue
+        seen.add(str(d))
+        for n in names:
+            cand = d / n
+            if cand.exists():
+                return str(cand)
     return None
 
 
