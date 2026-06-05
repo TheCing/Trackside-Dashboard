@@ -241,15 +241,33 @@
           background:var(--panel2);border:1px solid var(--line);border-radius:8px;box-shadow:0 12px 30px rgba(0,0,0,.5)}
   .pkitem{padding:6px 10px;cursor:pointer;border-bottom:1px solid var(--line);font-size:13px}
   .pkitem:hover{background:#262a31} .pkitem small{color:var(--mut)}
-  /* ---- factor filter rows ---- */
-  .fcat{border-top:1px solid var(--line);padding:7px 0}
-  .fhead{display:flex;justify-content:space-between;align-items:center}
-  .fhead .lab{font-size:12px;color:var(--mut)}
-  .frow{display:flex;align-items:center;gap:6px;margin-top:5px;flex-wrap:wrap;padding:5px 10px;background:rgba(255,255,255,0.02);border-radius:8px;border:1px solid transparent;transition:border-color .2s}
-  .frow:hover{border-color:var(--line)}
-  .frow select,.frow input{padding:5px 8px;font-size:12px}
-  .frow .x{cursor:pointer;color:#c05050;font-weight:700;padding:0 4px;font-size:14px;transition:color .15s} .frow .x:hover{color:#e06b6b}
-  .addf{font-size:11px;padding:4px 11px;border-radius:6px}
+  /* ---- factor filters (telemetry) ---- */
+  .fcat{border-top:1px solid var(--line);padding:9px 0 7px}
+  .fhead{display:flex;align-items:center;gap:9px}
+  .fcat-mark{width:9px;height:9px;border-radius:2px;transform:rotate(45deg);background:var(--cc,var(--amber));flex:none;opacity:.9}
+  .fcat-lab{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--ink2);text-transform:uppercase}
+  .fcat-sub{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.4px;color:var(--ink3)}
+  .fcat-n{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:800;color:var(--cc);background:color-mix(in srgb,var(--cc) 15%,transparent);border:1px solid color-mix(in srgb,var(--cc) 42%,transparent);border-radius:10px;padding:1px 7px}
+  .addf{margin-left:auto;width:22px;height:22px;border-radius:6px;border:1px solid var(--line2);background:transparent;background-image:none;color:var(--ink3);font-size:15px;font-weight:400;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+  .addf:hover{color:var(--cc);border-color:var(--cc);transform:none;box-shadow:none}
+  .frows{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+  .frow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:6px 10px;background:rgba(255,255,255,.025);border-radius:8px;border:1px solid var(--line);border-left:2px solid var(--cc,var(--line))}
+  .frow .fq{padding:5px 9px;font-size:12px;background:var(--bg);border:1px solid var(--line);border-radius:7px;color:var(--ink);min-width:190px;font-family:inherit}
+  .frow .fq:focus{border-color:var(--cc);outline:none}
+  .frow .x{margin-left:auto;cursor:pointer;color:var(--ink3);font-weight:700;font-size:13px;padding:0 2px;transition:color .15s} .frow .x:hover{color:#e06b6b}
+  /* dual-handle star-range slider (drag each thumb — no ambiguity) */
+  .rng{position:relative;width:150px;height:22px;flex:none}
+  .rng-inner{position:absolute;left:7px;right:7px;top:0;bottom:0}
+  .rng-track{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);height:4px;background:var(--line);border-radius:2px}
+  .rng-fill{position:absolute;top:50%;transform:translateY(-50%);height:4px;background:var(--cc,var(--amber));border-radius:2px;box-shadow:0 0 6px -1px var(--cc)}
+  .rng input[type=range]{position:absolute;left:0;top:0;width:100%;height:22px;margin:0;background:none;pointer-events:none;-webkit-appearance:none;appearance:none}
+  .rng input[type=range]:focus{outline:none}
+  .rng input[type=range]::-webkit-slider-runnable-track{background:none;height:4px}
+  .rng input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;pointer-events:auto;width:14px;height:14px;border-radius:50%;background:var(--cc,var(--amber));border:2px solid var(--bg);cursor:grab;box-shadow:0 1px 4px rgba(0,0,0,.55);margin-top:-5px}
+  .rng input[type=range]::-webkit-slider-thumb:active{cursor:grabbing}
+  .rng input[type=range]::-moz-range-track{background:none;height:4px}
+  .rng input[type=range]::-moz-range-thumb{pointer-events:auto;width:14px;height:14px;border-radius:50%;background:var(--cc,var(--amber));border:2px solid var(--bg);cursor:grab}
+  .sb-rng{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--ink2);letter-spacing:.3px;white-space:nowrap;min-width:42px}
   .stars-b{color:var(--blue)} .stars-p{color:var(--pink)} .stars-g{color:var(--green)} .stars-w{color:var(--white)}
   /* ---- detail modal ---- */
   .overlay{position:fixed;inset:0;background:rgba(4,5,8,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
@@ -1098,11 +1116,11 @@
     <div class="inv-factors-toggle" id="factorsToggle">
       <div style="display:flex;align-items:center">
         <span class="inv-factors-arrow">▶</span>
-        <b style="color:var(--accent);font-size:12px;text-transform:uppercase;letter-spacing:.05em">Inheritance Factors</b>
-        <span class="muted" style="font-size:10px;margin-left:6px">(uma.moe style)</span>
+        <b style="color:var(--accent);font-size:12px;text-transform:uppercase;letter-spacing:.05em">Factor Filters</b>
+        <span class="muted" style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;margin-left:7px;color:var(--ink3)">· SPARK QUERY</span>
         <span class="inv-factors-count hide" id="factorsActiveCount"></span>
       </div>
-      <button class="ghost" id="clearF" style="font-size:11px;padding:3px 10px" onclick="event.stopPropagation()">Clear factors</button>
+      <button class="ghost" id="clearF" style="font-size:11px;padding:3px 10px" onclick="event.stopPropagation()">Clear all</button>
     </div>
     <div class="inv-factors-body" id="factorsBody">
       <div id="fcats"></div>
@@ -1579,14 +1597,14 @@ function allUmas(){return DATA.mine.concat(DATA.rentable||[]);}
 // per-account, so mine and rentable can collide. Prefix with m/f.
 function tkey(u){return (u.src==='friend'?'f':'m')+u.trained_chara_id;}
 
-// ===== factor filters (uma.moe style) =====
+// ===== factor filters (telemetry spark query) =====
 const CATS=[
-  {k:'blue', lab:'Blue Factors (Stats)',    type:'blue', max:9, search:false, sc:'stars-b'},
-  {k:'pink', lab:'Pink Factors (Aptitude)', type:'pink', max:9, search:false, sc:'stars-p'},
-  {k:'green',lab:'Green Factors (Unique)',  type:'green',max:3, search:false, sc:'stars-g'},
-  {k:'whiteReq', lab:'White Required (Skills/Races)', type:'white', max:9, search:true, sc:'stars-w'},
-  {k:'whitePref',lab:'Preferred White (sorts by match count)', type:'white', max:9, search:true, sc:'stars-w'},
-  {k:'lineage',  lab:'Lineage White (sorts by depth factor 1.1^n)', type:'white', max:9, search:true, sc:'stars-w'},
+  {k:'blue', lab:'Blue Factors (Stats)',    t:'BLUE',  sub:'stats',    type:'blue', max:9, search:false, col:'var(--blue)'},
+  {k:'pink', lab:'Pink Factors (Aptitude)', t:'PINK',  sub:'aptitude', type:'pink', max:9, search:false, col:'var(--pink)'},
+  {k:'green',lab:'Green Factors (Unique)',  t:'GREEN', sub:'unique',   type:'green',max:3, search:false, col:'var(--green)'},
+  {k:'whiteReq', lab:'White Required',  t:'WHITE · REQUIRED',  sub:'skills / races',         type:'white', max:9, search:true, col:'var(--white-s)'},
+  {k:'whitePref',lab:'Preferred White', t:'WHITE · PREFERRED', sub:'sorts by match count',   type:'white', max:9, search:true, col:'var(--white-s)'},
+  {k:'lineage',  lab:'Lineage White',   t:'WHITE · LINEAGE',   sub:'sorts by depth · 1.1^n', type:'white', max:9, search:true, col:'var(--white-s)'},
 ];
 const FILTERS={blue:[],pink:[],green:[],whiteReq:[],whitePref:[],lineage:[]};
 function catOpts(k){
@@ -1595,22 +1613,33 @@ function catOpts(k){
   if(k==='green')return DATA.skills.green||[];
   return DATA.skills.white||[];
 }
-function starSel(cls,val,max,which){
-  let o=''; for(let i=1;i<=max;i++)o+=`<option value="${i}" ${i==val?'selected':''}>${i}★</option>`;
-  return `<select class="${cls} ${which}">${o}</select>`;
+// Dual-handle star-range slider: drag the min thumb and the max thumb independently.
+function rngBar(c,f){
+  const span=c.max-1, lp=v=>((v-1)/span*100);
+  return `<span class="rng">
+    <span class="rng-inner"><span class="rng-track"></span>
+      <span class="rng-fill" style="left:${lp(f.min)}%;width:${lp(f.max)-lp(f.min)}%"></span></span>
+    <input type="range" class="rng-min" min="1" max="${c.max}" step="1" value="${f.min}" aria-label="min stars">
+    <input type="range" class="rng-max" min="1" max="${c.max}" step="1" value="${f.max}" aria-label="max stars">
+  </span><span class="sb-rng">${f.min}–${f.max}★</span>`;
 }
 function renderFcats(){
   $('#fcats').innerHTML=CATS.map(c=>{
     const rows=FILTERS[c.k].map((f,i)=>{
       const namePart=c.search
-        ?`<input class="fname" list="whitelist" placeholder="search..." value="${esc(f.name||'')}" style="width:240px">`
-        :`<select class="fname" style="width:200px"><option value="">Any</option>${catOpts(c.k).map(n=>`<option ${n===f.name?'selected':''}>${esc(n)}</option>`).join('')}</select>`;
-      return `<div class="frow" data-k="${c.k}" data-i="${i}">${namePart}
-        ${starSel(c.sc,f.min,c.max,'fmin')}<span class="muted">–</span>${starSel(c.sc,f.max,c.max,'fmax')}
-        <span class="x" title="remove">✕</span></div>`;
+        ?`<input class="fq fname" list="whitelist" placeholder="search skill / race…" value="${esc(f.name||'')}">`
+        :`<select class="fq fname"><option value="">Any</option>${catOpts(c.k).map(n=>`<option ${n===f.name?'selected':''}>${esc(n)}</option>`).join('')}</select>`;
+      return `<div class="frow" data-k="${c.k}" data-i="${i}">${namePart}${rngBar(c,f)}<span class="x" title="remove">✕</span></div>`;
     }).join('');
-    return `<div class="fcat"><div class="fhead"><span class="lab">${c.lab}</span>
-      <button class="ghost addf" data-k="${c.k}">+ Add</button></div><div class="frows">${rows}</div></div>`;
+    const n=FILTERS[c.k].length;
+    return `<div class="fcat" style="--cc:${c.col}">
+      <div class="fhead">
+        <span class="fcat-mark"></span>
+        <span class="fcat-lab">${c.t}</span>
+        <span class="fcat-sub">· ${c.sub}</span>
+        ${n?`<span class="fcat-n">${n}</span>`:''}
+        <button class="addf" data-k="${c.k}" title="Add filter">+</button>
+      </div>${rows?`<div class="frows">${rows}</div>`:''}</div>`;
   }).join('');
 }
 // Filters compare against the TOTAL star value for that factor (the big
@@ -2723,8 +2752,24 @@ $('#fcats').addEventListener('change',e=>{
   if(e.target.classList.contains('fmax'))f.max=+e.target.value;
   renderInv();
 });
-$('#fcats').addEventListener('input',e=>{if(e.target.classList.contains('fname')&&e.target.tagName==='INPUT'){
-  const r=e.target.closest('.frow');FILTERS[r.dataset.k][+r.dataset.i].name=e.target.value;renderInv();}});
+$('#fcats').addEventListener('input',e=>{
+  const t=e.target;
+  if(t.classList.contains('fname')&&t.tagName==='INPUT'){
+    const r=t.closest('.frow');FILTERS[r.dataset.k][+r.dataset.i].name=t.value;renderInv();return;
+  }
+  if(t.classList.contains('rng-min')||t.classList.contains('rng-max')){
+    const r=t.closest('.frow'), rng=t.closest('.rng');
+    const f=FILTERS[r.dataset.k][+r.dataset.i], c=CATS.find(x=>x.k===r.dataset.k);
+    let mn=+rng.querySelector('.rng-min').value, mx=+rng.querySelector('.rng-max').value;
+    if(t.classList.contains('rng-min')){ if(mn>mx){mn=mx; rng.querySelector('.rng-min').value=mn;} }
+    else { if(mx<mn){mx=mn; rng.querySelector('.rng-max').value=mx;} }
+    f.min=mn; f.max=mx;
+    const span=c.max-1, lp=v=>((v-1)/span*100);
+    const fill=rng.querySelector('.rng-fill'); fill.style.left=lp(mn)+'%'; fill.style.width=(lp(mx)-lp(mn))+'%';
+    r.querySelector('.sb-rng').textContent=`${mn}–${mx}★`;
+    renderInv();
+  }
+});
 $('#clearF').onclick=()=>{for(const k in FILTERS)FILTERS[k]=[];renderFcats();renderInv();updateFactorsCount();};
 $('#run').onclick=runBreed;
 $('#trayGo').onclick=()=>{
