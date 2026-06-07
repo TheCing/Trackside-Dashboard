@@ -2896,7 +2896,7 @@ async function checkUpdateAvailable(){
 
 $('#restart').onclick=async()=>{
   const btn=$('#restart');
-  if(!confirm('Run git pull + restart the server? The page will reload automatically when it is back (~3s).')) return;
+  if(!confirm('Update & restart the server?\n\nThe page reloads automatically when the server is back (~3s).\n\nIf it does NOT come back, just close the Heaven window and open start.bat again — this is only needed once when updating from an older version.')) return;
   // snapshot the current workflow so it can be restored after reload
   try{
     sessionStorage.setItem(STATE_KEY, JSON.stringify(captureUIState()));
@@ -2925,7 +2925,10 @@ $('#restart').onclick=async()=>{
       if(r.ok){ window.location.reload(); return; }
     }catch(e){}
     if(Date.now() < deadline) setTimeout(probe, 400);
-    else { btn.textContent='Timed out — restart manually'; btn.disabled=false; }
+    else {
+      btn.textContent='Manual restart needed'; btn.disabled=false;
+      alert('Update downloaded, but the server did not come back on its own.\n\nThis can happen once when updating from an older version. To finish:\n\n  1) Close the Heaven window (the black console).\n  2) Open start.bat again.\n\nAfter this one time, the Update button will work cleanly.');
+    }
   };
   setTimeout(probe, 800);
 };
