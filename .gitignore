@@ -6,15 +6,16 @@ data/udid.txt
 # User data (per-account, not shareable)
 data/*.jsonl
 data/*.bak
-data/*.cursor
 data/heir_capture_*.jsonl
 data/raw_capture.jsonl
 data/raw_full.jsonl
 data/skill_export.json
 notes.json
 
-# Icon cache (auto-downloaded)
+# Image / icon cache (auto-downloaded game art — not redistributed)
 data/icons/
+data/images/
+data/race_icons/
 
 # Runtime capture logs (local)
 data/mitm_err.log

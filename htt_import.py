@@ -39,6 +39,7 @@ import json
 import os
 from pathlib import Path
 
+import jsonl_util
 import master
 import tt_scenario
 
@@ -211,10 +212,7 @@ def import_dir(target: "Path | str | None" = None) -> dict:
             skipped += 1
 
     if new_rows:
-        HISTORY_PATH.parent.mkdir(parents=True, exist_ok=True)
-        with open(HISTORY_PATH, "a", encoding="utf-8") as f:
-            for row in new_rows:
-                f.write(json.dumps(row, ensure_ascii=False, default=str) + "\n")
+        jsonl_util.append_jsonl(HISTORY_PATH, new_rows, json_kwargs={"default": str})
 
     # Keys `imported` / `rows` / `skipped` are what the dashboard frontend reads;
     # the rest are kept for the CLI / debugging.

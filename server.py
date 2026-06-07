@@ -21,6 +21,7 @@ sys.path.insert(0, str(HERE))
 
 import agenda
 import heir
+import jsonl_util
 import master
 import fetch as fetch_mod
 import skill_planner
@@ -1885,8 +1886,21 @@ def api_stadium(category: str = ""):
 
 @app.post("/api/stadium/import")
 async def api_stadium_import(file: UploadFile = File(...), label: str = Form("upload")):
-    """Upload a CSV of stadium rounds (Nguyen-format) and merge it in."""
-    import import_external_stadium_csv as importer
+    """Upload a CSV of stadium rounds (community 'Nguyen' format) and merge it in.
+
+    Optional feature: the parser lives in an `import_external_stadium_csv` module
+    that is not bundled. Without it, this returns a clean 'not available' instead
+    of a 500 — your own stadium data is captured automatically and isn't affected.
+    """
+    try:
+        import import_external_stadium_csv as importer
+    except ImportError:
+        return JSONResponse(
+            {"error": "External-CSV import is not enabled in this build "
+                      "(your own stadium data is captured automatically and "
+                      "isn't affected by this)."},
+            status_code=501,
+        )
     label = label.strip() or "upload"
     try:
         raw = await file.read()
@@ -1998,34 +2012,36 @@ async def api_db_import(file: UploadFile = File(...)):
     seen = {_tt_key(r) for r in _read_jsonl_list(skill_planner.HISTORY_PATH)}
     tt_added = tt_dupes = 0
     skill_planner.HISTORY_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with open(skill_planner.HISTORY_PATH, "a", encoding="utf-8") as f:
-        for r in tt_in:
-            if not isinstance(r, dict):
-                continue
-            k = _tt_key(r)
-            if k in seen:
-                tt_dupes += 1
-                continue
-            seen.add(k)
-            f.write(json.dumps(r, ensure_ascii=False) + "\n")
-            tt_added += 1
+    _tt_new = []
+    for r in tt_in:
+        if not isinstance(r, dict):
+            continue
+        k = _tt_key(r)
+        if k in seen:
+            tt_dupes += 1
+            continue
+        seen.add(k)
+        _tt_new.append(r)
+        tt_added += 1
+    jsonl_util.append_jsonl(skill_planner.HISTORY_PATH, _tt_new)
 
     # ── Stadium observations (dedup by packet_key) ──
     st_in = bundle.get("stadium") or []
     st_seen = stadium_tracker._load_seen_keys()
     st_added = st_dupes = 0
     stadium_tracker.OBSERVATIONS_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with open(stadium_tracker.OBSERVATIONS_PATH, "a", encoding="utf-8") as f:
-        for r in st_in:
-            if not isinstance(r, dict):
-                continue
-            k = r.get("packet_key")
-            if not k or k in st_seen:
-                st_dupes += 1
-                continue
-            st_seen.add(k)
-            f.write(json.dumps(r, ensure_ascii=False) + "\n")
-            st_added += 1
+    _st_new = []
+    for r in st_in:
+        if not isinstance(r, dict):
+            continue
+        k = r.get("packet_key")
+        if not k or k in st_seen:
+            st_dupes += 1
+            continue
+        st_seen.add(k)
+        _st_new.append(r)
+        st_added += 1
+    jsonl_util.append_jsonl(stadium_tracker.OBSERVATIONS_PATH, _st_new)
 
     _ACT_CACHE.clear()  # recompute activation% with the merged data
     return {

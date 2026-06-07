@@ -20,6 +20,7 @@ import time
 from pathlib import Path
 from typing import Any
 
+import jsonl_util
 import master
 
 DATA_DIR = Path(__file__).parent / "data"
@@ -255,8 +256,7 @@ def ingest_payloads(payloads: list[dict], my_viewer_id: int | None = None) -> in
             "round_count":    len(enriched),
             "rounds":         enriched,
         }
-        with OBSERVATIONS_PATH.open("a", encoding="utf-8") as f:
-            f.write(json.dumps(observation, ensure_ascii=False, separators=(",", ":")) + "\n")
+        jsonl_util.append_jsonl(OBSERVATIONS_PATH, [observation], json_kwargs={"separators": (",", ":")})
         seen.add(key)
         saved += 1
 

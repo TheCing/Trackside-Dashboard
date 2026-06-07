@@ -17,6 +17,7 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
+import jsonl_util
 import master
 import tt_scenario
 import player_state
@@ -135,9 +136,7 @@ def analyze_team_trial(payload_start: dict, payload_dfo: dict, trial_id: str = "
 def append_history(analysis: dict) -> None:
     """Append per-uma rows to history file for cross-trial summary."""
     DATA_DIR.mkdir(exist_ok=True)
-    with open(HISTORY_PATH, "a", encoding="utf-8") as f:
-        for row in analysis["per_uma"]:
-            f.write(json.dumps(row, ensure_ascii=False, default=str) + "\n")
+    jsonl_util.append_jsonl(HISTORY_PATH, analysis["per_uma"], json_kwargs={"default": str})
 
 
 def cross_trial_summary() -> dict:
