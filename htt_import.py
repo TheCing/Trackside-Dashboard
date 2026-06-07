@@ -41,11 +41,13 @@ from pathlib import Path
 
 import jsonl_util
 import master
+import safe_store
 import tt_scenario
 
 DATA_DIR = Path(__file__).parent / "data"
-NATIVE_DIR = DATA_DIR / "htt" / "native"
-HISTORY_PATH = DATA_DIR / "team_trials_history.jsonl"
+# Native captures + history live in the safe (AppData) store (migrated on first use).
+NATIVE_DIR = safe_store.native_dir()
+HISTORY_PATH = safe_store.history_path()
 
 
 def _row_key(r: dict) -> str:

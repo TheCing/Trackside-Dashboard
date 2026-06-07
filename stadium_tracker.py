@@ -22,11 +22,14 @@ from typing import Any
 
 import jsonl_util
 import master
+import safe_store
 
 DATA_DIR = Path(__file__).parent / "data"
-OBSERVATIONS_PATH = DATA_DIR / "stadium_observations.jsonl"
+# Your private observations live in the safe (AppData) store so they survive
+# deleting the project folder; safe_store migrates the legacy copy on first use.
+OBSERVATIONS_PATH = safe_store.stadium_path()
 # Public community seed shipped with the repo (track/weather/condition only —
-# no rosters, no account data). Loaded alongside your private local file.
+# no rosters, no account data). Stays in the project folder, read-only.
 COMMUNITY_SEED_PATH = DATA_DIR / "community_seed.jsonl"
 
 

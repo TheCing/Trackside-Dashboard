@@ -24,10 +24,12 @@ from pathlib import Path
 from typing import Any
 
 import master
+import safe_store
 
 
 DATA_DIR = Path(__file__).parent / "data"
-HISTORY_PATH = DATA_DIR / "team_trials_history.jsonl"
+# Safe (AppData) store — survives deleting the project folder (migrated on first use).
+HISTORY_PATH = safe_store.history_path()
 
 DIST_LABEL = {1: "Sprint", 2: "Mile", 3: "Medium", 4: "Long", 5: "Dirt"}
 STYLE_LABEL = {"NIGE": "Front Runner", "SENKO": "Pace Chaser",

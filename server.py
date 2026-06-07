@@ -22,6 +22,7 @@ sys.path.insert(0, str(HERE))
 import heir
 import jsonl_util
 import master
+import safe_store
 import fetch as fetch_mod
 import skill_planner
 import player_state
@@ -43,22 +44,25 @@ STATE = {"ds": None, "fmap": None, "skills": None, "source": None}
 
 # ── TTAnalyzer data paths ─────────────────────────────────────────────────
 DATA_DIR = HERE / "data"
-HISTORY_PATH = DATA_DIR / "team_trials_history.jsonl"
+# Team Trials history lives in the safe (AppData) store so it survives deleting
+# the project folder. safe_store migrates any legacy project-folder copy on first
+# use. (Stadium + native captures are likewise safe-stored in their modules.)
+HISTORY_PATH = safe_store.history_path()
 
 
 def _publish_data_dir() -> None:
-    """Tell the in-game Heaven MOD where this dashboard's data folder is, so its
-    Team Trials capture writes here (next to the user's existing history) instead
-    of guessing. The MOD reads %LOCALAPPDATA%\\Heaven\\datadir.txt; if it's
-    missing it falls back to %LOCALAPPDATA%\\Heaven\\data. Portable across PCs."""
+    """Tell the in-game Heaven MOD where to write its Team Trials captures: the
+    safe %LOCALAPPDATA%\\Heaven\\data folder (same place the dashboard now reads
+    from). Survives re-downloading the dashboard and is portable across PCs."""
     try:
         base = os.environ.get("LOCALAPPDATA")
         if not base:
             return
         marker_dir = Path(base) / "Heaven"
         marker_dir.mkdir(parents=True, exist_ok=True)
-        DATA_DIR.mkdir(parents=True, exist_ok=True)
-        (marker_dir / "datadir.txt").write_text(str(DATA_DIR), encoding="utf-8")
+        safe_dir = safe_store.ensure_migrated()
+        safe_dir.mkdir(parents=True, exist_ok=True)
+        (marker_dir / "datadir.txt").write_text(str(safe_dir), encoding="utf-8")
     except Exception:
         pass  # best-effort; never block startup over this
 

@@ -19,13 +19,15 @@ from pathlib import Path
 
 import jsonl_util
 import master
+import safe_store
 import tt_scenario
 import player_state
 import stadium_tracker
 
 
 DATA_DIR = Path(__file__).parent / "data"
-HISTORY_PATH = DATA_DIR / "team_trials_history.jsonl"
+# Safe (AppData) store — survives deleting the project folder (migrated on first use).
+HISTORY_PATH = safe_store.history_path()
 
 
 def skill_name(skill_id: int) -> str:
