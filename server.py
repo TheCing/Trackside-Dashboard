@@ -2077,11 +2077,14 @@ def api_db_restore():
 
 if __name__ == "__main__":
     print(f"[*] Heaven -> http://127.0.0.1:{PORT}")
+    # NOTE: reload is intentionally OFF. The in-app "Update & restart" button
+    # (/api/restart) re-execs the process with os.execv after `git pull`; that
+    # does not coexist with uvicorn's reload supervisor (it left orphaned
+    # processes fighting over the port and the server never came back cleanly).
+    # A fresh os.execv restart picks up pulled code changes on its own.
     uvicorn.run(
         "server:app",
         host="127.0.0.1",
         port=PORT,
         log_level="warning",
-        reload=True,
-        reload_dirs=[str(HERE)],
     )
