@@ -19,7 +19,6 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
-import agenda
 import heir
 import jsonl_util
 import master
@@ -879,7 +878,7 @@ def icon(card_id: int):
 @app.get("/race_icon/{tid}")
 def race_icon(tid: int):
     """Serve a cached race banner. Downloads from uma.guide on first request,
-    then serves locally (so the agenda works offline after first view)."""
+    then serves locally (so banners work offline after first view)."""
     cache_file = RACE_ICON_CACHE / f"{tid}.webp"
     miss_file = RACE_ICON_CACHE / f"{tid}.miss"
     if cache_file.exists():
@@ -921,15 +920,6 @@ def api_data():
         "targets": target_list,
         "source": STATE["source"],
     }
-
-
-@app.get("/api/agenda")
-def api_agenda():
-    """Career race calendar + Trackblazer epithets, built from local master.mdb."""
-    try:
-        return agenda.build_agenda()
-    except Exception as e:
-        return JSONResponse({"error": str(e)}, status_code=500)
 
 
 class TargetAffinityReq(BaseModel):

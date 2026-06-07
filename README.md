@@ -1,7 +1,7 @@
 # Heaven
 
 Local dashboard for Uma Musume: **breeding optimizer**, **Team Trials analyzer**,
-**skill planner**, **stadium tracker** and **career agenda**. Runs as a small web
+**skill planner** and **stadium tracker**. Runs as a small web
 app on your own machine.
 
 > **The dashboard is passive — it does not inject code, modify game memory, or
@@ -92,10 +92,6 @@ characters learn it.
 Stadium conditions across your captured matches: top tracks, starting-gate
 distribution, ground/surface/weather/season breakdowns and a full rounds table.
 Also houses the **mitmproxy capture controls** (start/stop without a terminal).
-
-### Career Agenda
-Career race calendar + Trackblazer routes/epithets, built from the game's own
-`master.mdb` (race schedule, requirements, SP/stat scaling).
 
 ---
 
