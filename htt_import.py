@@ -216,12 +216,60 @@ def import_dir(target: "Path | str | None" = None) -> dict:
     if new_rows:
         jsonl_util.append_jsonl(HISTORY_PATH, new_rows, json_kwargs={"default": str})
 
+    # ── Stadium / Track & Condition ────────────────────────────────────────
+    # Native captures now carry each round's start fields (race_instance_id,
+    # weather, ground_condition, season, random_seed) + my umas' frame_order,
+    # so we can rebuild the `race_start_params_array` shape stadium_tracker
+    # expects and re-populate observations without the mitmproxy path. Old
+    # captures (pre-DLL-update) lack these fields → they're skipped.
+    stadium_saved = 0
+    try:
+        import stadium_tracker
+        stad_payloads = []
+        for fp in files:
+            try:
+                trial = json.loads(fp.read_text(encoding="utf-8"))
+            except Exception:
+                continue
+            rounds = []
+            for race in trial.get("races") or []:
+                if race.get("race_instance_id") is None:
+                    continue  # legacy capture without stadium fields
+                rounds.append({
+                    "round":              race.get("round"),
+                    "race_instance_id":   race.get("race_instance_id"),
+                    "weather":            race.get("weather"),
+                    "ground_condition":   race.get("ground_condition"),
+                    "season":             race.get("season"),
+                    "random_seed":        race.get("random_seed"),
+                    # native `charas` are already my team only → all are my gates.
+                    "race_horse_data_array": [
+                        {"trained_chara_id": c.get("trained_chara_id"),
+                         "chara_id":         c.get("chara_id"),
+                         "card_id":          c.get("card_id"),
+                         "running_style":    c.get("running_style"),
+                         "frame_order":      c.get("frame_order"),
+                         "viewer_id":        1}
+                        for c in race.get("charas") or []
+                    ],
+                })
+            if rounds:
+                stad_payloads.append({
+                    "endpoint": "team_stadium/start",
+                    "payload": {"race_start_params_array": rounds},
+                })
+        if stad_payloads:
+            stadium_saved = stadium_tracker.ingest_payloads(stad_payloads, my_viewer_id=1)
+    except Exception as e:
+        print(f"  ! stadium ingest failed: {e}")
+
     # Keys `imported` / `rows` / `skipped` are what the dashboard frontend reads;
     # the rest are kept for the CLI / debugging.
     return {
         "ok": True,
         "imported": imported,
         "rows": len(new_rows),
+        "stadium": stadium_saved,
         "skipped": skipped,
         "files": len(files),
         "trials": trials_seen,
