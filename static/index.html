@@ -3732,10 +3732,13 @@ async function slLoadPoolStats(){
 }
 async function slSyncRaces(){
   const el=$('#sl-pool'); if(el) el.textContent='syncing races…';
-  try{ const r=await fetch('/api/skill_data/import_races',{method:'POST'}).then(r=>r.json());
-    await slLoadPoolStats();
-    if(el&&r.processed!=null) el.textContent+=` (scanned ${r.processed})`;
-  }catch(e){ if(el) el.textContent='sync failed'; }
+  let before=0;
+  try{ before=(await fetch('/api/skill_data/stats').then(r=>r.json())).rows||0; }catch(e){}
+  try{ await fetch('/api/skill_data/import_races',{method:'POST'}).then(r=>r.json()); }
+  catch(e){ if(el) el.textContent='sync failed'; return; }
+  const after=(await fetch('/api/skill_data/stats').then(r=>r.json())).rows||0;
+  await slLoadPoolStats();
+  if(el){ const d=after-before; el.textContent+= d>0?` (+${d.toLocaleString()} new)`:' (no new races)'; }
 }
 async function slImportData(input){
   const f=input.files&&input.files[0]; if(!f) return;

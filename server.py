@@ -1951,7 +1951,8 @@ def api_health():
 def api_skill_data_import_races():
     """(Re)scan heaven-races and merge any new local races into the pool."""
     return race_skills.import_races(
-        types=("Career", "Champions meeting", "Room match", "Other", "Practice room"))
+        types=("Career", "Champions meeting", "Room match", "Team trials",
+               "Other", "Practice room"))
 
 
 @app.get("/api/skill_data/export")

@@ -45,6 +45,13 @@ B = ">k__BackingField"
 _RS = {1: "NIGE", 2: "SENKO", 3: "SASHI", 4: "OIKOMI"}
 _DIST = {"short": "sprint", "sprint": "sprint", "mile": "mile",
          "medium": "medium", "middle": "medium", "long": "long"}
+# Team Trials distance_type (int 1-5) -> canonical bucket.
+_TT_DIST = {1: "sprint", 2: "mile", 3: "medium", 4: "long", 5: "dirt"}
+
+try:
+    import master as _master
+except Exception:
+    _master = None
 
 
 def _g(o: dict, key: str):
@@ -100,6 +107,66 @@ def _extract_rows(obj: dict) -> list[dict]:
     return out
 
 
+def _extract_rows_tt(obj: dict) -> list[dict]:
+    """Team Trials dump (raw team_stadium response, snake_case). Each race has a
+    `race_result_array` + `race_start_params_array`; the latter carries every
+    horse's skill_array. A TT race fields 12 horses — 6 real player/opponent umas
+    (card_id > 0) and 6 filler mobs (card_id 0, skipped). All real ones are
+    recorded, so a single TT dump yields skill data for many umas."""
+    rr = obj.get("race_result_array") or []
+    rsp = obj.get("race_start_params_array") or []
+    hd_by_round, seed_by_round = {}, {}
+    for p in rsp:
+        hd_by_round[p.get("round")] = p.get("race_horse_data_array") or []
+        seed_by_round[p.get("round")] = p.get("random_seed")
+
+    out: list[dict] = []
+    for race in rr:
+        rnd = race.get("round")
+        dist_cat = _TT_DIST.get(race.get("distance_type"))
+        seed = seed_by_round.get(rnd)
+        # sim horse index = position in chara_result_array (the index the
+        # race_scenario events key per-horse data on).
+        sim_idx = {cr.get("trained_chara_id"): i
+                   for i, cr in enumerate(race.get("chara_result_array") or [])}
+        acts = {}
+        scen = race.get("race_scenario")
+        if scen:
+            try:
+                acts = tt_scenario.activations_per_horse(tt_scenario.parse(scen))
+            except Exception:
+                acts = {}
+        for hd in hd_by_round.get(rnd, []):
+            cid = hd.get("card_id")
+            if not cid:                      # filler mob (card_id 0) → skip
+                continue
+            owned = [s.get("skill_id") for s in (hd.get("skill_array") or []) if s.get("skill_id")]
+            if not owned:
+                continue
+            hi = sim_idx.get(hd.get("trained_chara_id"))
+            out.append({
+                "race_id":         seed,
+                "chara_id":        cid,
+                "chara_name":      (_master.chara_name_by_card_id(cid) if _master else None) or "?",
+                "running_style":   _RS.get(hd.get("running_style"), str(hd.get("running_style"))),
+                "distance_cat":    dist_cat,
+                "owned_skills":    owned,
+                "activated_skills": acts.get(hi, []) if hi is not None else [],
+                "src":             "tt",
+            })
+    return out
+
+
+def _extract_any(obj: dict) -> list[dict]:
+    """Dispatch on dump shape: horseACT race (PlayerTeamMemberArray) vs Team
+    Trials (race_result_array)."""
+    if _g(obj, "PlayerTeamMemberArray") is not None:
+        return _extract_rows(obj)
+    if obj.get("race_result_array") is not None:
+        return _extract_rows_tt(obj)
+    return []
+
+
 def _load_seen() -> set[str]:
     if not SEEN_PATH.exists():
         return set()
@@ -144,7 +211,7 @@ def import_races(types: tuple[str, ...] = ("Career",), limit: int | None = None,
     for fp in todo:
         try:
             obj = json.loads(fp.read_text(encoding="utf-8"))
-            new_rows.extend(_extract_rows(obj))
+            new_rows.extend(_extract_any(obj))
         except Exception:
             errors += 1
         new_seen.append(fp.name)
