@@ -12,6 +12,9 @@ from functools import lru_cache
 _MDB_GLOBS = [
     r"%LOCALAPPDATA%/../LocalLow/Cygames/Umamusume/master/master.mdb",
     r"%USERPROFILE%/AppData/LocalLow/Cygames/Umamusume/master/master.mdb",
+    r"$HOME/.local/share/Steam/steamapps/compatdata/3224770/pfx/drive_c/users/steamuser/AppData/LocalLow/Cygames/Umamusume/master/master.mdb",
+    r"$HOME/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/compatdata/3224770/pfx/drive_c/users/steamuser/AppData/LocalLow/Cygames/Umamusume/master/master.mdb",
+    r"$HOME/.steam/*/steamapps/compatdata/3224770/pfx/drive_c/users/steamuser/AppData/LocalLow/Cygames/Umamusume/master/master.mdb",
 ]
 
 
@@ -25,7 +28,11 @@ def find_mdb():
 
 @lru_cache(maxsize=1)
 def _conn():
-    path = find_mdb()
+    import argparse
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("--master-mdb-path", default=None)
+    args, _unknown = parser.parse_known_args()
+    path = args.master_mdb_path or find_mdb()
     if not path:
         raise FileNotFoundError("No encuentro master.mdb (Umamusume no instalado en este equipo?)")
     return sqlite3.connect(path, check_same_thread=False)
