@@ -947,6 +947,10 @@
     <div class="tab" data-tab="tt-stadium">Track &amp; Condition</div>
   </div>
   <div class="hdr-actions">
+    <div class="hdr-bk" style="position:relative;display:inline-block">
+      <button class="ghost" id="bkBtn" title="Restore your data from a dated backup, or make one now">Backups &#9662;</button>
+      <div id="bkMenu" style="display:none;position:absolute;top:112%;left:0;z-index:1000;min-width:260px;max-height:380px;overflow:auto;background:var(--panel,#171a21);border:1px solid var(--line,#2a2e38);border-radius:8px;box-shadow:0 10px 28px rgba(0,0,0,.55);padding:4px"></div>
+    </div>
     <button class="ghost" id="refetch" title="Fetch fresh data from the game server">Refetch</button>
     <button class="ghost" id="export" title="Download your umas as a data.json compatible with UmaExtractor / hakuraku.moe">Export</button>
     <button class="ghost" id="reload">Reload data</button>
@@ -4147,6 +4151,46 @@ async function dbCheckBackup(){
   }catch(e){}
 }
 dbCheckBackup();
+
+// ── Backups dropdown (dated restore points, left of Refetch) ──
+const bkBtn=$('#bkBtn'), bkMenu=$('#bkMenu');
+function _bkDate(u){ try{ return new Date((u||0)*1000).toLocaleString(); }catch(e){ return '?'; } }
+async function bkOpen(){
+  bkMenu.innerHTML='<div style="padding:10px;color:var(--mut);font-size:12px">Loading…</div>';
+  bkMenu.style.display='block';
+  let data; try{ data=await fetch('/api/db/backups').then(r=>r.json()); }
+  catch(e){ bkMenu.innerHTML='<div style="padding:10px;color:#ff6e7e">Could not load backups</div>'; return; }
+  const bks=data.backups||[];
+  const item=(inner,onclick)=>`<div onclick="${onclick}" style="padding:8px 10px;border-radius:6px;cursor:pointer" onmouseover="this.style.background='rgba(255,255,255,.06)'" onmouseout="this.style.background=''">${inner}</div>`;
+  let html=item('<b style="color:var(--ok,#43c98a)">&#43; Backup now</b>','bkBackupNow()');
+  html+='<div style="height:1px;background:var(--line,#2a2e38);margin:4px 0"></div>';
+  if(!bks.length) html+='<div style="padding:10px;color:var(--mut);font-size:12px">No backups yet</div>';
+  else html+=bks.map(b=>item(
+    `<div><b>${_bkDate(b.created)}</b> <span style="color:var(--mut);font-size:11px">${esc(b.tag||'')}</span></div>`+
+    `<div style="color:var(--mut);font-size:11px">${(b.tt_rows||0).toLocaleString()} TT · ${(b.stadium_rows||0).toLocaleString()} stadium</div>`,
+    `bkRestore('${b.id}','${_bkDate(b.created).replace(/'/g,'')}')`)).join('');
+  bkMenu.innerHTML=html;
+}
+if(bkBtn){
+  bkBtn.onclick=(e)=>{ e.stopPropagation(); if(bkMenu.style.display==='block') bkMenu.style.display='none'; else bkOpen(); };
+  document.addEventListener('click',e=>{ if(!e.target.closest('.hdr-bk')) bkMenu.style.display='none'; });
+}
+async function bkBackupNow(){
+  bkMenu.style.display='none';
+  try{ const r=await fetch('/api/db/backup',{method:'POST'}).then(r=>r.json());
+    alert('Backup created ✓  '+(((r.backup&&r.backup.tt_rows)||0)).toLocaleString()+' TT rows saved.'); }
+  catch(e){ alert('Backup failed'); }
+}
+async function bkRestore(id,dateStr){
+  bkMenu.style.display='none';
+  if(!confirm(`Restore your data to the backup from ${dateStr}?\n\nYour current data is snapshotted first (so this is undoable), then replaced with that backup.`)) return;
+  try{
+    const r=await fetch('/api/db/restore',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})}).then(r=>r.json());
+    if(r.error){ alert('Restore failed: '+r.error); return; }
+    alert(`Restored ✓  ${(r.tt||0).toLocaleString()} TT rows, ${(r.stadium||0).toLocaleString()} stadium.\n\nReloading…`);
+    location.reload();
+  }catch(e){ alert('Restore failed'); }
+}
 
 async function ttImportStadiumCsv(input){
   const file=input.files&&input.files[0];

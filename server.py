@@ -2229,22 +2229,60 @@ def _db_paths():
     return h, s, h.with_name(h.name + ".bak"), s.with_name(s.name + ".bak")
 
 
-def _backup_db():
-    """Snapshot the live datasets before an import. Keeps a small rotation
-    (.bak newest, then .bak.1, .bak.2) so two imports in a row don't destroy the
-    undo point of the first. Restore still reads .bak (the most recent pre-import
-    snapshot)."""
+_BACKUP_DIR = skill_planner.HISTORY_PATH.parent / "backups"
+_BACKUP_KEEP = 20   # how many dated snapshots to retain
+
+
+def _snapshot_db(tag: str = "") -> dict:
+    """Save a timestamped snapshot of the live datasets (TT history + stadium)
+    under backups/<ts>/, pruning to the most recent _BACKUP_KEEP. Each snapshot
+    is a self-contained restore point pickable from the Backups menu."""
     import shutil
-    h, s, hb, sb = _db_paths()
-    for live, bak in ((h, hb), (s, sb)):
-        if not live.exists():
-            continue
-        b1, b2 = bak.with_name(bak.name + ".1"), bak.with_name(bak.name + ".2")
-        if b1.exists():
-            shutil.copy2(b1, b2)
-        if bak.exists():
-            shutil.copy2(bak, b1)
-        shutil.copy2(live, bak)
+    from datetime import datetime
+    h, s, _hb, _sb = _db_paths()
+    ts = datetime.now().strftime("%Y%m%d-%H%M%S")
+    d = _BACKUP_DIR / ts
+    d.mkdir(parents=True, exist_ok=True)
+    tt_rows = st_rows = 0
+    if h.exists():
+        shutil.copy2(h, d / h.name)
+        tt_rows = sum(1 for _ in open(h, encoding="utf-8"))
+    if s.exists():
+        shutil.copy2(s, d / s.name)
+        st_rows = sum(1 for _ in open(s, encoding="utf-8"))
+    meta = {"id": ts, "tag": tag, "created": int(_time.time()),
+            "tt_rows": tt_rows, "stadium_rows": st_rows}
+    (d / "meta.json").write_text(json.dumps(meta), encoding="utf-8")
+    # prune oldest beyond the retention count
+    snaps = sorted([p for p in _BACKUP_DIR.iterdir() if p.is_dir()], key=lambda p: p.name)
+    for old in snaps[:-_BACKUP_KEEP]:
+        shutil.rmtree(old, ignore_errors=True)
+    return meta
+
+
+def _list_backups() -> list[dict]:
+    """All dated snapshots, newest first. Seeds an initial snapshot of the
+    current data if none exist, so there's always a restore point."""
+    if not _BACKUP_DIR.exists() and skill_planner.HISTORY_PATH.exists():
+        _snapshot_db("initial")
+    out = []
+    if _BACKUP_DIR.exists():
+        for d in _BACKUP_DIR.iterdir():
+            if not d.is_dir():
+                continue
+            try:
+                out.append(json.loads((d / "meta.json").read_text(encoding="utf-8")))
+            except Exception:
+                out.append({"id": d.name, "tag": "?", "created": 0,
+                            "tt_rows": 0, "stadium_rows": 0})
+    out.sort(key=lambda m: m.get("created", 0), reverse=True)
+    return out
+
+
+def _backup_db():
+    """Snapshot the live datasets before an import (kept in backups/, pickable
+    from the Backups menu so any import can be rolled back)."""
+    _snapshot_db("before import")
 
 
 @app.get("/api/db/export")
@@ -2380,20 +2418,46 @@ def api_db_backup_status():
     return {"available": hb.exists() or sb.exists()}
 
 
+@app.get("/api/db/backups")
+def api_db_backups():
+    """List dated backup snapshots for the Backups menu."""
+    return {"backups": _list_backups()}
+
+
+@app.post("/api/db/backup")
+def api_db_backup():
+    """Create a manual backup snapshot of the current data right now."""
+    return {"ok": True, "backup": _snapshot_db("manual")}
+
+
+class RestoreReq(BaseModel):
+    id: str = ""
+
+
 @app.post("/api/db/restore")
-def api_db_restore():
-    """Undo the last import: restore the datasets from the rolling backup."""
+def api_db_restore(req: RestoreReq | None = None):
+    """Restore the datasets from a chosen backup (by `id`, or the newest if
+    omitted). The CURRENT data is snapshotted first, so a restore is itself
+    undoable."""
     import shutil
-    h, s, hb, sb = _db_paths()
-    if not hb.exists() and not sb.exists():
-        return JSONResponse({"error": "no backup available"}, status_code=400)
-    if hb.exists():
-        shutil.copy2(hb, h)
-    if sb.exists():
-        shutil.copy2(sb, s)
+    bid = (req.id if req else "") or ""
+    backups = _list_backups()
+    if not backups:
+        return JSONResponse({"error": "no backups available"}, status_code=400)
+    target = next((b for b in backups if b["id"] == bid), backups[0])
+    d = _BACKUP_DIR / target["id"]
+    if not d.exists():
+        return JSONResponse({"error": "backup not found"}, status_code=404)
+    h, s, _hb, _sb = _db_paths()
+    _snapshot_db("before restore")   # safety: current state stays recoverable
+    bh, bs = d / h.name, d / s.name
+    if bh.exists():
+        shutil.copy2(bh, h)
+    if bs.exists():
+        shutil.copy2(bs, s)
     _ACT_CACHE.clear()
     return {
-        "ok": True, "restored": True,
+        "ok": True, "restored": target["id"],
         "tt": len(_read_jsonl_list(h)),
         "stadium": len(_read_jsonl_list(s)),
     }
