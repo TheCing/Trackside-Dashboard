@@ -2438,17 +2438,14 @@ function showTab(name){
   $$('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===name));
   const panels = ['inv','breed','tt-overview','tt-planner','tt-lookup','tt-stadium'];
   panels.forEach(p=>{ const el=$('#'+p); if(el) el.classList.toggle('hide',p!==name); });
-  if(name==='tt-overview' && !TT_LOADED){
-    TT_LOADED=true; ttLoad(); ttLoadStadium(); ttLoadPlannerOptions(); ttLoadSkillList(); slLoadPoolStats(); ttLoadRetrains();
-  }
-  if(name==='tt-planner' && !TT_LOADED){
-    TT_LOADED=true; ttLoad(); ttLoadStadium(); ttLoadPlannerOptions(); ttLoadSkillList(); slLoadPoolStats(); ttLoadRetrains();
-  }
-  if(name==='tt-lookup' && !TT_LOADED){
-    TT_LOADED=true; ttLoad(); ttLoadStadium(); ttLoadPlannerOptions(); ttLoadSkillList(); slLoadPoolStats(); ttLoadRetrains();
-  }
-  if(name==='tt-stadium' && !TT_LOADED){
-    TT_LOADED=true; ttLoad(); ttLoadStadium(); ttLoadPlannerOptions(); ttLoadSkillList(); slLoadPoolStats(); ttLoadRetrains();
+  if(name.startsWith('tt-')){
+    if(!TT_LOADED){
+      // one-time heavy setup (dropdown options, skill list, pool stats)
+      TT_LOADED=true; ttLoadPlannerOptions(); ttLoadSkillList(); slLoadPoolStats();
+    }
+    // always re-fetch the data-driven views on entry (backend is mtime-cached,
+    // so this is cheap and keeps the tab fresh without a manual F5)
+    ttLoad(); ttLoadStadium(); ttLoadRetrains();
   }
 }
 function refreshTagSelects(){
@@ -3376,6 +3373,7 @@ $('#kofiBannerClose')?.addEventListener('click', ()=>{
 // TEAM TRIALS ANALYZER LOGIC (merged from TTAnalyzer dashboard)
 // ============================================================
 let TT_LOADED = false;
+let TT_LAST_SIG = null;   // last seen TT-history signature (mtime|size) for auto-refresh
 let TT_DATA = null;
 let TT_RETRAINS = {};   // card_id -> {name, versions[]} for the re-train compare dropdown
 let TT_SORT_KEY = 'avg_score';
@@ -3530,6 +3528,19 @@ async function ttLoad(){
     const r = await fetch('/api/team').then(r=>r.json());
     TT_DATA = r;
     ttRender();
+  }catch(e){}
+}
+// Poll a tiny change-signal; reload the Team Trials views only when the
+// underlying data actually changed (new trials imported) — no manual F5.
+async function ttAutoRefresh(){
+  try{
+    const s = await fetch('/api/team/sig').then(r=>r.json());
+    const sig = `${s.mtime}|${s.size}`;
+    if(sig === TT_LAST_SIG) return;
+    const firstTime = (TT_LAST_SIG === null);
+    TT_LAST_SIG = sig;
+    if(firstTime) return;                 // baseline only; entry already loaded current data
+    ttLoad(); ttLoadStadium(); ttLoadRetrains();
   }catch(e){}
 }
 
@@ -4227,7 +4238,7 @@ async function ttImportNative(){
 }
 
 // Start polling capture status (only when TT tabs are loaded)
-setInterval(()=>{ if(TT_LOADED) ttRefreshCaptureStatus(); }, 5000);
+setInterval(()=>{ if(TT_LOADED){ ttRefreshCaptureStatus(); ttAutoRefresh(); } }, 5000);
 
 async function bootstrap(){
   // reset any stuck capturing/fetching from a previous tab/session

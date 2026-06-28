@@ -1872,6 +1872,18 @@ def api_team_retrains():
     return {"characters": out}
 
 
+@app.get("/api/team/sig")
+def api_team_sig():
+    """Tiny change-signal (mtime + size of the TT history) so the UI can poll
+    cheaply and only reload the Team Trials views when the data actually changed
+    — no manual refresh needed."""
+    try:
+        st = HISTORY_PATH.stat()
+        return {"mtime": st.st_mtime, "size": st.st_size}
+    except OSError:
+        return {"mtime": 0, "size": 0}
+
+
 @app.get("/api/team")
 def api_team():
     rows, agg = _team_data()
