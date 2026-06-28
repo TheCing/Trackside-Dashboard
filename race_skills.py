@@ -260,30 +260,81 @@ def load_rows() -> list[dict]:
     return out
 
 
+def _skill_row_from_tt(r: dict) -> dict | None:
+    """Convert a Team-Trials skill row (trial_id-keyed — from a Heaven /
+    UmaTTAnalyzer export bundle or a raw team_trials_history.jsonl) into the
+    race_skills pool shape, with a synthetic per-race id for dedup."""
+    cid, owned = r.get("chara_id"), r.get("owned_skills")
+    if not cid or not owned:
+        return None
+    rid = f"{r.get('trial_id')}|{r.get('race_idx')}|{r.get('trained_chara_id')}"
+    rs = r.get("running_style")
+    rs = _RS.get(rs, rs)                      # already a string in TT exports; map if int
+    return {
+        "race_id":          rid,
+        "chara_id":         cid,
+        "chara_name":       r.get("chara_name") or "?",
+        "running_style":    rs,
+        "distance_cat":     _TT_DIST.get(r.get("distance_type")),
+        "owned_skills":     owned,
+        "activated_skills": r.get("activated_skills") or [],
+        "src":              "tt",
+    }
+
+
+def _normalize_skill_row(r) -> dict | None:
+    """Return a dedup-able pool row from any supported shape, or None. Accepts
+    native pool rows (have race_id) and Team-Trials rows (have trial_id), both
+    needing owned_skills."""
+    if not isinstance(r, dict) or not r.get("owned_skills"):
+        return None
+    if r.get("race_id") is not None:
+        return r                              # already pool shape
+    if r.get("trial_id") is not None:
+        return _skill_row_from_tt(r)          # TT shape → convert
+    return None
+
+
 def import_community_file(src_bytes: bytes, label: str = "shared") -> dict:
-    """Save an uploaded community export under COMMUNITY_DIR (so load_rows merges
-    + dedupes it). Re-importing the same label overwrites, so it never piles up.
-    Returns how many NEW (race_id, chara_id) pairs it adds over what we have."""
+    """Save an uploaded skill export under COMMUNITY_DIR (so load_rows merges +
+    dedupes it). Accepts THREE shapes, all routed to the skill pool (never the
+    scored Race Analysis): a native skill `.jsonl` (race_id rows), a Heaven /
+    UmaTTAnalyzer export bundle with a `tt` array, or a raw
+    team_trials_history.jsonl. Returns how many NEW (race_id, chara_id) pairs it
+    adds over what we have."""
     COMMUNITY_DIR.mkdir(parents=True, exist_ok=True)
     safe = "".join(c for c in label if c.isalnum() or c in "-_") or "shared"
     have = {(r.get("race_id"), r.get("chara_id")) for r in load_rows()
             if r.get("race_id") is not None}
+
+    text = src_bytes.decode("utf-8", "ignore")
+    # A whole-file JSON bundle (skill-track / Heaven export) carries rows in `tt`;
+    # otherwise it's a .jsonl (one row per line).
+    raw_rows: list = []
+    try:
+        bundle = json.loads(text)
+    except Exception:
+        bundle = None
+    if isinstance(bundle, dict) and isinstance(bundle.get("tt"), list):
+        raw_rows = bundle["tt"]
+    else:
+        for line in text.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                raw_rows.append(json.loads(line))
+            except Exception:
+                pass
+
     added = 0
     rows_in = 0
-    rejected = 0                 # rows we WON'T keep (no race_id → can't dedup)
-    valid_lines: list[str] = []  # only keep dedup-able, well-formed rows
-    for line in src_bytes.decode("utf-8", "ignore").splitlines():
-        line = line.strip()
-        if not line:
-            continue
-        try:
-            r = json.loads(line)
-        except Exception:
-            rejected += 1
-            continue
+    rejected = 0
+    valid_lines: list[str] = []
+    for raw in raw_rows:
         rows_in += 1
-        # require race_id + owned_skills, else it can't be deduped or counted
-        if r.get("race_id") is None or not r.get("owned_skills"):
+        r = _normalize_skill_row(raw)
+        if r is None:
             rejected += 1
             continue
         valid_lines.append(json.dumps(r, separators=(",", ":"), default=str))
@@ -292,8 +343,8 @@ def import_community_file(src_bytes: bytes, label: str = "shared") -> dict:
             have.add(k)
             added += 1
     if not valid_lines:
-        return {"ok": False, "error": "no valid rows (need race_id + owned_skills) — "
-                "is this a Heaven skill-data export?"}
+        return {"ok": False, "error": "no valid skill rows (need owned_skills) — "
+                "is this a Heaven / UmaTTAnalyzer skill export?"}
     (COMMUNITY_DIR / f"{safe}.jsonl").write_text("\n".join(valid_lines) + "\n", encoding="utf-8")
     return {"ok": True, "rows_in_file": rows_in, "new_added": added, "rejected": rejected,
             "duplicates": rows_in - added - rejected if rows_in >= added + rejected else 0}
