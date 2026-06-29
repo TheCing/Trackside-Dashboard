@@ -371,6 +371,30 @@ def skill_cost(skill_id: int) -> int | None:
     return skill_costs().get(skill_id)
 
 
+@lru_cache(maxsize=1)
+def _skill_timing():
+    """skill_id -> {cooldown, duration} in seconds (skill_data stores 1/10000s)."""
+    cur = _conn().cursor()
+    out = {}
+    for sid, cd, dur in cur.execute(
+            "SELECT id, float_cooldown_time_1, float_ability_time_1 FROM skill_data"):
+        out[int(sid)] = {
+            "cooldown": (round((cd or 0) / 10000) or None),
+            "duration": (round((dur or 0) / 10000, 1) or None),
+        }
+    return out
+
+
+def skill_cooldown(skill_id: int):
+    m = _skill_timing().get(skill_id)
+    return m["cooldown"] if m else None
+
+
+def skill_duration(skill_id: int):
+    m = _skill_timing().get(skill_id)
+    return m["duration"] if m else None
+
+
 # ── Skill Value (SV) helpers ───────────────────────────────────────────────
 
 @lru_cache(maxsize=1)

@@ -729,6 +729,7 @@ def _compute_uma_metrics(e: dict, team_avg: float) -> None:
                 "name":  master.skill_name(sid),
                 "pct":   round(skill_activation_pct.get(sid, 0), 1),
                 "count": activated_counts.get(sid, 0),
+                "sv":    master.skill_sv(sid),
             }
             for sid in sorted(owned_set, key=lambda s: -skill_activation_pct.get(s, 0))
         },
@@ -1882,6 +1883,37 @@ def api_team_retrains():
     return {"characters": out}
 
 
+@app.get("/api/team/ace")
+def api_team_ace():
+    """Best ace candidate per distance: your umas ranked by average Team Trials
+    score in that distance. The ace slot earns the team score bonus, so you want
+    your strongest uma at each distance there."""
+    from collections import defaultdict
+    rows, _ = _team_data()
+    agg: dict = defaultdict(lambda: defaultdict(lambda: {"cid": None, "scores": []}))
+    for r in rows:
+        if not _is_scored(r):
+            continue
+        d, nm, cid, s = (r.get("distance_type"), r.get("chara_name"),
+                         r.get("chara_id"), r.get("display_score"))
+        if not (d and nm and s):
+            continue
+        e = agg[d][nm]
+        if e["cid"] is None:
+            e["cid"] = cid
+        e["scores"].append(s)
+    MIN = 10
+    out = []
+    for d in (1, 2, 3, 4, 5):
+        cands = [{"chara_name": nm, "chara_id": e["cid"],
+                  "avg": round(sum(e["scores"]) / len(e["scores"])), "races": len(e["scores"])}
+                 for nm, e in agg[d].items() if len(e["scores"]) >= MIN]
+        cands.sort(key=lambda x: -x["avg"])
+        out.append({"distance": _TT_DIST_LABEL.get(d, str(d)), "distance_type": d,
+                    "umas": cands[:3]})
+    return {"distances": out}
+
+
 @app.get("/api/team/sig")
 def api_team_sig():
     """Tiny change-signal (mtime + size of the TT history) so the UI can poll
@@ -1992,6 +2024,12 @@ def api_skill_planner_plan(chara_id: int = 0, distance_type: int = 0, running_st
 def api_skill_planner_skills():
     """All skill_ids appearing in history (for autocomplete)."""
     return skill_planner.all_skill_names()
+
+
+@app.get("/api/skill_planner/all_skills")
+def api_skill_planner_all_skills():
+    """Every skill in your pool ranked by activation (for the 'All skills' mode)."""
+    return {"skills": skill_planner.all_skill_stats()}
 
 
 @app.get("/api/skill_planner/lookup")

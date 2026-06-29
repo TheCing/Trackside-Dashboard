@@ -438,16 +438,70 @@ def skill_lookup(skill_query: str | int, rows: list[dict] | None = None,
                                                          r.get("running_style"))),
                       key=lambda x: -x["owned"])
 
+    # 2D matrix: activation rate per (running style x distance) cell. `multi` =
+    # how often the skill procced 2+ times in one race (rare). Lets you read the
+    # exact context a skill fires best in, not just style or distance alone.
+    _cell: dict = {}
+    for row in rows:
+        if not (sid_group & set(row.get("owned_skills") or [])):
+            continue
+        style = _STYLE_LABEL.get(row.get("running_style"), row.get("running_style"))
+        dist = _row_dist(row)
+        if not style or not dist:
+            continue
+        n_proc = sum(1 for s in (row.get("activated_skills") or []) if s in sid_group)
+        c = _cell.setdefault((style, dist), [0, 0, 0])     # owned, activated, multi(2+)
+        c[0] += 1
+        if n_proc >= 1:
+            c[1] += 1
+        if n_proc >= 2:
+            c[2] += 1
+    matrix_all = [{"style": st, "distance": di, "owned": o, "activated": a, "multi": m,
+                   "pct": round(a / o * 100, 1) if o else 0,
+                   "multi_pct": round(m / o * 100, 1) if o else 0}
+                  for (st, di), (o, a, m) in _cell.items()]
+    # A cell with too few races is noise (0/2, a 100% from 1 race…) — only surface
+    # contexts backed by a real sample. Below this they're dropped entirely.
+    MIN_SAMPLE = 25
+    matrix = [c for c in matrix_all if c["owned"] >= MIN_SAMPLE]
+
+    # Best context = the cell with the strongest activation rate ADJUSTED for how
+    # much data backs it (Wilson 95% lower bound), so a flukey high rate from a
+    # thin sample never wins.
+    def _wilson_lower(a, n, z=1.96):
+        if not n:
+            return 0.0
+        p = a / n
+        denom = 1 + z * z / n
+        centre = p + z * z / (2 * n)
+        margin = z * ((p * (1 - p) / n + z * z / (4 * n * n)) ** 0.5)
+        return (centre - margin) / denom
+
+    best = max(matrix, key=lambda c: _wilson_lower(c["activated"], c["owned"]),
+               default=None)
+    best_context = ({"style": best["style"], "distance": best["distance"],
+                     "pct": best["pct"], "owned": best["owned"]} if best else None)
+
+    # Same reliability floor for the per-uma list: a uma with a handful of races
+    # tells you nothing trustworthy, so drop it (keep a count for transparency).
+    umas_hidden = sum(1 for u in umas if u["owned"] < MIN_SAMPLE)
+    umas = [u for u in umas if u["owned"] >= MIN_SAMPLE]
+
     return {
         "skill_id":          primary_sid,
         "name":              display_name,
         "sp_cost":           sp_cost,
+        "cooldown":          master.skill_cooldown(primary_sid),
+        "duration":          master.skill_duration(primary_sid),
         "overall_owned":     overall_owned,
         "overall_activated": overall_act,
         "overall_pct":       round((overall_act / overall_owned) * 100, 1),
         "umas":              umas,
+        "umas_hidden":       umas_hidden,
         "by_distance":       by_distance,
         "by_style":          by_style,
+        "matrix":            matrix,
+        "best_context":      best_context,
     }
 
 
@@ -471,6 +525,53 @@ def all_skill_names(rows: list[dict] | None = None) -> list[dict]:
         if nm not in by_name or sid < by_name[nm]["id"]:
             by_name[nm] = {"id": sid, "name": nm}
     out = sorted(by_name.values(), key=lambda x: x["name"])
+    return out
+
+
+def all_skill_stats(rows: list[dict] | None = None, min_sample: int = 25) -> list[dict]:
+    """Every skill observed in your pool, ranked by overall activation. Same-name
+    variant ids (a skill's base + its inherited form) are merged. `eff` = SP per
+    real activation (SP cost / activation rate) — what each proc effectively costs.
+    Skills under `min_sample` owned races are dropped (too little data to trust)."""
+    if rows is None:
+        rows = combined_rows()
+    names = master._skill_names()
+    owned: dict = defaultdict(int)
+    act: dict = defaultdict(int)
+    for r in rows:
+        o = set(r.get("owned_skills") or [])
+        a = set(r.get("activated_skills") or [])
+        for s in o:
+            owned[s] += 1
+            if s in a:
+                act[s] += 1
+    # group by display name so base + identical-name inherited ids count as one
+    by_name: dict = {}
+    for sid, o in owned.items():
+        nm = names.get(sid)
+        if not nm or nm.startswith("skill#"):
+            continue
+        g = by_name.setdefault(nm, {"name": nm, "ids": [], "owned": 0, "activated": 0})
+        g["ids"].append(sid)
+        g["owned"] += o
+        g["activated"] += act.get(sid, 0)
+    out = []
+    for nm, g in by_name.items():
+        if g["owned"] < min_sample:
+            continue
+        pct = g["activated"] / g["owned"] * 100
+        sp = next((c for c in (skill_cost(s) for s in sorted(g["ids"])) if c), None)
+        eff = round(sp / (pct / 100)) if (sp and pct > 0) else None
+        out.append({
+            "skill_id":  min(g["ids"]),
+            "name":      nm,
+            "pct":       round(pct, 1),
+            "races":     g["owned"],
+            "activated": g["activated"],
+            "sp_cost":   sp,
+            "eff":       eff,
+        })
+    out.sort(key=lambda x: -x["pct"])
     return out
 
 

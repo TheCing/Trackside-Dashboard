@@ -679,7 +679,7 @@
   .tt-ra2-stat small{font-size:8.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
   .tt-ra2-spark{flex:1;min-width:80px;max-width:180px;height:32px;position:relative}
   .tt-ra2-spark svg{width:100%;height:100%}
-  .tt-ra2-verdict{flex-shrink:0}
+  .tt-ra2-verdict{flex-shrink:0;width:90px;text-align:center}
   /* expanded detail under a row */
   .tt-ra2-detail{padding:14px 16px 14px 72px;background:var(--bg);border-bottom:1px solid var(--line);animation:odds-detail-in .2s ease}
   .tt-ra2-heatmap{display:flex;gap:2px;flex-wrap:wrap;margin-top:6px}
@@ -1349,8 +1349,19 @@
 
   <div class="tt-card">
     <div class="tt-card-header">
+      <h2 class="tt-card-title">Recommended Ace per distance</h2>
+      <div class="tt-card-tools"><span class="tt-status-line" style="font-size:11px">your strongest uma in each distance · the ace slot earns the team score bonus</span></div>
+    </div>
+    <div id="tt-ace" style="padding:4px 2px"></div>
+  </div>
+
+  <div class="tt-card">
+    <div class="tt-card-header">
       <h2 class="tt-card-title">Race Analysis</h2>
-      <div class="tt-card-tools">
+      <div class="tt-card-tools" style="display:flex;align-items:center;gap:12px">
+        <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--mut);white-space:nowrap" title="Adjusted SV — recompute each uma's SV as if skills that activate below this % weren't there (they inflate SV but rarely fire). 0 = off. Click a uma to see which skills were excluded.">Adj&nbsp;SV&nbsp;&ge;
+          <input id="tt-sv-cutoff" type="number" min="0" max="100" step="5" value="50" style="width:50px;padding:3px 5px" onchange="ttSetSvCutoff(this.value)">%
+        </label>
         <span id="tt-filter-count" class="tt-status-line"></span>
       </div>
     </div>
@@ -1401,18 +1412,25 @@
       </div>
     </div>
     <div class="tt-form-row">
-      <div class="tt-form-field" style="flex:2">
+      <div class="tt-form-field">
+        <div class="tt-field-label">Show</div>
+        <select id="tt-sl-mode" class="tt-select" onchange="slModeChange()">
+          <option value="single">Single skill</option>
+          <option value="all">All skills</option>
+        </select>
+      </div>
+      <div class="tt-form-field" id="sl-f-name" style="flex:2">
         <div class="tt-field-label">Skill name</div>
         <input id="tt-sl-input" list="tt-sl-list" class="tt-input" placeholder="Type a skill name (e.g. Fast-Paced, Sympathy, Front Runner Savvy)" onkeydown="if(event.key==='Enter')ttRunSkillLookup()">
         <datalist id="tt-sl-list"></datalist>
       </div>
-      <div class="tt-form-field">
+      <div class="tt-form-field" id="sl-f-dist">
         <div class="tt-field-label">Distance</div>
         <select id="tt-sl-dist" class="tt-select" onchange="ttRunSkillLookup()">
           <option value="">All</option><option value="sprint">Sprint</option><option value="mile">Mile</option><option value="medium">Medium</option><option value="long">Long</option><option value="dirt">Dirt</option>
         </select>
       </div>
-      <div class="tt-form-field">
+      <div class="tt-form-field" id="sl-f-style">
         <div class="tt-field-label">Style (aptitude)</div>
         <select id="tt-sl-style" class="tt-select" onchange="ttRunSkillLookup()">
           <option value="">All</option><option value="NIGE">Front Runner</option><option value="SENKO">Pace Chaser</option><option value="SASHI">Late Surger</option><option value="OIKOMI">End Closer</option>
@@ -2449,7 +2467,7 @@ function showTab(name){
     }
     // always re-fetch the data-driven views on entry (backend is mtime-cached,
     // so this is cheap and keeps the tab fresh without a manual F5)
-    ttLoad(); ttLoadStadium(); ttLoadRetrains();
+    ttLoad(); ttLoadStadium(); ttLoadRetrains(); ttLoadAce();
   }
 }
 function refreshTagSelects(){
@@ -3382,6 +3400,22 @@ let TT_DATA = null;
 let TT_RETRAINS = {};   // card_id -> {name, versions[]} for the re-train compare dropdown
 let TT_SORT_KEY = 'avg_score';
 let TT_SORT_DIR = -1;
+let TT_SV_CUTOFF = 50;  // Adjusted SV + problem-skills threshold: skills proccing under this % (0 = off)
+// Recompute a uma's SV excluding skills that activate below TT_SV_CUTOFF, as if
+// those low-proc skills weren't there. SV is a pure sum, so adj = sum of kept svs.
+function ttAdjustedSv(u){
+  const raw = u.sv||0;
+  if(!TT_SV_CUTOFF) return {adj:raw, raw, excluded:[]};
+  let adj=0; const excluded=[];
+  Object.values(u.skill_activation||{}).forEach(info=>{
+    const sv=info.sv||0;
+    if(sv<=0) return;                          // uniques don't count toward SV
+    if((info.pct??0) < TT_SV_CUTOFF) excluded.push(info);
+    else adj += sv;
+  });
+  return {adj, raw, excluded};
+}
+function ttSetSvCutoff(v){ TT_SV_CUTOFF = Math.max(0, Math.min(100, +v||0)); ttRender(); }
 let TT_STADIUM_DATA = null;
 let TT_STADIUM_CAT = null;
 let TT_STADIUM_SORT_KEY = 'distance_category';
@@ -3526,6 +3560,27 @@ function ttCompareCell(u){
   return `<button class="ghost tt-cmp-btn" data-cid="${u.chara_id}" style="font-size:10px;padding:4px 8px;white-space:nowrap" `+
     `title="Compare your ${vs.length} versions of ${esc(c.name)}">▾ ${vs.length} ver <b style="color:${col}">${sign}${d.toFixed(0)}%</b></button>`;
 }
+async function ttLoadAce(){
+  const box=$('#tt-ace'); if(!box) return;
+  let data;
+  try{ data=await fetch('/api/team/ace').then(r=>r.json()); }catch(e){ box.innerHTML='<div class="muted" style="font-size:11px;padding:8px">Could not load.</div>'; return; }
+  const dists=data.distances||[];
+  box.innerHTML=`<div style="display:flex;gap:10px;flex-wrap:wrap">`+dists.map(d=>{
+    const top=d.umas&&d.umas[0];
+    const head=`<div class="muted" style="font-size:10px;text-transform:uppercase;letter-spacing:1px;text-align:center;margin-bottom:8px">${d.distance}</div>`;
+    if(!top) return `<div style="flex:1;min-width:150px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 8px">${head}<div class="muted" style="font-size:11px;text-align:center">no data</div></div>`;
+    const rest=(d.umas||[]).slice(1).map(u=>`${esc(u.chara_name)} ${u.avg.toLocaleString()}`).join(' · ');
+    return `<div style="flex:1;min-width:150px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 8px">${head}`+
+      `<div style="display:flex;align-items:center;gap:9px">`+
+        `<img src="${ttIconUrl(top.chara_id)}" style="width:40px;height:40px;border-radius:50%;border:2px solid var(--accent);flex-shrink:0" onerror="this.style.visibility='hidden'"/>`+
+        `<div style="min-width:0"><div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(top.chara_name)}">${esc(top.chara_name)}</div>`+
+        `<div style="font-size:15px;font-weight:800;color:var(--accent)">${top.avg.toLocaleString()}</div>`+
+        `<div class="muted" style="font-size:9px">${top.races} races</div></div>`+
+      `</div>`+
+      (rest?`<div class="muted" style="font-size:10px;margin-top:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(rest)}">then ${esc((d.umas[1].chara_name))}</div>`:'')+
+    `</div>`;
+  }).join('')+`</div>`;
+}
 async function ttLoad(){
   await ttLoadPlayer();
   try{
@@ -3544,7 +3599,7 @@ async function ttAutoRefresh(){
     const firstTime = (TT_LAST_SIG === null);
     TT_LAST_SIG = sig;
     if(firstTime) return;                 // baseline only; entry already loaded current data
-    ttLoad(); ttLoadStadium(); ttLoadRetrains();
+    ttLoad(); ttLoadStadium(); ttLoadRetrains(); ttLoadAce();
   }catch(e){}
 }
 
@@ -3620,28 +3675,41 @@ function ttRender(){
       <span style="min-width:52px;text-align:center;cursor:pointer" onclick="ttSetSort('trimmed_avg')" title="Trimmed AVG = average after dropping the single lowest race, but only if that race was below 80% of your team's total average. Stops one bad race from tanking the number. Click to sort.">TRIM${TT_SORT_KEY==='trimmed_avg'?(TT_SORT_DIR>0?' &uarr;':' &darr;'):''}</span>
       <span style="min-width:52px;text-align:center;cursor:pointer" onclick="ttSetSort('cv')" title="CV% (Coefficient of Variation) = consistency. Std deviation ÷ average, as a percentage. LOWER is better: low % = steady race to race, high % = swingy/inconsistent. Click to sort.">CV%${TT_SORT_KEY==='cv'?(TT_SORT_DIR>0?' &uarr;':' &darr;'):''}</span>
       <span style="min-width:52px;text-align:center;cursor:pointer" onclick="ttSetSort('ceiling')" title="BEST = the highest single-race score this uma hit. Its ceiling / best case. Click to sort.">BEST${TT_SORT_KEY==='ceiling'?(TT_SORT_DIR>0?' &uarr;':' &darr;'):''}</span>
-      <span style="min-width:52px;text-align:center;cursor:pointer" onclick="ttSetSort('floor')" title="WORST = the lowest single-race score this uma hit. Its floor / worst case. A high floor means it rarely flops. Click to sort.">WORST${TT_SORT_KEY==='floor'?(TT_SORT_DIR>0?' &uarr;':' &darr;'):''}</span>
       <span style="min-width:52px;text-align:center;cursor:pointer" onclick="ttSetSort('overall_act_pct')" title="ACT% = skill activation rate. How often this uma's skills actually fired across its races. Higher = skills trigger reliably (good skill picks for this build). Click to sort.">ACT%${TT_SORT_KEY==='overall_act_pct'?(TT_SORT_DIR>0?' &uarr;':' &darr;'):''}</span>
     </span>
     <span style="flex:1;min-width:80px;max-width:180px;text-align:center" title="TREND = sparkline of this uma's scores over its recent races, oldest to newest. Shows whether it's trending up or down.">TREND</span>
-    <span style="min-width:80px;text-align:center;cursor:pointer" onclick="ttSetSort('avg_score')" title="VERDICT = overall rating (GOAT / STRONG / SOLID / WEAK / BENCH) from average score and consistency. Click to sort.">VERDICT</span>
-    <span style="min-width:104px;text-align:center" title="VERSIONS = if you've trained this character more than once, click to compare the old vs new builds (avg score, runs, stats).">VERSIONS</span>
+    <span style="width:90px;flex:0 0 90px;text-align:center;cursor:pointer" onclick="ttSetSort('avg_score')" title="VERDICT = overall rating (GOAT / STRONG / SOLID / WEAK / BENCH) from average score and consistency. Click to sort.">VERDICT</span>
+    <span style="width:120px;flex:0 0 120px;text-align:center" title="VERSIONS = if you've trained this character more than once, click to compare the old vs new builds (avg score, runs, stats).">VERSIONS</span>
+    <span style="flex:1;min-width:160px;text-align:left" title="PROBLEM SKILLS = skills this uma owns that activate below the Adj SV threshold — they cost SV but rarely fire. Lower the threshold above to be stricter.">PROBLEM SKILLS</span>
   </div>`;
 
   html += sorted.map(u=>{
-    const sv = u.sv||0;
+    const svi = ttAdjustedSv(u);
+    const sv = TT_SV_CUTOFF ? svi.adj : svi.raw;
+    const svReduced = TT_SV_CUTOFF && svi.adj < svi.raw;
+    const svTitle = TT_SV_CUTOFF ? `Adjusted SV ${svi.adj} (raw ${svi.raw}; excludes ${svi.excluded.length} skill${svi.excluded.length!==1?'s':''} under ${TT_SV_CUTOFF}%)` : `SV ${svi.raw}`;
+    const svStyle = svReduced ? 'style="background:#ff6e7e;color:#2a1115"' : '';
     const initial = (u.chara_name||'?').trim().charAt(0).toUpperCase();
     const [v, vc] = ttVerdictFor(u, topAvg);
     const actPct = u.overall_act_pct??0;
     const actCls = actPct>=80?'color:var(--ok)':(actPct>=60?'':'color:#ff6e7e');
     const trials = (u.trials||[]).slice().sort((a,b)=>a.trial_idx-b.trial_idx);
     const spark = _ttSparkline(trials, u.avg_score, topAvg);
+    const probs = (svi.excluded||[]).slice().sort((a,b)=>a.pct-b.pct);   // worst first
+    const probPenalty = svi.raw - svi.adj;
+    const probTip = probs.map(e=>`${e.name} — ${e.pct}% (−${e.sv} SV)`).join('\n');
+    const probHtml = !TT_SV_CUTOFF ? '<span class="muted" style="font-size:11px;flex:1;text-align:center">—</span>'
+      : (probs.length
+          ? `<span title="${esc(probTip)}" style="cursor:default;font-size:12px;white-space:nowrap;display:inline-flex;align-items:baseline;gap:6px">`+
+            `<b style="color:#ff6e7e;min-width:52px;text-align:right">&minus;${probPenalty} SV</b>`+
+            `<span class="muted">· ${probs.length} skill${probs.length>1?'s':''} <span style="font-size:11px">(worst ${esc(probs[0].name)} ${probs[0].pct}%)</span></span></span>`
+          : '<span style="font-size:11px;color:var(--ok);flex:1;text-align:center">clean</span>');
 
     return `<div class="tt-ra2-row" data-tcid="${u.trained_chara_id}">
       <div class="tt-ra2-uma">
         <div class="tt-uma-badge">
           <div class="tt-uma-icon-wrap"><span>${initial}</span><img class="tt-uma-icon" src="${ttIconUrl(u.chara_id)}" onerror="this.style.display='none'"/></div>
-          <span class="tt-sv-badge" title="SV ${sv}">${sv}</span>
+          <span class="tt-sv-badge" ${svStyle} title="${svTitle}">${sv}</span>
         </div>
         <div><div class="tt-uma-name">${u.chara_name}</div><div class="tt-uma-id">${u.n_appearances} races</div></div>
       </div>
@@ -3650,12 +3718,12 @@ function ttRender(){
         <div class="tt-ra2-stat"><b>${(u.trimmed_avg??u.avg_score).toLocaleString()}</b><small>trim</small></div>
         <div class="tt-ra2-stat"><b class="${ttCvColor(u.cv)}">${u.cv}%</b><small>cv</small></div>
         <div class="tt-ra2-stat"><b>${u.ceiling.toLocaleString()}</b><small>best</small></div>
-        <div class="tt-ra2-stat"><b>${u.floor.toLocaleString()}</b><small>worst</small></div>
         <div class="tt-ra2-stat"><b style="${actCls}">${actPct}%</b><small>act</small></div>
       </div>
       <div class="tt-ra2-spark" title="Score trend across ${trials.length} trials">${spark}</div>
       <div class="tt-ra2-verdict"><span class="tt-verdict-pill ${vc}">${v}</span></div>
-      <div class="tt-ra2-compare" style="min-width:104px;text-align:center">${ttCompareCell(u)}</div>
+      <div class="tt-ra2-compare" style="width:120px;flex:0 0 120px;text-align:center">${ttCompareCell(u)}</div>
+      <div class="tt-ra2-problems" style="flex:1;min-width:160px;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;text-align:left;gap:0">${probHtml}</div>
     </div>`;
   }).join('');
 
@@ -3677,6 +3745,12 @@ function ttRender(){
       const trials = (uma.trials||[]).slice().sort((a,b)=>a.trial_idx-b.trial_idx);
       const detail = document.createElement('div');
       detail.className = 'tt-ra2-detail';
+      const _si = ttAdjustedSv(uma);
+      const _adjBlock = TT_SV_CUTOFF ? `
+        <div style="margin-top:10px;border-top:1px solid var(--line);padding-top:8px">
+          <div style="font-size:11px;color:var(--mut)">Adjusted SV (&ge;${TT_SV_CUTOFF}% proc): <b style="color:${_si.adj<_si.raw?'#ff6e7e':'var(--ok)'};font-size:15px">${_si.adj}</b> <span class="muted">vs raw ${_si.raw}</span></div>
+          ${_si.excluded.length ? `<div style="font-size:10px;color:var(--mut);margin-top:5px">Excludes ${_si.excluded.length} low-proc skill${_si.excluded.length!==1?'s':''} (&minus;${_si.raw-_si.adj} SV): ${_si.excluded.slice().sort((a,b)=>a.pct-b.pct).map(e=>`${esc(e.name)} <span style="color:#ff6e7e">${e.pct}%</span> <span class="muted">(&minus;${e.sv})</span>`).join(' · ')}</div>` : `<div style="font-size:10px;color:var(--ok);margin-top:5px">No skills under ${TT_SV_CUTOFF}% — SV unchanged.</div>`}
+        </div>` : '';
       // Heatmap + key stats
       detail.innerHTML = `
         <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
@@ -3695,7 +3769,7 @@ function ttRender(){
             <div style="font-size:10px;color:var(--mut);margin-top:2px">${uma.avg_activated} of ${uma.owned_total} / race</div>
             <button class="ghost" style="margin-top:6px;font-size:10px;padding:4px 10px" onclick="event.stopPropagation();ttShowDetail(${tcid})">Full skill breakdown</button>
           </div>
-        </div>`;
+        </div>${_adjBlock}`;
       row.after(detail);
     };
   });
@@ -3892,35 +3966,116 @@ async function ttRunSkillLookup(){
     return;
   }
   if(r.error){result.innerHTML=`<div style="color:#ff6e7e">${esc(r.error)}</div>`;return;}
+  const cap=s=>(s||'').charAt(0).toUpperCase()+(s||'').slice(1);
+  const bc=r.best_context;
+  // Summary: skill + SP cost on the left, Best context (or overall) on the right.
+  const rightHtml = bc
+    ? `<div class="tt-lookup-overall">
+         <div class="tt-lookup-overall-sub" style="margin:0 0 1px">Best context</div>
+         <div class="tt-lookup-overall-pct" style="color:${ttSlPctColor(bc.pct)}">${bc.pct}%</div>
+         <div class="tt-lookup-overall-sub">${esc(bc.style)} / ${cap(bc.distance)} · ${bc.owned} races</div>
+         <div class="tt-lookup-overall-sub">overall ${r.overall_pct==null?'n/a':r.overall_pct+'%'} · ${r.overall_activated}/${r.overall_owned}</div>
+       </div>`
+    : `<div class="tt-lookup-overall">
+         <div class="tt-lookup-overall-pct" style="color:${ttSlPctColor(r.overall_pct)}">${r.overall_pct==null?'n/a':r.overall_pct+'%'}</div>
+         <div class="tt-lookup-overall-sub">${r.overall_activated}/${r.overall_owned} owned races</div>
+       </div>`;
   let html=`<div class="tt-lookup-summary">
-    <div><div class="tt-lookup-skill-name">${esc(r.name)}</div><div class="tt-lookup-meta">SP cost: ${r.sp_cost??'?'}</div></div>
-    <div class="tt-lookup-overall">
-      <div class="tt-lookup-overall-pct" style="color:${ttSlPctColor(r.overall_pct)}">${r.overall_pct==null?'n/a':r.overall_pct+'%'}</div>
-      <div class="tt-lookup-overall-sub">${r.overall_activated}/${r.overall_owned} owned races</div>
-    </div>
+    <div><div class="tt-lookup-skill-name">${esc(r.name)}</div><div class="tt-lookup-meta">SP cost: ${r.sp_cost??'?'}${r.cooldown?` · cooldown ${r.cooldown}s`:''}${r.duration?` · ${r.duration}s effect`:''}</div></div>
+    ${rightHtml}
   </div>`;
   if(r.note){
     html+=`<div class="tt-empty">${esc(r.note)}</div>`;
   } else {
-    html+=`<table class="tt-planner"><thead><tr><th>Uma</th><th>Owned</th><th>Activated</th><th>Act%</th></tr></thead><tbody>`+
-      r.umas.map(u=>{
-        const low=u.owned<5;   // thin sample → dim + flag so it's not over-trusted
-        return `<tr style="${low?'opacity:.45':''}"><td style="font-weight:600">${esc(u.chara_name)}${low?' <span style="font-size:9px;color:var(--mut);font-weight:600">few</span>':''}</td><td>${u.owned}</td><td>${u.activated}</td>
-        <td style="font-weight:700;color:${ttSlPctColor(u.activation_pct)}">${u.activation_pct}%</td></tr>`;
-      }).join('') +
-      `</tbody></table>`+
-      `<div class="muted" style="font-size:10px;margin-top:6px">Rows with under 5 races are dimmed (low sample — % not reliable yet).</div>`;
-    // breakdown by distance + by running style
-    const cap=s=>(s||'').charAt(0).toUpperCase()+(s||'').slice(1);
-    const bdRow=(arr,fmt)=>arr.map(x=>`<span style="display:inline-block;margin:2px 12px 2px 0;white-space:nowrap"><b style="color:${ttSlPctColor(x.pct)}">${x.pct}%</b> <span class="muted" style="font-size:11px">${esc(fmt?fmt(x.key):x.key)} (${x.owned})</span></span>`).join('');
-    if((r.by_distance&&r.by_distance.length)||(r.by_style&&r.by_style.length)){
-      html+=`<div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:28px">`;
-      if(r.by_distance&&r.by_distance.length) html+=`<div><div class="muted" style="font-size:10px;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">By distance</div>${bdRow(r.by_distance,cap)}</div>`;
-      if(r.by_style&&r.by_style.length) html+=`<div><div class="muted" style="font-size:10px;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">By style</div>${bdRow(r.by_style)}</div>`;
-      html+=`</div>`;
+    // ── Style × distance matrix (the activation grid) ──
+    const DISTS=['sprint','mile','medium','long','dirt'];
+    const STYLE_ORDER=['Front Runner','Pace Chaser','Late Surger','End Closer'];
+    const cellMap={}; (r.matrix||[]).forEach(c=>{ cellMap[c.style+'|'+c.distance]=c; });
+    const styles=STYLE_ORDER.filter(st=>(r.matrix||[]).some(c=>c.style===st));
+    (r.matrix||[]).forEach(c=>{ if(!styles.includes(c.style)) styles.push(c.style); });
+    if(styles.length){
+      html+=`<table class="tt-planner" style="width:100%;margin-top:2px"><thead><tr><th>Style</th>`+
+        DISTS.map(d=>`<th style="text-align:center">${cap(d)}</th>`).join('')+`</tr></thead><tbody>`+
+        styles.map(st=>`<tr><td style="font-weight:600">${esc(st)}</td>`+
+          DISTS.map(d=>{
+            const c=cellMap[st+'|'+d];
+            if(!c||!c.owned) return `<td style="text-align:center;color:var(--mut)">–</td>`;
+            const isBest=bc&&bc.style===st&&bc.distance===d;
+            const multiTip=c.multi_pct>0?` · procced 2+ times in ${c.multi}/${c.owned} (${c.multi_pct}%)`:'';
+            return `<td title="${esc(st)} / ${cap(d)}: ${c.activated}/${c.owned} activated${multiTip}" style="text-align:center;padding:6px 4px;${isBest?'background:rgba(67,201,138,.12);border-radius:5px':''}">`+
+              `<div style="font-weight:700;color:${ttSlPctColor(c.pct)}">${c.pct}%</div>`+
+              `<div style="font-size:10px;color:var(--mut)">${c.activated}/${c.owned}</div></td>`;
+          }).join('')+`</tr>`).join('')+
+        `</tbody></table>`+
+        `<div class="muted" style="font-size:10px;margin-top:5px">Highlighted cell = best context (strongest rate adjusted for sample size). Contexts with fewer than 25 races are hidden (not enough data to trust). Hover a cell for details.</div>`;
     }
+    // ── Per-uma breakdown (who runs it, how reliably) — same 25-race floor ──
+    html+=`<div class="muted" style="font-size:10px;letter-spacing:1px;text-transform:uppercase;margin:16px 0 4px">By uma</div>`;
+    if(r.umas.length){
+      html+=`<table class="tt-planner"><thead><tr><th>Uma</th><th>Owned</th><th>Activated</th><th>Act%</th></tr></thead><tbody>`+
+        r.umas.map(u=>`<tr><td style="font-weight:600">${esc(u.chara_name)}</td><td>${u.owned}</td><td>${u.activated}</td>`+
+          `<td style="font-weight:700;color:${ttSlPctColor(u.activation_pct)}">${u.activation_pct}%</td></tr>`).join('')+
+        `</tbody></table>`;
+    } else {
+      html+=`<div class="muted" style="font-size:11px;padding:4px 0">No uma has 25+ races with this skill yet.</div>`;
+    }
+    if(r.umas_hidden) html+=`<div class="muted" style="font-size:10px;margin-top:4px">${r.umas_hidden} uma${r.umas_hidden>1?'s':''} hidden (under 25 races).</div>`;
   }
   result.innerHTML=html;
+}
+
+// ── Skill Lookup: "All skills" mode (ranked table) ──
+let SL_ALL=[], SL_ALL_SORT='pct', SL_ALL_DIR=-1, SL_ALL_FILTER='';
+function slModeChange(){
+  const all=$('#tt-sl-mode').value==='all';
+  ['sl-f-name','sl-f-dist','sl-f-style','tt-sl-btn'].forEach(id=>{ const e=$('#'+id); if(e) e.style.display=all?'none':''; });
+  if(all) slLoadAllSkills(); else $('#tt-sl-result').innerHTML='';
+}
+async function slLoadAllSkills(){
+  const status=$('#tt-sl-status'); if(status) status.textContent='Loading…';
+  try{ const r=await fetch('/api/skill_planner/all_skills').then(r=>r.json()); SL_ALL=r.skills||[]; }
+  catch(e){ $('#tt-sl-result').innerHTML='<div style="color:#ff6e7e">Could not load. <button class="ghost" onclick="slLoadAllSkills()" style="font-size:11px">Retry</button></div>'; return; }
+  if(status) status.textContent='';
+  slBuildAllShell();
+}
+function slVerdict(p){ if(p>=85) return ['Reliable','var(--ok)']; if(p>=50) return ['Situational','#ffce4d']; return ['Dead weight','#ff6e7e']; }
+function slEffColor(e){ if(e==null) return 'var(--mut)'; if(e<=200) return 'var(--ok)'; if(e<=600) return '#ffce4d'; return '#ff6e7e'; }
+function slBuildAllShell(){
+  $('#tt-sl-result').innerHTML=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">`+
+    `<input id="sl-all-filter" class="tt-input" placeholder="Filter skills…" style="max-width:280px">`+
+    `<span id="sl-all-count" class="muted" style="font-size:11px"></span></div>`+
+    `<table class="tt-planner" style="width:100%"><thead><tr id="sl-all-head"></tr></thead><tbody id="sl-all-tbody"></tbody></table>`;
+  const fi=$('#sl-all-filter'); fi.value=SL_ALL_FILTER; fi.oninput=()=>{ SL_ALL_FILTER=fi.value; slRenderRows(); };
+  slRenderHead(); slRenderRows();
+}
+function slRenderHead(){
+  const arrow=k=>SL_ALL_SORT===k?(SL_ALL_DIR>0?' ▲':' ▼'):'';
+  const cols=[['name','Skill','left'],['pct','Act%','right'],['races','Races','right'],['sp_cost','SP cost','right'],['eff','SP / proc','right']];
+  const head=$('#sl-all-head');
+  head.innerHTML=cols.map(([k,l,a])=>`<th data-k="${k}" style="cursor:pointer;text-align:${a};padding:8px 8px;white-space:nowrap" title="Click to sort">${l}${arrow(k)}</th>`).join('')+`<th style="padding:8px 8px">Verdict</th>`;
+  head.querySelectorAll('th[data-k]').forEach(th=>th.onclick=()=>slAllSort(th.dataset.k));
+}
+function slAllSort(k){ if(SL_ALL_SORT===k) SL_ALL_DIR*=-1; else { SL_ALL_SORT=k; SL_ALL_DIR=k==='name'?1:-1; } slRenderHead(); slRenderRows(); }
+function slRenderRows(){
+  const q=SL_ALL_FILTER.trim().toLowerCase();
+  let rows=SL_ALL.filter(s=>!q||s.name.toLowerCase().includes(q));
+  rows.sort((a,b)=>{ const av=a[SL_ALL_SORT],bv=b[SL_ALL_SORT]; if(typeof av==='string') return av.localeCompare(bv)*SL_ALL_DIR; return ((av??-1)-(bv??-1))*SL_ALL_DIR; });
+  const cnt=$('#sl-all-count'); if(cnt) cnt.textContent=`${rows.length} skills · 25+ races each · click a row for its full breakdown`;
+  const tb=$('#sl-all-tbody');
+  tb.innerHTML=rows.map(s=>{
+    const [vl,vc]=slVerdict(s.pct);
+    return `<tr class="sl-all-row" data-name="${esc(s.name)}" style="cursor:pointer">`+
+      `<td style="font-weight:600">${esc(s.name)}</td>`+
+      `<td style="text-align:right;font-weight:700;color:${ttSlPctColor(s.pct)}">${s.pct}%</td>`+
+      `<td style="text-align:right;color:var(--mut)">${(s.races||0).toLocaleString()}</td>`+
+      `<td style="text-align:right;color:var(--mut)">${s.sp_cost??'–'}</td>`+
+      `<td style="text-align:right;font-weight:700;color:${slEffColor(s.eff)}" title="SP cost / activation rate = SP per real activation">${s.eff==null?'–':s.eff.toLocaleString()}</td>`+
+      `<td><span style="font-size:11px;padding:3px 9px;border-radius:5px;border:1px solid ${vc};color:${vc}">${vl}</span></td></tr>`;
+  }).join('');
+  tb.querySelectorAll('.sl-all-row').forEach(tr=>tr.onclick=()=>{
+    $('#tt-sl-mode').value='single'; slModeChange();
+    $('#tt-sl-input').value=tr.dataset.name; ttRunSkillLookup();
+  });
 }
 
 // ── TT Stadium / Track & Condition ────────────────────
