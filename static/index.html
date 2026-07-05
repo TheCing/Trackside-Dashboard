@@ -667,6 +667,27 @@
 
   .tt-sortable{cursor:pointer;user-select:none}
 
+  /* ---- Race Analysis toolbar controls (pretty stepper chips) ---- */
+  .tt-ctrl{display:inline-flex;align-items:center;gap:8px;padding:4px 10px;border:1px solid var(--line);border-radius:999px;
+           background:var(--panel2);font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;
+           font-weight:700;white-space:nowrap;transition:border-color .2s,box-shadow .2s}
+  .tt-ctrl:focus-within{border-color:var(--accent);box-shadow:0 0 0 2px var(--glow)}
+  .tt-ctrl .tt-ctrl-suf{color:var(--mut);font-size:10px;font-weight:600}
+  .tt-stepper{display:inline-flex;align-items:center;background:var(--panel);border:1px solid var(--line);
+              border-radius:999px;overflow:hidden;height:24px}
+  .tt-stepper button{all:unset;box-sizing:border-box;cursor:pointer;width:22px;height:22px;display:grid;place-items:center;
+                     color:var(--mut);font-size:14px;font-weight:700;line-height:1;transition:background .15s,color .15s}
+  .tt-stepper button:hover{background:var(--line2);color:var(--accent)}
+  .tt-stepper button:active{background:var(--accent);color:#2a1e05}
+  .tt-stepper input{all:unset;width:38px;text-align:center;color:var(--accent);font-weight:800;font-size:12.5px;
+                    font-variant-numeric:tabular-nums;-moz-appearance:textfield;appearance:textfield}
+  .tt-stepper input::-webkit-outer-spin-button,.tt-stepper input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .tt-count-badge{display:inline-flex;align-items:center;gap:7px;padding:4px 12px;border-radius:999px;
+                  background:rgba(255,182,39,.10);border:1px solid rgba(255,182,39,.30);color:var(--accent);
+                  font-size:11px;font-weight:600;letter-spacing:.01em;white-space:nowrap}
+  .tt-count-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent)}
+  .tt-count-badge b{font-weight:800}
+
   /* ---- Race Analysis v2 (compact summary rows) ---- */
   .tt-ra2-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);
               transition:background .15s,transform .1s;cursor:pointer}
@@ -1358,11 +1379,23 @@
   <div class="tt-card">
     <div class="tt-card-header">
       <h2 class="tt-card-title">Race Analysis</h2>
-      <div class="tt-card-tools" style="display:flex;align-items:center;gap:12px">
-        <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--mut);white-space:nowrap" title="Adjusted SV — recompute each uma's SV as if skills that activate below this % weren't there (they inflate SV but rarely fire). 0 = off. Click a uma to see which skills were excluded.">Adj&nbsp;SV&nbsp;&ge;
-          <input id="tt-sv-cutoff" type="number" min="0" max="100" step="5" value="50" style="width:50px;padding:3px 5px" onchange="ttSetSvCutoff(this.value)">%
-        </label>
-        <span id="tt-filter-count" class="tt-status-line"></span>
+      <div class="tt-card-tools" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span class="tt-ctrl" title="Adjusted SV — recompute each uma's SV as if skills that activate below this % weren't there (they inflate SV but rarely fire). 0 = off. Click a uma to see which skills were excluded.">Adj&nbsp;SV&nbsp;&ge;
+          <span class="tt-stepper">
+            <button type="button" tabindex="-1" onclick="ttBumpSv(-5)" aria-label="Lower SV threshold">&minus;</button>
+            <input id="tt-sv-cutoff" type="number" min="0" max="100" step="5" value="50" onchange="ttSetSvCutoff(this.value)">
+            <button type="button" tabindex="-1" onclick="ttBumpSv(5)" aria-label="Raise SV threshold">+</button>
+          </span>
+          <span class="tt-ctrl-suf">%</span>
+        </span>
+        <span class="tt-ctrl" title="Min races — hide umas that have run fewer than this many Team Trials races. Filters out low-sample umas whose averages aren't reliable yet. 1 = show all.">Min&nbsp;races&nbsp;&ge;
+          <span class="tt-stepper">
+            <button type="button" tabindex="-1" onclick="ttBumpMinRaces(-1)" aria-label="Lower min races">&minus;</button>
+            <input id="tt-min-races" type="number" min="1" max="999" step="1" value="1" onchange="ttSetMinRaces(this.value)">
+            <button type="button" tabindex="-1" onclick="ttBumpMinRaces(1)" aria-label="Raise min races">+</button>
+          </span>
+        </span>
+        <span id="tt-filter-count"></span>
       </div>
     </div>
     <!-- hidden selects to keep IDs alive for any external references -->
@@ -3320,6 +3353,7 @@ function captureUIState(){
       trayTarget: $('#trayTarget')?.value,
     },
     ttSort: { k: TT_SORT_KEY, d: TT_SORT_DIR },
+    ttMinRaces: TT_MIN_RACES,
     ttStadiumSort: { k: TT_STADIUM_SORT_KEY, d: TT_STADIUM_SORT_DIR },
   };
 }
@@ -3333,6 +3367,7 @@ async function restoreUIState(s){
   if(s.aptStrong && $('#aptStrong')) $('#aptStrong').classList.add('active');
   if(s.srcFilter){ SRC_FILTER = s.srcFilter; updateSrcBtns(); }
   if(s.ttSort){ TT_SORT_KEY=s.ttSort.k; TT_SORT_DIR=s.ttSort.d; }
+  if(s.ttMinRaces!=null){ TT_MIN_RACES = Math.max(1, Math.floor(+s.ttMinRaces||1)); const mr=$('#tt-min-races'); if(mr) mr.value = TT_MIN_RACES; }
   if(s.ttStadiumSort){ TT_STADIUM_SORT_KEY=s.ttStadiumSort.k; TT_STADIUM_SORT_DIR=s.ttStadiumSort.d; }
   if(s.filters){ for(const k in FILTERS) if(s.filters[k]) FILTERS[k] = s.filters[k]; renderFcats(); }
   if(s.breedTarget) $('#target').value = s.breedTarget;
@@ -3416,6 +3451,10 @@ function ttAdjustedSv(u){
   return {adj, raw, excluded};
 }
 function ttSetSvCutoff(v){ TT_SV_CUTOFF = Math.max(0, Math.min(100, +v||0)); ttRender(); }
+let TT_MIN_RACES = 1;   // hide umas with fewer than this many races run (1 = show all)
+function ttSetMinRaces(v){ TT_MIN_RACES = Math.max(1, Math.min(999, Math.floor(+v||1))); const el=$('#tt-min-races'); if(el) el.value = TT_MIN_RACES; ttRender(); }
+function ttBumpSv(d){ const el=$('#tt-sv-cutoff'); const v = Math.max(0, Math.min(100, (Math.round((+el.value||0)/5)*5)+d)); el.value=v; ttSetSvCutoff(v); }
+function ttBumpMinRaces(d){ ttSetMinRaces((Math.floor(+($('#tt-min-races').value)||1))+d); }
 let TT_STADIUM_DATA = null;
 let TT_STADIUM_CAT = null;
 let TT_STADIUM_SORT_KEY = 'distance_category';
@@ -3659,13 +3698,31 @@ function ttRender(){
     return;
   }
 
-  const sorted=[...r.umas].sort((a,b)=>{
+  // Min-races filter: hide umas with fewer than TT_MIN_RACES races run.
+  const visible = r.umas.filter(u=>(u.n_appearances||0) >= TT_MIN_RACES);
+  const hidden = r.umas.length - visible.length;
+  const fc = $('#tt-filter-count');
+  if(fc){
+    fc.innerHTML = (TT_MIN_RACES>1 && hidden>0)
+      ? `<span class="tt-count-badge"><span class="dot"></span><b>${visible.length}</b>&nbsp;of&nbsp;${r.umas.length}&nbsp;umas&nbsp;<span style="opacity:.7">·&nbsp;${hidden}&nbsp;under&nbsp;${TT_MIN_RACES}&nbsp;races&nbsp;hidden</span></span>`
+      : '';
+  }
+
+  const sorted=[...visible].sort((a,b)=>{
     const av=a[TT_SORT_KEY],bv=b[TT_SORT_KEY];
     if(typeof av==='string') return av.localeCompare(bv)*TT_SORT_DIR;
     return ((av??0)-(bv??0))*TT_SORT_DIR;
   });
 
+  // Verdict/gap coloring stays relative to the whole roster's top, not the
+  // filtered subset, so filtering never inflates a weak uma's rating.
   const topAvg=Math.max(...r.umas.map(u=>u.avg_score));
+
+  if(!sorted.length){
+    list.innerHTML=`<div class="tt-empty"><div style="font-size:14px;color:var(--mut);margin-bottom:8px">No umas with ${TT_MIN_RACES}+ races</div>
+      <div>Lower the <b>Min races</b> filter to see more.</div></div>`;
+    return;
+  }
 
   // Header row
   let html = `<div style="display:flex;align-items:center;gap:12px;padding:8px 16px;border-bottom:1px solid var(--line);font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;font-weight:700">
