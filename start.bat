@@ -1,10 +1,10 @@
 @echo off
-title Heaven - Uma Breeding and Analysis
+title Trackside Dashboard
 cd /d "%~dp0"
 
 echo.
 echo  =============================================
-echo   Project Heaven
+echo   Trackside Dashboard
 echo   http://127.0.0.1:1620
 echo  =============================================
 echo.

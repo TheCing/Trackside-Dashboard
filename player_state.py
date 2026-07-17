@@ -23,7 +23,7 @@ from typing import Any, Callable
 import safe_store
 import jsonl_util
 
-# Persist in the portable safe dir (%LOCALAPPDATA%\Heaven) like history/stadium,
+# Persist in the portable safe dir (%LOCALAPPDATA%\Trackside) like history/stadium,
 # so the player's rank/RP/bonus history survives re-downloading the project.
 STATE_PATH = safe_store.player_state_path()
 

@@ -1,8 +1,30 @@
 # Fork notes
 
 This is a fork of [Nighty3333/Heaven](https://github.com/Nighty3333/Heaven), the
-companion dashboard to the Heaven overlay. It exists to pair with
+companion dashboard to that project's overlay. It exists to pair with
 [Trackside](https://github.com/TheCing/Trackside) (an MIT fork of that overlay).
+
+## Renamed to Trackside Dashboard
+
+Upstream called this "Heaven" — the same name as the in-game overlay — while the
+setup dialog called it "Heir" and the breeding engine lived in `heir.py`. Three
+names for two programs. Here the overlay is **Trackside** and this is the
+**Trackside Dashboard**; "Heir" is retired (`heir.py` → `breeding.py`).
+
+What that touched on disk:
+
+| Was | Now | Notes |
+|-----|-----|-------|
+| `%LOCALAPPDATA%\Heaven\` | `%LOCALAPPDATA%\Trackside\` | shared with the overlay; `safe_store._migrate_appdata_name()` renames an old folder on first run, and refuses if both exist |
+| `<game>\heaven-races\` | `<game>\trackside-races\` | the overlay already wrote `trackside-races`, so this was **broken** before the rename |
+| `heir_capture_*.jsonl` | `capture_*.jsonl` | old files still load — `find_trace()` globs `*.jsonl` with no name filter |
+| `HEAVEN_RACES_DIR` | `TRACKSIDE_RACES_DIR` | now only an override; the game dir is auto-detected from Steam's `libraryfolders.vdf` |
+| `heir_ui_state_v1` | `trackside_ui_state_v1` | localStorage key; resets saved UI state once |
+
+`%LOCALAPPDATA%\Trackside\datadir.txt` is a **two-sided handshake**: this app
+writes it (`server._publish_data_dir`), the overlay reads it (`paths.rs`). If you
+change the folder name, change both — `safe_store.APPDATA_NAME` and
+`paths.rs::localappdata_trackside()`.
 
 ## What changed
 

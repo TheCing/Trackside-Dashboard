@@ -1,8 +1,8 @@
-# Breeding Workflow — Heaven
+# Breeding Workflow — Trackside Dashboard
 
 ## Overview
 
-Heaven's breeding optimizer finds the best parent pairs using **expected proc scoring** — the probability each desired spark will actually proc during inheritance. This makes affinity, spark stars, grandparent sparks, and individual entity affinities all feed into ONE number: the real chance your offspring gets what you want.
+The breeding optimizer finds the best parent pairs using **expected proc scoring** — the probability each desired spark will actually proc during inheritance. This makes affinity, spark stars, grandparent sparks, and individual entity affinities all feed into ONE number: the real chance your offspring gets what you want.
 
 **Scoring model**: `obj = sum(P(>=1 proc) for each wanted spark) + sum(P(>=1 proc) for blue stats) * 0.5`
 
@@ -12,7 +12,7 @@ No artificial weights needed — affinity is already inside each proc chance via
 
 ## Prerequisites
 
-1. **Capture your data**: Run the game once with capture active. Heaven reads:
+1. **Capture your data**: Run the game once with capture active. The dashboard reads:
    - `load/index` — your trained umas (mine)
    - `pre_single_mode/index` — friend/rental parents
    - This populates `data/heir_capture_*.jsonl`

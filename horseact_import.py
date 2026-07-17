@@ -1,10 +1,10 @@
 """Import ayaliz/horseACT-format Team Trials JSONs into the dashboard history.
 
 A horseACT dump is a full reflection of the game's `TeamStadiumResult` object —
-the same schema Heaven's `race_export.rs` writes to
-`heaven-races/Team trials/TT-*.json`, and the schema ayaliz/horseACT and Hakuraku
+the same schema Trackside's `race_export.rs` writes to
+`trackside-races/Team trials/TT-*.json`, and the schema ayaliz/horseACT and Hakuraku
 use. It is NOT the dashboard's compact native capture, so the normal
-`htt_import` / `/api/db/import` (Heaven bundle) paths reject it.
+`htt_import` / `/api/db/import` (dashboard bundle) paths reject it.
 
 This module maps a horseACT dump onto the SAME compact per-trial shape that
 `htt_import._rows_for_trial` consumes, then reuses that to emit identical history
@@ -34,7 +34,7 @@ MY_TEAM_ID = 1
 
 
 def is_horseact(doc) -> bool:
-    """True if `doc` looks like a horseACT / TeamStadiumResult dump (vs a Heaven
+    """True if `doc` looks like a horseACT / TeamStadiumResult dump (vs a dashboard
     export bundle or the compact native capture)."""
     return (
         isinstance(doc, dict)

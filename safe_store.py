@@ -6,19 +6,24 @@ Problem: until now TT history, stadium observations and the raw native captures
 lived inside the project's own `data/` folder. If a user deletes or replaces the
 folder (e.g. re-downloading the app) they lose everything.
 
-Fix: store those three artifacts under %LOCALAPPDATA%\Heaven\data instead, and
+Fix: store those three artifacts under %LOCALAPPDATA%\Trackside\data instead, and
 migrate any existing copies from the old project `data/` folder on first run.
+
+`Trackside` is the shared namespace for the Trackside family — the overlay writes
+its in-game captures to the same place (see paths.rs). It used to be `Heaven`;
+_migrate_appdata_name() moves an old folder across on first run.
 
 What moves to the safe dir:
   - team_trials_history.jsonl   (Team Trials history)
   - stadium_observations.jsonl  (Stadium / Track & Condition observations)
   - htt/native/*.json           (raw in-game captures from the MOD)
-  - breeding/heir_capture_*.jsonl  (your umas + friends' borrowable parents)
+  - breeding/capture_*.jsonl    (your umas)
   - notes.json                  (your per-uma notes / tags)
 
 Breeding traces go into a dedicated `breeding/` subfolder (NOT the data root):
-heir's find_trace() just picks the newest *.jsonl with no name filter, so mixing
-them with team_trials_history.jsonl would make it grab the wrong file.
+breeding.find_trace() just picks the newest *.jsonl with no name filter, so mixing
+them with team_trials_history.jsonl would make it grab the wrong file. (That same
+no-name-filter glob is why the legacy `heir_capture_*.jsonl` files still load.)
 
 What STAYS in the project folder (read-only seed / caches / per-account):
   - community_seed.jsonl, icons/, race_icons/, skill_export.json,
@@ -40,10 +45,14 @@ HERE = Path(__file__).resolve().parent
 PROJECT_DATA = HERE / "data"
 
 
+APPDATA_NAME = "Trackside"
+APPDATA_NAME_LEGACY = "Heaven"
+
+
 def _resolve_safe_dir() -> Path:
     base = os.environ.get("LOCALAPPDATA") or os.environ.get("APPDATA")
     if base:
-        return Path(base) / "Heaven" / "data"
+        return Path(base) / APPDATA_NAME / "data"
     return PROJECT_DATA  # non-Windows / no env → keep old behaviour
 
 
@@ -133,6 +142,25 @@ def _move_file(old: Path, new: Path) -> None:
             pass
 
 
+def _migrate_appdata_name() -> None:
+    """Move %LOCALAPPDATA%\\Heaven → %LOCALAPPDATA%\\Trackside (the pre-rename name).
+
+    Runs before anything reads SAFE_DATA. Only acts when the old folder exists and
+    the new one doesn't — so it can't clobber a live install, and it's a no-op on
+    every run after the first.
+    """
+    base = os.environ.get("LOCALAPPDATA") or os.environ.get("APPDATA")
+    if not base:
+        return
+    old = Path(base) / APPDATA_NAME_LEGACY
+    new = Path(base) / APPDATA_NAME
+    if old.is_dir() and not new.exists():
+        try:
+            old.rename(new)
+        except Exception:
+            pass  # cross-device or locked → fall through, nothing lost
+
+
 def ensure_migrated() -> Path:
     """Idempotent: create the safe dir and move any legacy project-folder data
     into it. Returns the safe data dir. Safe to call from many modules."""
@@ -141,6 +169,7 @@ def ensure_migrated() -> Path:
         return SAFE_DATA
     _migrated = True
     try:
+        _migrate_appdata_name()
         if SAFE_DATA.resolve() == PROJECT_DATA.resolve():
             return SAFE_DATA  # nothing to do (non-Windows / same dir)
         SAFE_DATA.mkdir(parents=True, exist_ok=True)
@@ -149,7 +178,9 @@ def ensure_migrated() -> Path:
         for sub in _SAFE_TREES:
             _merge_tree(PROJECT_DATA / sub, SAFE_DATA / sub)
         # breeding traces (your umas + friends) → dedicated breeding/ subfolder
+        # legacy prefix — pre-rename traces still live under the old name
         _move_glob(PROJECT_DATA, "heir_capture_*.jsonl", SAFE_DATA / "breeding")
+        _move_glob(PROJECT_DATA, "capture_*.jsonl", SAFE_DATA / "breeding")
         # per-uma notes / tags (lives in the project ROOT, not data/)
         _move_file(HERE / "notes.json", SAFE_DATA / "notes.json")
     except Exception:
@@ -173,21 +204,21 @@ def native_dir() -> Path:
 
 
 def breeding_dir() -> Path:
-    """Folder holding heir_capture_*.jsonl (your umas + friends). Created on demand."""
+    """Folder holding the breeding traces (capture_*.jsonl). Created on demand."""
     d = ensure_migrated() / "breeding"
     d.mkdir(parents=True, exist_ok=True)
     return d
 
 
 def write_trace(load_res, pre_res):
-    """Write a breeding trace (the shape heir.py reads) into the safe store.
+    """Write a breeding trace (the shape breeding.py reads) into the safe store.
 
     Lives here, next to breeding_dir(), because it's a store concern. It used to
     sit in fetch.py alongside the Frida/Steam capture; that module is gone, but
     the data.json import path still needs this.
     """
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    out = breeding_dir() / f"heir_capture_{ts}.jsonl"
+    out = breeding_dir() / f"capture_{ts}.jsonl"
 
     def _default(o):
         if isinstance(o, bytes):

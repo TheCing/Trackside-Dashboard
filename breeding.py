@@ -1,5 +1,5 @@
 """
-Heir - inheritance intelligence for your Umamusume account.
+Breeding — inheritance intelligence for your Umamusume account.
 
 Decodes YOUR trained umas (load/index) and the BORROWABLE parents from friends
 (pre_single_mode/index), with their SPARKS (blue=stat, pink=aptitude, green=unique,
@@ -7,8 +7,8 @@ white=skill/race) and their ancestor tree, using factor_map.json (965 factors)
 and the game's master.mdb (names + affinity/相性 tables + G1 wins).
 
 Commands:
-    python heir.py scan  [trace.jsonl]     decode -> heir_data.json + spark inventory
-    python heir.py breed --target <card_id> [--want speed,Long,...] [trace.jsonl]
+    python breeding.py scan  [trace.jsonl]     decode -> breeding_data.json + spark inventory
+    python breeding.py breed --target <card_id> [--want speed,Long,...] [trace.jsonl]
         rank the best parent PAIRS (yours + 1 borrowable) to breed that uma,
         combining AFFINITY (relations + shared G1) and SPARK value.
 
@@ -34,7 +34,7 @@ import safe_store
 
 FACTOR_MAP_PATH = HERE / "factor_map.json"
 DATA_DIR = HERE / "data"
-OUT_PATH = HERE / "heir_data.json"
+OUT_PATH = HERE / "breeding_data.json"
 
 SPARK_TYPE = {
     "stat": "blue", "aptitude": "pink", "skill": "white",
@@ -48,7 +48,7 @@ def ascii_safe(s):
 
 
 def _eden_trace_dirs():
-    """No external trace dirs — Heaven is self-contained."""
+    """No external trace dirs — the dashboard is self-contained."""
     return []
 
 
@@ -194,7 +194,7 @@ def load_raw_trained_chara(path=None):
     """Return the RAW trained_chara entries from the trace (untouched game data).
     Used to re-export the user's umas into formats other tools accept (UmaExtractor
     data.json, hakuraku veteran import, etc).
-    Scans Heir data/ + Eden trace dirs and picks the newest one with mine data."""
+    Scans the breeding trace dirs and picks the newest one with mine data."""
     all_dirs = _trace_dirs()
     all_traces = []
     for d in all_dirs:
@@ -233,7 +233,7 @@ def load_raw_trained_chara(path=None):
 
 def load_dataset_from_trace(path, fmap):
     """Load mine+rentable from path, falling back to other traces for missing halves.
-    Scans Heir data/ and Eden trace dirs so a fresh capture (rentable only) can
+    Scans the breeding trace dirs so a fresh capture (rentable only) can
     complement an Eden trace that has mine, and vice-versa."""
     all_dirs = _trace_dirs()
     all_traces = []
@@ -710,7 +710,7 @@ def _get_dataset(args, fmap):
     path = find_trace(getattr(args, "trace", None))
     if not path or not path.exists():
         print("[-] No trace found. Capture one first:  python capture.py   (see README)")
-        print("    or pass a path:  python heir.py scan <trace.jsonl>")
+        print("    or pass a path:  python breeding.py scan <trace.jsonl>")
         return None
     print(f"[*] Trace: {path}")
     return load_dataset_from_trace(path, fmap)
@@ -786,7 +786,7 @@ def cmd_breed(args):
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Heir - Umamusume inheritance intelligence")
+    ap = argparse.ArgumentParser(description="Trackside Dashboard - Umamusume inheritance intelligence")
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     s = sub.add_parser("scan", help="decode trace -> spark inventory")

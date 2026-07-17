@@ -220,7 +220,7 @@ def compatibility_from_parsed(trainee_card: int, p1: dict, p2: dict) -> dict:
     """Convenience: takes parse_chara dicts (with card_id, grandparents).
     Computes WSB offline from the parsed data (no bridge needed).
 
-    p1, p2: dicts from heir.parse_chara (card_id, grandparents with card_id + win_saddle_id_array).
+    p1, p2: dicts from breeding.parse_chara (card_id, grandparents with card_id + win_saddle_id_array).
     """
     t = master.chara_id_of(trainee_card)
     c1 = master.chara_id_of(p1["card_id"])

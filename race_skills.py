@@ -1,7 +1,7 @@
-"""Skill activation stats from horseACT race dumps (heaven-races).
+"""Skill activation stats from horseACT race dumps (trackside-races).
 
 The in-game race exporter writes one JSON per race under
-    <game>/heaven-races/<RaceType>/<...>.json
+    <game>/trackside-races/<RaceType>/<...>.json
 in horseACT/Hakuraku format (C# `<X>k__BackingField` fields). Each file holds
 the full RaceInfo incl. the player horse's owned skills + the base64(gzip())
 race simulation, which `tt_scenario` decodes into per-horse skill activations.
@@ -19,15 +19,82 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from pathlib import Path
 
 import tt_scenario
 
-# heaven-races lives next to the game exe.
-_GAME_DIR = Path(os.environ.get(
-    "HEAVEN_RACES_DIR",
-    r"D:\Steam\steamapps\common\UmamusumePrettyDerby\heaven-races",
-))
+# trackside-races lives next to the game exe. Finding it is a three-step fallback:
+# an explicit override, then Steam's own library config, then a last-ditch guess.
+_STEAM_APPID = "3224770"          # Umamusume Pretty Derby
+_GAME_FOLDER = "UmamusumePrettyDerby"
+_RACES_FOLDER = "trackside-races"
+
+
+def _steam_roots() -> list[Path]:
+    """Steam install roots, from the registry then the usual suspects."""
+    roots = []
+    try:
+        import winreg
+        for hive, key in ((winreg.HKEY_CURRENT_USER, r"Software\Valve\Steam"),
+                          (winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\WOW6432Node\Valve\Steam")):
+            try:
+                with winreg.OpenKey(hive, key) as k:
+                    for val in ("SteamPath", "InstallPath"):
+                        try:
+                            roots.append(Path(winreg.QueryValueEx(k, val)[0]))
+                        except OSError:
+                            pass
+            except OSError:
+                pass
+    except Exception:
+        pass
+    roots += [Path(r"C:\Program Files (x86)\Steam"), Path(r"C:\Program Files\Steam")]
+    return roots
+
+
+def _find_game_dir() -> "Path | None":
+    """Locate <library>/steamapps/common/UmamusumePrettyDerby via libraryfolders.vdf.
+
+    The game is often NOT on the Steam install drive, so we read the library list
+    and prefer the library that actually lists our appid. Hand-rolled parse — the
+    file is a simple quoted-token format and we only need "path" and the app ids.
+    """
+    for root in _steam_roots():
+        vdf = root / "steamapps" / "libraryfolders.vdf"
+        if not vdf.is_file():
+            continue
+        try:
+            text = vdf.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        # split into per-library blocks so an appid is attributed to its own path
+        libs: list[tuple[Path, bool]] = []
+        for block in re.split(r'"\d+"\s*\{', text)[1:]:
+            m = re.search(r'"path"\s*"([^"]+)"', block)
+            if not m:
+                continue
+            path = Path(m.group(1).replace("\\\\", "\\"))
+            libs.append((path, f'"{_STEAM_APPID}"' in block))
+        # a library that claims the appid wins; otherwise try them all
+        for path, has_app in sorted(libs, key=lambda x: not x[1]):
+            cand = path / "steamapps" / "common" / _GAME_FOLDER
+            if cand.is_dir():
+                return cand
+    return None
+
+
+def _resolve_races_dir() -> Path:
+    env = os.environ.get("TRACKSIDE_RACES_DIR")
+    if env:
+        return Path(env)
+    game = _find_game_dir()
+    if game:
+        return game / _RACES_FOLDER
+    return Path(r"C:\Program Files (x86)\Steam\steamapps\common") / _GAME_FOLDER / _RACES_FOLDER
+
+
+_GAME_DIR = _resolve_races_dir()
 
 try:
     import safe_store
@@ -180,9 +247,9 @@ def _load_seen() -> set[str]:
 def import_races(types: tuple[str, ...] = ("Career",), limit: int | None = None,
                  flush_every: int = 500) -> dict:
     """Incrementally parse new race dumps and append their skill rows.
-    `types` = subfolders of heaven-races to scan. Returns counts."""
+    `types` = subfolders of trackside-races to scan. Returns counts."""
     if not _GAME_DIR.exists():
-        return {"ok": False, "error": f"heaven-races not found: {_GAME_DIR}"}
+        return {"ok": False, "error": f"trackside-races not found: {_GAME_DIR}"}
 
     seen = _load_seen()
     _DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -261,7 +328,7 @@ def load_rows() -> list[dict]:
 
 
 def _skill_row_from_tt(r: dict) -> dict | None:
-    """Convert a Team-Trials skill row (trial_id-keyed — from a Heaven /
+    """Convert a Team-Trials skill row (trial_id-keyed — from a dashboard /
     UmaTTAnalyzer export bundle or a raw team_trials_history.jsonl) into the
     race_skills pool shape, with a synthetic per-race id for dedup."""
     cid, owned = r.get("chara_id"), r.get("owned_skills")
@@ -298,7 +365,7 @@ def _normalize_skill_row(r) -> dict | None:
 def import_community_file(src_bytes: bytes, label: str = "shared") -> dict:
     """Save an uploaded skill export under COMMUNITY_DIR (so load_rows merges +
     dedupes it). Accepts THREE shapes, all routed to the skill pool (never the
-    scored Race Analysis): a native skill `.jsonl` (race_id rows), a Heaven /
+    scored Race Analysis): a native skill `.jsonl` (race_id rows), a dashboard /
     UmaTTAnalyzer export bundle with a `tt` array, or a raw
     team_trials_history.jsonl. Returns how many NEW (race_id, chara_id) pairs it
     adds over what we have."""
@@ -308,7 +375,7 @@ def import_community_file(src_bytes: bytes, label: str = "shared") -> dict:
             if r.get("race_id") is not None}
 
     text = src_bytes.decode("utf-8", "ignore")
-    # A whole-file JSON bundle (skill-track / Heaven export) carries rows in `tt`;
+    # A whole-file JSON bundle (skill-track / dashboard export) carries rows in `tt`;
     # otherwise it's a .jsonl (one row per line).
     raw_rows: list = []
     try:
@@ -344,7 +411,7 @@ def import_community_file(src_bytes: bytes, label: str = "shared") -> dict:
             added += 1
     if not valid_lines:
         return {"ok": False, "error": "no valid skill rows (need owned_skills) — "
-                "is this a Heaven / UmaTTAnalyzer skill export?"}
+                "is this a dashboard / UmaTTAnalyzer skill export?"}
     (COMMUNITY_DIR / f"{safe}.jsonl").write_text("\n".join(valid_lines) + "\n", encoding="utf-8")
     return {"ok": True, "rows_in_file": rows_in, "new_added": added, "rejected": rejected,
             "duplicates": rows_in - added - rejected if rows_in >= added + rejected else 0}

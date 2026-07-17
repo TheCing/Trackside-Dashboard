@@ -1,5 +1,5 @@
 """
-Unified master.mdb reader for Heaven.
+Unified master.mdb reader for the Trackside Dashboard.
 Provides: uma names, skill names, relation/affinity tables, G1 wins, rank labels.
 Caches everything in memory on first access.
 """

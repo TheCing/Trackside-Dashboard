@@ -576,7 +576,7 @@ def all_skill_stats(rows: list[dict] | None = None, min_sample: int = 25) -> lis
 
 
 def export_for_heir(rows: list[dict] | None = None, min_obs: int = 5) -> dict:
-    """Export ALL skill act% data grouped by (distance, style) for Heir import.
+    """Export ALL skill act% data grouped by (distance, style) for the optimizer.
 
     Returns:
     {

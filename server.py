@@ -1,6 +1,6 @@
 """
-Heaven — unified web UI.
-Merges Heir (breeding optimizer, port 1620) and TTAnalyzer (Team Trials
+Trackside Dashboard — unified web UI.
+Merges the breeding optimizer (port 1620) and TTAnalyzer (Team Trials
 dashboard, port 7434) into a single FastAPI server.
 
 Run:
@@ -19,7 +19,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
-import heir
+import breeding
 import jsonl_util
 import master
 import safe_store
@@ -37,7 +37,7 @@ import uvicorn
 NOTES_PATH = safe_store.notes_path()  # per-uma notes/tags in the safe (AppData) store
 PORT = 1620
 
-app = FastAPI(title="Heaven")
+app = FastAPI(title="Trackside Dashboard")
 app.mount("/static", StaticFiles(directory=str(HERE / "static")), name="static")
 STATE = {"ds": None, "fmap": None, "skills": None, "source": None}
 
@@ -50,16 +50,22 @@ HISTORY_PATH = safe_store.history_path()
 
 
 def _publish_data_dir() -> None:
-    """Tell the in-game Heaven MOD where to write its Team Trials captures: the
-    safe %LOCALAPPDATA%\\Heaven\\data folder (same place the dashboard now reads
-    from). Survives re-downloading the dashboard and is portable across PCs."""
+    """Tell the in-game Trackside overlay where to write its Team Trials captures:
+    the safe %LOCALAPPDATA%\\Trackside\\data folder (same place the dashboard reads
+    from). Survives re-downloading the dashboard and is portable across PCs.
+
+    This is one half of a handshake — the overlay reads this marker in paths.rs.
+    The folder name must stay in sync with it (and with safe_store.APPDATA_NAME).
+    ensure_migrated() renames a pre-rename `Heaven` folder across first, so the
+    marker always lands next to the data it points at.
+    """
     try:
         base = os.environ.get("LOCALAPPDATA")
         if not base:
             return
-        marker_dir = Path(base) / "Heaven"
+        safe_dir = safe_store.ensure_migrated()   # migrates Heaven -> Trackside first
+        marker_dir = Path(base) / safe_store.APPDATA_NAME
         marker_dir.mkdir(parents=True, exist_ok=True)
-        safe_dir = safe_store.ensure_migrated()
         safe_dir.mkdir(parents=True, exist_ok=True)
         (marker_dir / "datadir.txt").write_text(str(safe_dir), encoding="utf-8")
     except Exception:
@@ -261,14 +267,14 @@ def save_notes(notes):
 def ensure_dataset(force=False):
     if STATE["ds"] is not None and not force:
         return STATE["ds"]
-    STATE["fmap"] = heir.load_factor_map()
-    path = heir.find_trace(None)
+    STATE["fmap"] = breeding.load_factor_map()
+    path = breeding.find_trace(None)
     if not path or not path.exists():
         STATE["ds"] = {"mine": [], "rentable": []}
         STATE["source"] = None
         return STATE["ds"]
-    STATE["ds"] = heir.load_dataset_from_trace(path, STATE["fmap"])
-    STATE["skills"] = heir.all_spark_names(STATE["ds"])
+    STATE["ds"] = breeding.load_dataset_from_trace(path, STATE["fmap"])
+    STATE["skills"] = breeding.all_spark_names(STATE["ds"])
     STATE["source"] = str(path)
     return STATE["ds"]
 
@@ -620,7 +626,7 @@ def uma_ui(c, notes, src="mine"):
         "apt": c.get("apt") or {},
         "sparks": [{"name": sp["name"], "stars": sp["stars"], "type": sp["type"]}
                    for sp in c["own_sparks"]],
-        "blue": {k: round(v, 1) for k, v in heir.blue_strength(c).items() if v},
+        "blue": {k: round(v, 1) for k, v in breeding.blue_strength(c).items() if v},
         "white_count": len(chain_whites),
         "white_stars": chain_white_stars,
         "note": note.get("note", ""),
@@ -629,11 +635,11 @@ def uma_ui(c, notes, src="mine"):
 
 
 _IMAGES_DIRS = []
-# 1. Explicit override via env var: HEIR_IMAGES_DIR=C:\path\to\images
-if os.environ.get("HEIR_IMAGES_DIR"):
-    _IMAGES_DIRS.append(Path(os.environ["HEIR_IMAGES_DIR"]))
+# 1. Explicit override via env var: TRACKSIDE_IMAGES_DIR=C:\path\to\images
+if os.environ.get("TRACKSIDE_IMAGES_DIR"):
+    _IMAGES_DIRS.append(Path(os.environ["TRACKSIDE_IMAGES_DIR"]))
 # 2. Bundled in the repo
-_IMAGES_DIRS.append(heir.ROOT / "data" / "images")
+_IMAGES_DIRS.append(breeding.ROOT / "data" / "images")
 
 
 def _find_image(card_id: int):
@@ -895,7 +901,7 @@ def aggregate(rows: list[dict]) -> dict:
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-#  ROUTES — Heir (breeding optimizer)
+#  ROUTES — Breeding optimizer
 # ═══════════════════════════════════════════════════════════════════════════
 
 @app.get("/")
@@ -920,7 +926,7 @@ def img(card_id: int):
     ]
     for url in urls:
         try:
-            req = _urlreq.Request(url, headers={"User-Agent": "Mozilla/5.0 Heaven-Dashboard"})
+            req = _urlreq.Request(url, headers={"User-Agent": "Mozilla/5.0 Trackside-Dashboard"})
             with _urlreq.urlopen(req, timeout=5) as r:
                 data = r.read()
             if data and len(data) > 500:
@@ -969,7 +975,7 @@ def icon(card_id: int):
 
     for url in icon_urls(card_id):
         try:
-            req = _urlreq.Request(url, headers={"User-Agent": "Mozilla/5.0 Heaven-Dashboard"})
+            req = _urlreq.Request(url, headers={"User-Agent": "Mozilla/5.0 Trackside-Dashboard"})
             with _urlreq.urlopen(req, timeout=5) as r:
                 data = r.read()
             if data and len(data) > 200:    # crude sanity: a real PNG is bigger
@@ -995,7 +1001,7 @@ def race_icon(tid: int):
         return Response(status_code=404)
     url = f"https://uma.guide/icon/race/thum_race_rt_000_{tid}_00.webp"
     try:
-        req = _urlreq.Request(url, headers={"User-Agent": "Mozilla/5.0 Heaven-Dashboard"})
+        req = _urlreq.Request(url, headers={"User-Agent": "Mozilla/5.0 Trackside-Dashboard"})
         with _urlreq.urlopen(req, timeout=6) as r:
             data = r.read()
         if data and len(data) > 200:
@@ -1063,7 +1069,7 @@ def api_export_umaextractor():
     produces (and hakuraku.moe/veterans can import). Includes BOTH your own
     umas and your friends' borrowable parents in a single array -- hakuraku
     treats them all as veterans. Each element is the raw game object."""
-    raw_mine, raw_rentable = heir.load_raw_trained_chara()
+    raw_mine, raw_rentable = breeding.load_raw_trained_chara()
     # Dedup by trained_chara_id in case mine and rentable overlap.
     seen, combined = set(), []
     for c in (raw_mine or []) + (raw_rentable or []):
@@ -1083,11 +1089,11 @@ def api_export_full():
     """Export BOTH your umas and friends' borrowable parents in a single JSON,
     with the original game structure preserved (load/index + pre_single_mode/index).
     Useful for sharing with tools that accept either side."""
-    raw_mine, raw_rentable = heir.load_raw_trained_chara()
+    raw_mine, raw_rentable = breeding.load_raw_trained_chara()
     return JSONResponse({
         "trained_chara": raw_mine,
         "succession_trained_chara_array": raw_rentable,
-        "_format": "heir-full-export-v1",
+        "_format": "trackside-full-export-v1",
     }, headers={"Content-Disposition": 'attachment; filename="heir_export_full.json"'})
 
 
@@ -1253,7 +1259,7 @@ def api_breed(req: BreedReq):
         apt_base_grade = master.card_base_aptitudes(req.target).get(apt_label) or 1
         apt_min_grade = _GRADE_N.get((req.apt_grade or "A").upper(), 7)
 
-    res = heir.optimize_breed(ds, req.target, req.want, req.w_affinity, req.w_spark,
+    res = breeding.optimize_breed(ds, req.target, req.want, req.w_affinity, req.w_spark,
                               top=15, allowed_ids=req.allowed_ids, skill_weights=sw,
                               use_eproc=req.use_eproc,
                               apt_label=apt_label, apt_base_grade=apt_base_grade,
@@ -1477,7 +1483,7 @@ def _set_step(step, message=""):
 
 
 def _has_trace():
-    p = heir.find_trace(None)
+    p = breeding.find_trace(None)
     return bool(p and p.exists())
 
 
@@ -1913,7 +1919,7 @@ def api_health():
 
 @app.post("/api/skill_data/import_races")
 def api_skill_data_import_races():
-    """(Re)scan heaven-races and merge any new local races into the pool."""
+    """(Re)scan trackside-races and merge any new local races into the pool."""
     return race_skills.import_races(
         types=("Career", "Champions meeting", "Room match", "Team trials",
                "Other", "Practice room"))
@@ -1925,7 +1931,7 @@ def api_skill_data_export():
     p = race_skills.ROWS_PATH
     data = p.read_bytes() if p.exists() else b""
     return Response(content=data, media_type="application/x-ndjson",
-                    headers={"Content-Disposition": 'attachment; filename="heaven_skill_data.jsonl"'})
+                    headers={"Content-Disposition": 'attachment; filename="trackside_skill_data.jsonl"'})
 
 
 @app.post("/api/skill_data/import")
@@ -2033,7 +2039,7 @@ def api_stadium_csv():
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-#  ROUTES — Community DB (export everything · import-MERGES into another Heaven)
+#  ROUTES — Community DB (export everything · import-MERGES into another install)
 #  Bundles the two accumulating observation datasets — Team Trials history
 #  (skills + activation %) and Stadium observations — into one shareable file.
 #  Import APPENDS with dedup: existing data is never replaced or lost, new rows
@@ -2131,7 +2137,7 @@ def api_db_export():
     tt = _read_jsonl_list(skill_planner.HISTORY_PATH)
     stadium = _read_jsonl_list(stadium_tracker.OBSERVATIONS_PATH)
     bundle = {
-        "heaven_db": 1,
+        "trackside_db": 1,
         "exported_at": int(_time.time()),
         "counts": {"tt": len(tt), "stadium": len(stadium)},
         "tt": tt,
@@ -2140,7 +2146,7 @@ def api_db_export():
     return Response(
         content=json.dumps(bundle, ensure_ascii=False),
         media_type="application/json",
-        headers={"Content-Disposition": "attachment; filename=heaven-data.json"},
+        headers={"Content-Disposition": "attachment; filename=trackside-data.json"},
     )
 
 
@@ -2148,9 +2154,9 @@ def api_db_export():
 async def api_db_import(files: list[UploadFile] = File(...)):
     """Merge data from one or MANY files into this dashboard. Each upload is
     auto-detected and routed:
-      * a Heaven export bundle (has `tt` / `stadium` keys), or
+      * a dashboard export bundle (has `tt` / `stadium` keys), or
       * a raw horseACT / TeamStadiumResult Team Trials dump (ayaliz/horseACT,
-        Hakuraku, or Heaven's own `heaven-races/Team trials/TT-*.json`), or
+        Hakuraku, or Trackside's own `trackside-races/Team trials/TT-*.json`), or
       * a raw `.jsonl` data file straight from UmaTTAnalyzer
         (`team_trials_history.jsonl` / `stadium_observations.jsonl`) — so people
         migrating don't need to touch UmaTTAnalyzer at all.
@@ -2260,7 +2266,7 @@ async def api_db_import(files: list[UploadFile] = File(...)):
                 errors.append(f"{name}: horseACT parse failed ({e})")
         else:
             unknown += 1
-            errors.append(f"{name}: not a Heaven export, horseACT dump, or raw .jsonl")
+            errors.append(f"{name}: not a dashboard export, horseACT dump, or raw .jsonl")
 
     jsonl_util.append_jsonl(skill_planner.HISTORY_PATH, _tt_new)
     jsonl_util.append_jsonl(stadium_tracker.OBSERVATIONS_PATH, _st_new)
@@ -2341,7 +2347,7 @@ def api_db_restore(req: RestoreReq | None = None):
 # ═══════════════════════════════════════════════════════════════════════════
 
 if __name__ == "__main__":
-    print(f"[*] Heaven -> http://127.0.0.1:{PORT}")
+    print(f"[*] Trackside Dashboard -> http://127.0.0.1:{PORT}")
     # NOTE: reload is intentionally OFF. The in-app "Update & restart" button
     # (/api/restart) re-execs the process with os.execv after `git pull`; that
     # does not coexist with uvicorn's reload supervisor (it left orphaned

@@ -1,4 +1,4 @@
-# Heaven
+# Trackside Dashboard
 
 [![Discord](https://img.shields.io/badge/Discord-Join%20the%20server-5865F2?logo=discord&logoColor=white)](https://discord.com/invite/SpCGcXMeFt)
 
@@ -35,8 +35,8 @@ app on your own machine.
 ## Quick Start
 
 ```bash
-git clone https://github.com/TheCing/Heaven.git
-cd Heaven
+git clone https://github.com/TheCing/Trackside-Dashboard.git
+cd Trackside-Dashboard
 python -m pip install -r requirements.txt
 .\start.bat
 ```
@@ -104,6 +104,9 @@ per-uma breakdown of who runs it and how reliably it fires.
   twice.
 - **Export / Import / Sync** — share your skill data or pull in someone else's;
   imports only ever *add* to your pool, never replace it.
+- **Sync races** pulls in every race Trackside exported to `<game>\trackside-races`.
+  The game folder is found automatically from Steam's library config; if yours
+  isn't found, set `TRACKSIDE_RACES_DIR` to that folder's path.
 
 ### Track & Condition
 Stadium conditions across your captured matches: top tracks, starting-gate
@@ -146,7 +149,7 @@ first.
 
 ### Import & merge (Team Trials tab)
 Pulls extra data into your dashboard. It auto-detects and accepts:
-- a **Heaven export** bundle (from the *Export data* button),
+- a **dashboard export** bundle (from the *Export data* button),
 - raw **horseACT / Team Trials** dumps,
 - raw **UmaTTAnalyzer** data files (`team_trials_history.jsonl`,
   `stadium_observations.jsonl`).
@@ -174,7 +177,7 @@ your current data is snapshotted first, even a restore is undoable.
 ## Updating
 
 ```bash
-cd Heaven
+cd Trackside-Dashboard
 git pull
 python -m pip install -r requirements.txt
 .\start.bat

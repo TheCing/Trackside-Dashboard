@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Heaven - Breeding & Team Trials</title>
+<title>Trackside Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Archivo+Narrow:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -436,7 +436,7 @@
   /* ============================================================
      TEAM TRIALS ANALYZER STYLES (merged from TTAnalyzer dashboard)
      ============================================================ */
-  /* TT design tokens — mapped to Heir's palette */
+  /* TT design tokens — mapped to the app palette */
   .tt-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:22px 26px;margin-bottom:22px}
   .tt-card-header{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:18px}
   .tt-card-title{font-size:16px;font-weight:700;color:var(--txt);margin:0}
@@ -914,7 +914,7 @@
 </head>
 <body>
 <header>
-  <h1>HEAVEN</h1>
+  <h1>TRACKSIDE</h1>
   <span class="src" id="src">loading...</span>
   <div class="tabs">
     <div class="tab active" data-tab="inv">Inventory</div>
@@ -946,7 +946,7 @@
 <div id="setupOverlay" class="setup-bg hide">
  <div class="setup-wrap">
   <div class="setup-card">
-    <h2 id="setupTitle">Set up Heir</h2>
+    <h2 id="setupTitle">Set up Trackside Dashboard</h2>
     <div class="sub" id="setupSub">Connect your account once. Your data stays local.</div>
 
     <!-- Import a data.json (the only path — Frida/Steam capture was removed) -->
@@ -1234,10 +1234,10 @@
       <span class="tt-stat-chip" id="tt-stat-rows"><b>0</b>&nbsp;race entries</span>
     </div>
     <div class="tt-hero-actions">
-      <button class="ghost" onclick="ttImportNative()" title="Import Team Trials captured in-game by the Heaven overlay (no proxy needed). Enable 'Team Trials' capture in the overlay first." style="font-size:11px;padding:6px 12px">⬇ Import in-game</button>
+      <button class="ghost" onclick="ttImportNative()" title="Import Team Trials captured in-game by the Trackside overlay (no proxy needed). Enable 'Team Trials' capture in the overlay first." style="font-size:11px;padding:6px 12px">⬇ Import in-game</button>
       <button class="ghost" onclick="ttLoad()" style="font-size:11px;padding:6px 12px">⟳ Refresh</button>
       <button class="ghost" onclick="dbExport()" title="Download ALL your data (Team Trials skills, activation %, and stadium) as one file to share with others" style="font-size:11px;padding:6px 12px">⬇ Export data</button>
-      <button class="ghost" onclick="document.getElementById('db-import-file').click()" title="Import &amp; MERGE — a Heaven export, raw horseACT Team Trials JSONs, or UmaTTAnalyzer data files (team_trials_history.jsonl / stadium_observations.jsonl). Select many at once. Adds new data, never deletes or replaces" style="font-size:11px;padding:6px 12px">⬆ Import &amp; merge</button>
+      <button class="ghost" onclick="document.getElementById('db-import-file').click()" title="Import &amp; MERGE — a dashboard export, raw horseACT Team Trials JSONs, or UmaTTAnalyzer data files (team_trials_history.jsonl / stadium_observations.jsonl). Select many at once. Adds new data, never deletes or replaces" style="font-size:11px;padding:6px 12px">⬆ Import &amp; merge</button>
       <input type="file" id="db-import-file" accept=".json,.jsonl,application/json" multiple style="display:none" onchange="dbImport(this)">
       <button class="ghost" id="db-undo-btn" onclick="dbRestore()" title="Undo the last import — restores from the automatic pre-import backup" style="font-size:11px;padding:6px 12px;display:none">↩ Undo import</button>
       <span id="db-import-status" class="tt-status-line" style="margin-left:4px"></span>
@@ -1321,8 +1321,8 @@
       <h2 class="tt-card-title">Skill Lookup</h2>
       <div class="tt-card-tools" style="display:flex;gap:8px;align-items:center;margin-left:auto">
         <span id="sl-pool" class="tt-status-line"></span>
-        <button class="tt-btn" onclick="slSyncRaces()" title="Scan heaven-races for new races and add them to the pool">Sync races</button>
-        <button class="tt-btn" onclick="document.getElementById('sl-import-file').click()" title="Merge a skill-data file: a Heaven skill export, a UmaTTAnalyzer skill-track export, or a raw team_trials_history.jsonl (deduped, never double-counts, only touches Skill Lookup)">Import data</button>
+        <button class="tt-btn" onclick="slSyncRaces()" title="Scan trackside-races for new races and add them to the pool">Sync races</button>
+        <button class="tt-btn" onclick="document.getElementById('sl-import-file').click()" title="Merge a skill-data file: a dashboard skill export, a UmaTTAnalyzer skill-track export, or a raw team_trials_history.jsonl (deduped, never double-counts, only touches Skill Lookup)">Import data</button>
         <input type="file" id="sl-import-file" accept=".jsonl,.json,application/json" style="display:none" onchange="slImportData(this)">
         <a class="tt-btn" href="/api/skill_data/export" download title="Download your skill data to share">Export data</a>
       </div>
@@ -1432,7 +1432,7 @@ async function load(){
     DATA=await dataRes.json();
   }catch(e){
     const el=$('#src'); if(el){ el.textContent='⚠ could not reach server — is it running? (retry: F5)'; el.style.color='#ff6e7e'; }
-    const inv=$('#invList'); if(inv) inv.innerHTML='<div class="muted" style="padding:20px">Failed to load data. Make sure the Heaven server is running. <button class="ghost" onclick="load()" style="font-size:11px;margin-left:6px">Retry</button></div>';
+    const inv=$('#invList'); if(inv) inv.innerHTML='<div class="muted" style="padding:20px">Failed to load data. Make sure the Trackside Dashboard server is running. <button class="ghost" onclick="load()" style="font-size:11px;margin-left:6px">Retry</button></div>';
     return;
   }
   $('#src').textContent=`${DATA.mine.length} umas`
@@ -3016,7 +3016,7 @@ async function checkUpdateAvailable(){
 
 $('#restart').onclick=async()=>{
   const btn=$('#restart');
-  if(!confirm('Update & restart the server?\n\nThe page reloads automatically when the server is back (~3s).\n\nIf it does NOT come back, just close the Heaven window and open start.bat again — this is only needed once when updating from an older version.')) return;
+  if(!confirm('Update & restart the server?\n\nThe page reloads automatically when the server is back (~3s).\n\nIf it does NOT come back, just close the Trackside Dashboard window and open start.bat again — this is only needed once when updating from an older version.')) return;
   // snapshot the current workflow so it can be restored after reload
   try{
     sessionStorage.setItem(STATE_KEY, JSON.stringify(captureUIState()));
@@ -3047,7 +3047,7 @@ $('#restart').onclick=async()=>{
     if(Date.now() < deadline) setTimeout(probe, 400);
     else {
       btn.textContent='Manual restart needed'; btn.disabled=false;
-      alert('Update downloaded, but the server did not come back on its own.\n\nThis can happen once when updating from an older version. To finish:\n\n  1) Close the Heaven window (the black console).\n  2) Open start.bat again.\n\nAfter this one time, the Update button will work cleanly.');
+      alert('Update downloaded, but the server did not come back on its own.\n\nThis can happen once when updating from an older version. To finish:\n\n  1) Close the Trackside Dashboard window (the black console).\n  2) Open start.bat again.\n\nAfter this one time, the Update button will work cleanly.');
     }
   };
   setTimeout(probe, 800);
@@ -3090,7 +3090,7 @@ async function setupRefresh(){
     if(SETUP.polling){clearInterval(SETUP.polling); SETUP.polling=null;}
   } else { // idle
     setupShowView(null);
-    $('#setupTitle').textContent = SETUP.mode==='refetch' ? 'Re-import data' : 'Set up Heir';
+    $('#setupTitle').textContent = SETUP.mode==='refetch' ? 'Re-import data' : 'Set up Trackside Dashboard';
     $('#setupSub').textContent = SETUP.mode==='refetch'
       ? 'Import a fresh data.json to update your umas.'
       : 'Import your umas once. Your data stays local.';
@@ -3124,8 +3124,8 @@ $('#setupClose').onclick  = async ()=>{ await fetch('/api/setup/reset',{method:'
 $('#refetch').onclick     = async ()=>{ SETUP.mode='refetch'; await fetch('/api/setup/reset',{method:'POST'}); await setupRefresh(); setupShow(); };
 
 // ---- preserve workflow across Update & restart ----
-const STATE_KEY = 'heir_ui_state_v1';
-const PENDING_KEY = 'heir_restart_pending';
+const STATE_KEY = 'trackside_ui_state_v1';
+const PENDING_KEY = 'trackside_restart_pending';
 
 function captureUIState(){
   return {
@@ -4123,7 +4123,7 @@ async function ttLoadStadium(){
 function dbExport(){
   // browser download of the full observation bundle (TT history + stadium)
   window.location.href = '/api/db/export';
-  const s=$('#db-import-status'); if(s){ s.textContent='Exported heaven-data.json'; s.style.color='var(--green)'; setTimeout(()=>s.textContent='',4000); }
+  const s=$('#db-import-status'); if(s){ s.textContent='Exported trackside-data.json'; s.style.color='var(--green)'; setTimeout(()=>s.textContent='',4000); }
 }
 async function dbImport(input){
   const files=input.files&&Array.from(input.files); if(!files||!files.length) return;

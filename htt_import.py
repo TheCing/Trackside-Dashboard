@@ -1,6 +1,6 @@
-"""Import Heaven's native Team Trials captures into the history file.
+"""Import Trackside's native Team Trials captures into the history file.
 
-The in-game Heaven overlay (heaven_overlay.dll) reads the game's own
+The in-game Trackside overlay (trackside.dll) reads the game's own
 TeamStadiumResult response object and writes a compact per-trial file to
   data/htt/native/<trial_id>.json
 in OUR own compact schema (targeted field reads, no generic object dump):
@@ -160,7 +160,7 @@ def import_dir(target: "Path | str | None" = None) -> dict:
 
     `target` overrides the source dir if given. Otherwise we scan this
     dashboard's own `data/htt/native/` plus the MOD's fallback location
-    (`%LOCALAPPDATA%/Heaven/data/htt/native/`) — the latter is where the MOD
+    (`%LOCALAPPDATA%/Trackside/data/htt/native/`) — the latter is where the MOD
     writes if it ran before this dashboard published its path. Returns a small
     summary dict for the Flask endpoint.
     """
@@ -170,7 +170,7 @@ def import_dir(target: "Path | str | None" = None) -> dict:
         sources = [NATIVE_DIR]
         appdata = os.environ.get("LOCALAPPDATA")
         if appdata:
-            fallback = Path(appdata) / "Heaven" / "data" / "htt" / "native"
+            fallback = Path(appdata) / "Trackside" / "data" / "htt" / "native"
             if fallback.resolve() != NATIVE_DIR.resolve():
                 sources.append(fallback)
 
