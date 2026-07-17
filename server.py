@@ -1975,9 +1975,21 @@ def api_tt_import_native():
     """Import Team Trials captured in-process by the HorseTheTrails native module
     (data/htt/native/<trial_id>.json, our own compact schema) into the history,
     with dedup. No proxy or certificate — the data is read straight from the
-    game's managed objects and the race_scenario blobs are parsed locally."""
+    game's managed objects and the race_scenario blobs are parsed locally.
+
+    Also drains the overlay's player-state captures (data/player_state/state_*.json)
+    into player_state.jsonl for the "Your status" panel — same trigger, same trip."""
     import htt_import
-    return htt_import.import_dir()
+    import player_state_import
+    res = htt_import.import_dir()
+    try:
+        ps = player_state_import.import_dir()
+        if ps.get("imported"):
+            res["player_state_imported"] = ps["imported"]
+    except Exception as e:
+        # Never let the status panel's import sink the Team Trials import.
+        res["player_state_error"] = str(e)
+    return res
 
 
 # ═══════════════════════════════════════════════════════════════════════════

@@ -243,3 +243,12 @@ def notes_path() -> Path:
 
 def player_state_path() -> Path:
     return ensure_migrated() / "player_state.jsonl"
+
+
+def player_state_dir() -> Path:
+    """Raw per-trial player-state captures from the overlay (one JSON per trial,
+    keyed by endpoint). Consumed by player_state_import, then extracted into
+    player_state.jsonl."""
+    d = ensure_migrated() / "player_state"
+    d.mkdir(parents=True, exist_ok=True)
+    return d
