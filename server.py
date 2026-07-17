@@ -23,11 +23,9 @@ import heir
 import jsonl_util
 import master
 import safe_store
-import fetch as fetch_mod
 import skill_planner
 import player_state
 import stadium_tracker
-import tt_capture
 import race_skills
 
 from fastapi import FastAPI, Query, UploadFile, File, Form
@@ -1463,15 +1461,11 @@ def api_restart():
 # ═══════════════════════════════════════════════════════════════════════════
 
 SETUP_STATE = {
-    "step": "idle",           # idle | capturing | captured | fetching | done | error
+    "step": "idle",           # idle | done | error
     "message": "",
     "viewer_id": None,
     "mine": 0,
-    "rentable": 0,
-    "captured": None,         # dict with auth_key etc once Frida hooks
-    "_thread": None,
-    "_session": None,
-    "_cancel": False,
+    "rentable": 0,            # always 0 — friends' parents needed the removed fetch path
 }
 SETUP_LOCK = threading.Lock()
 
@@ -1487,183 +1481,17 @@ def _has_trace():
     return bool(p and p.exists())
 
 
-def _has_auth():
-    return bool(fetch_mod.load_saved_auth())
-
-
 @app.get("/api/setup/status")
 def setup_status():
     with SETUP_LOCK:
         return {
             "has_trace": _has_trace(),
-            "has_auth": _has_auth(),
             "step": SETUP_STATE["step"],
             "message": SETUP_STATE["message"],
             "viewer_id": SETUP_STATE["viewer_id"],
             "mine": SETUP_STATE["mine"],
             "rentable": SETUP_STATE["rentable"],
         }
-
-
-def _capture_worker():
-    """Run Frida capture, populate SETUP_STATE.captured when creds arrive."""
-    try:
-        import frida
-        import time as _time
-    except ImportError:
-        _set_step("error", "frida not installed: pip install frida")
-        return
-
-    _set_step("capturing", "Launching Umamusume via Steam...")
-    fetch_mod.launch_game()
-
-    captured = {}
-
-    def on_msg(msg, data):
-        if msg.get("type") == "error":
-            return
-        p = msg.get("payload") or {}
-        if p.get("type") == "creds" and p.get("app_ver") and p.get("res_ver"):
-            captured.update(p)
-
-    deadline = _time.time() + 240
-    session = None
-    _set_step("capturing", "Waiting for the game... (log in and reach the main menu)")
-    while _time.time() < deadline:
-        if SETUP_STATE["_cancel"]:
-            _set_step("idle", "Capture cancelled")
-            return
-        try:
-            session = frida.attach(fetch_mod.PROCESS_NAME)
-            break
-        except Exception:
-            _time.sleep(1)
-
-    if not session:
-        _set_step("error", f"Timeout waiting for {fetch_mod.PROCESS_NAME}")
-        return
-
-    with SETUP_LOCK:
-        SETUP_STATE["_session"] = session
-    _set_step("capturing", "Frida attached. When you reach the home screen with your umas, I'll capture and continue.")
-
-    try:
-        script = session.create_script(fetch_mod.FRIDA_JS)
-        script.on("message", on_msg)
-        script.load()
-        while _time.time() < deadline:
-            if SETUP_STATE["_cancel"]:
-                _set_step("idle", "Capture cancelled")
-                return
-            if fetch_mod.fresh_auth(captured):
-                _time.sleep(1)
-                with SETUP_LOCK:
-                    SETUP_STATE["captured"] = dict(captured)
-                    SETUP_STATE["viewer_id"] = captured.get("viewer_id")
-                _set_step("captured", f"Credentials OK (viewer_id={captured.get('viewer_id')}). Now enter your Steam account.")
-                return
-            _time.sleep(0.5)
-        _set_step("error", "Timed out without capturing valid credentials.")
-    except Exception as e:
-        _set_step("error", f"Frida error: {e}")
-    finally:
-        try:
-            session.detach()
-        except Exception:
-            pass
-
-
-@app.post("/api/setup/start_capture")
-def setup_start_capture():
-    if _has_auth():
-        return JSONResponse({"error": "auth already saved, skip straight to fetch"}, status_code=400)
-    with SETUP_LOCK:
-        if SETUP_STATE["step"] in ("capturing", "fetching"):
-            return {"ok": True, "step": SETUP_STATE["step"], "message": SETUP_STATE["message"]}
-        SETUP_STATE["_cancel"] = False
-        SETUP_STATE["captured"] = None
-        t = threading.Thread(target=_capture_worker, daemon=True)
-        SETUP_STATE["_thread"] = t
-        t.start()
-    return {"ok": True, "step": "capturing"}
-
-
-@app.post("/api/setup/cancel_capture")
-def setup_cancel_capture():
-    with SETUP_LOCK:
-        SETUP_STATE["_cancel"] = True
-    return {"ok": True}
-
-
-class FetchReq(BaseModel):
-    username: str = ""
-    password: str = ""
-    code: str = ""
-
-
-def _fetch_worker(username, password, code):
-    try:
-        with SETUP_LOCK:
-            captured = SETUP_STATE.get("captured")
-        cfg = fetch_mod.load_saved_auth()
-        if not cfg and captured:
-            cfg = dict(captured)
-            cfg.update(fetch_mod.get_hwid())
-        if not cfg:
-            _set_step("error", "No auth (neither saved nor captured).")
-            return
-
-        if username:
-            cfg["steam_username"] = username
-        if password:
-            cfg["steam_password"] = password
-        if not cfg.get("steam_username") or not cfg.get("steam_password"):
-            _set_step("error", "Missing Steam credentials.")
-            return
-
-        _set_step("fetching", "Generating Steam ticket...")
-        try:
-            sid, tkt = fetch_mod.get_steam_ticket(cfg["steam_username"], cfg["steam_password"], code)
-        except RuntimeError as e:
-            if "STEAM_GUARD_REQUIRED" in str(e):
-                _set_step("captured", "Steam Guard required. Resubmit the form with your 2FA code.")
-                return
-            _set_step("error", f"Steam: {e}")
-            return
-        cfg["steam_id"] = sid
-        cfg["steam_session_ticket"] = tkt
-        fetch_mod.save_auth(cfg)
-
-        _set_step("fetching", "Logging in to the game server...")
-        client = fetch_mod.UmaClient(cfg)
-        load_res = client.login()
-        _set_step("fetching", "Requesting lendable parents...")
-        pre_res = client.pre_single_mode()
-
-        out = fetch_mod.write_trace(load_res, pre_res)
-        mine = len((load_res.get("data") or {}).get("trained_chara") or [])
-        rent = len(((pre_res.get("data") or {}).get("succession_trained_chara_data") or {})
-                   .get("succession_trained_chara_array") or [])
-        ensure_dataset(force=True)
-        with SETUP_LOCK:
-            SETUP_STATE["mine"] = mine
-            SETUP_STATE["rentable"] = rent
-            SETUP_STATE["viewer_id"] = cfg.get("viewer_id")
-        _set_step("done", f"{mine} of your umas + {rent} lendable parents. Trace: {out.name}")
-    except Exception as e:
-        _set_step("error", f"{e}\n{traceback.format_exc()[-300:]}")
-
-
-@app.post("/api/setup/fetch")
-def setup_fetch(req: FetchReq):
-    with SETUP_LOCK:
-        if SETUP_STATE["step"] in ("capturing", "fetching"):
-            return {"ok": True, "step": SETUP_STATE["step"], "message": SETUP_STATE["message"]}
-        SETUP_STATE["_cancel"] = False
-        t = threading.Thread(target=_fetch_worker, args=(req.username, req.password, req.code), daemon=True)
-        SETUP_STATE["_thread"] = t
-        t.start()
-    return {"ok": True, "step": "fetching"}
 
 
 class ImportExtractorReq(BaseModel):
@@ -1688,7 +1516,7 @@ def setup_import_extractor(req: ImportExtractorReq):
     pre_res = {"data": {"succession_trained_chara_data": {
         "succession_trained_chara_array": [], "summary_user_info_array": []
     }}, "data_headers": {"result_code": 1}}
-    out = fetch_mod.write_trace(load_res, pre_res)
+    out = safe_store.write_trace(load_res, pre_res)
     ensure_dataset(force=True)
     mine = len(req.umas)
     with SETUP_LOCK:
@@ -1702,8 +1530,6 @@ def setup_import_extractor(req: ImportExtractorReq):
 def setup_reset():
     """Used to dismiss error state and return to idle."""
     _set_step("idle", "")
-    with SETUP_LOCK:
-        SETUP_STATE["_cancel"] = False
     return {"ok": True}
 
 
@@ -2136,32 +1962,6 @@ def api_skill_planner_act_rates(distance_type: int = 0, running_style: str = "")
 def api_skill_planner_export():
     """Export all skill act% data grouped by (distance, style) for import."""
     return skill_planner.export_for_heir()
-
-
-# ═══════════════════════════════════════════════════════════════════════════
-#  ROUTES — TT Capture (mitmproxy control)
-# ═══════════════════════════════════════════════════════════════════════════
-
-@app.get("/api/capture/status")
-def api_capture_status():
-    return tt_capture.status()
-
-
-@app.post("/api/capture/start")
-def api_capture_start():
-    return tt_capture.start()
-
-
-@app.post("/api/capture/stop")
-def api_capture_stop():
-    """Stop capture, restore proxy, run the analyzer, and report what was added."""
-    return tt_capture.stop(run_analyze=True)
-
-
-@app.post("/api/process")
-def api_process():
-    """Run the analyzer on whatever is already captured (no capture toggle)."""
-    return tt_capture.run_analyzer()
 
 
 @app.post("/api/tt/import_native")

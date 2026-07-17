@@ -6,34 +6,36 @@ Local dashboard for Uma Musume: **breeding optimizer**, **Team Trials analyzer**
 **skill planner** and **stadium tracker**. Runs as a small web
 app on your own machine.
 
-> **The dashboard is passive — it does not inject code, modify game memory, or
-> send anything to the game server.** It only reads data: your account inventory
-> (via the game's own API or a memory-dump import) and your Team Trials results.
-> Everything runs locally at **http://127.0.0.1:1620**.
+> **The dashboard is passive — it does not inject code, hook the game, modify
+> game memory, or send anything to the game server.** It only reads files you
+> give it. Everything runs locally at **http://127.0.0.1:1620**.
 
 ### Where the data comes from
 
 | Data | How it's read |
 |------|---------------|
-| **Inventory / breeding** | Your account data via the game's own API (the same request your client makes on login), or a memory-dump import (UmaExtractor) |
-| **Team Trials** | Either **(A)** imported from the in-game Heaven overlay's capture, or **(B)** captured from network traffic through a local HTTPS proxy (mitmproxy). Both just *read* — never modify packets |
+| **Inventory / breeding** | A `data.json` you import — from the Trackside overlay's veterans export, or [UmaExtractor](https://github.com/xancia/UmaExtractor) |
+| **Team Trials** | Imported from the in-game Trackside overlay's own capture |
 
-> Method **A** (in-game overlay) is the simplest on the **Steam / Global** client
-> and needs no proxy or certificate. Method **B** (mitmproxy) is the option for the
-> **DMM** client.
+> This fork removed the **Frida** (in-game credential capture) and **mitmproxy**
+> (HTTPS interception) paths that upstream uses. Both existed to reach data the
+> overlay now provides directly, and neither is worth the risk: Frida attaches a
+> debugger to the game and needs your Steam password, and mitmproxy re-routes
+> **all** of your machine's traffic through a local proxy. Nothing here injects,
+> hooks, or asks for credentials. See [FORK.md](FORK.md).
 
 ---
 
 ## Requirements
 
-- **Python 3.10+** (tested on 3.12 / 3.14)
+- **Python 3.10+** (tested on 3.12 / 3.13)
 - **Windows**
-- Uma Musume (Steam/Global for method A, DMM for method B)
+- Uma Musume (Steam/Global) + the Trackside overlay
 
 ## Quick Start
 
 ```bash
-git clone https://github.com/Nighty3333/Heaven.git
+git clone https://github.com/TheCing/Heaven.git
 cd Heaven
 python -m pip install -r requirements.txt
 .\start.bat
@@ -41,10 +43,9 @@ python -m pip install -r requirements.txt
 
 Opens at **http://127.0.0.1:1620**.
 
-> Use `python -m pip` (not bare `pip`) so every dependency installs into the
+> Use `python -m pip` (not bare `pip`) so the dependencies install into the
 > **same** Python that runs the app. On a PC with more than one Python, a bare
-> `pip` can install into a different environment, which later breaks Team Trials
-> capture (method B).
+> `pip` can install into a different environment.
 
 ---
 
@@ -107,7 +108,6 @@ per-uma breakdown of who runs it and how reliably it fires.
 ### Track & Condition
 Stadium conditions across your captured matches: top tracks, starting-gate
 distribution, ground/surface/weather/season breakdowns and a full rounds table.
-Also houses the **mitmproxy capture controls** (start/stop without a terminal).
 
 ---
 
@@ -115,84 +115,26 @@ Also houses the **mitmproxy capture controls** (start/stop without a terminal).
 
 ### 1) Import your account (Inventory / Breeding)
 
-Open **http://127.0.0.1:1620** → the setup dialog offers two options:
+Open **http://127.0.0.1:1620** → the setup dialog asks for a `data.json`. Get one
+either way:
 
-**A — Memory dump (recommended, no Steam login)**
-1. In Umamusume go to **Enhance → List** (Veteran List).
-2. Run [UmaExtractor](https://github.com/xancia/UmaExtractor) → it writes `data.json`.
-3. In Heaven's setup, click **Import data.json**.
-   *(UmaExtractor reads only your own umas — friends' borrowable parents won't appear.)*
+**From Trackside (recommended)** — in the overlay, open **Plugins → Export
+veterans (data.json)**. It writes `trackside_umas/data.json` next to the game.
 
-**B — Frida + Steam (advanced, includes friends' parents)**
-1. Click **Open game & capture** — Heaven launches the game and captures the auth
-   key via Frida.
-2. Enter Steam username/password (and Steam Guard 2FA if enabled).
-3. Heaven fetches your full inventory + friends' borrowable parents.
-   Credentials are stored locally, encrypted via Windows DPAPI (same scheme Chrome
-   uses) — they never leave your machine.
+**From UmaExtractor** — go to **Enhance → List** (Veteran List) in-game, run
+[UmaExtractor](https://github.com/xancia/UmaExtractor), and it writes `data.json`.
+
+Either way, click **Import data.json** and pick the file.
+
+> Both sources read only *your own* umas, so friends' borrowable parents aren't
+> available and the Breed Optimizer's rental pool will be empty. Upstream filled
+> that gap with the Frida path; this fork doesn't, on purpose.
 
 ### 2) Team Trials data
 
-**Method A — in-game overlay (Steam/Global):**
-Run the in-game Heaven overlay, enable its **Team Trials** capture, and play a
-match. Then in this dashboard click **Import in-game** (on the Team Trials tab) —
-it reads the overlay's per-trial captures and merges them into your history. No
-proxy, no certificate.
-
-**Method B — mitmproxy (DMM):** a one-time setup, below.
-
-<details>
-<summary><b>Method B — mitmproxy setup (click to expand)</b></summary>
-
-#### 2b.1 Generate the certificate
-`mitmproxy` was installed in Quick Start via pip — **do not** install the
-standalone build from mitmproxy.org (it ships its own frozen Python that can't see
-`msgpack`/`pycryptodome`, which breaks capture). Run it once to create the CA cert,
-then `Ctrl+C`:
-```bash
-mitmdump
-```
-
-#### 2b.2 Install the certificate
-The cert is at `C:\Users\<YOU>\.mitmproxy\mitmproxy-ca-cert.cer`.
-
-PowerShell (as Admin):
-```powershell
-Import-Certificate -FilePath "$env:USERPROFILE\.mitmproxy\mitmproxy-ca-cert.cer" -CertStoreLocation Cert:\LocalMachine\Root
-```
-> ⚠️ Mind the backslash before `.mitmproxy`. If you get *"certificate file could
-> not be found"*, that missing `\` is almost always the cause.
-
-Verify:
-```powershell
-Get-ChildItem Cert:\LocalMachine\Root | Where-Object { $_.Subject -like "*mitmproxy*" }
-```
-
-#### 2b.3 Capture
-1. Open the **Track & Condition** tab → **Start Capture** (sets your Windows proxy
-   automatically).
-2. Play Team Trials in DMM.
-3. **Stop Capture** (restores your Windows proxy) → see results on the Team Trials tab.
-
-The proxy auto-detects your `udid` from request headers on first capture; if it
-fails, save it to `data/udid.txt` (one line, 32 hex chars).
-
-</details>
-
----
-
-## Troubleshooting (mitmproxy / method B)
-
-| Problem | Solution |
-|---------|----------|
-| `Import-Certificate : certificate file could not be found` | A `\` got dropped — use exactly `"$env:USERPROFILE\.mitmproxy\mitmproxy-ca-cert.cer"`. Or double-click the `.cer` and use the GUI |
-| SSL / `SEC_ERROR` in the game | Cert not installed in **Local Machine → Trusted Root** (not Current User). Redo 2b.2 |
-| `mitmdump exited immediately` / `ModuleNotFoundError: msgpack` | You installed the **standalone** mitmproxy (its embedded Python can't see the pip packages). Uninstall it (Settings → Apps → mitmproxy), then `python -m pip install -r requirements.txt`. Verify `(Get-Command mitmdump).Source` points at your Python's `Scripts\mitmdump.exe` |
-| Capture running, no data | Traffic isn't going through the proxy. Check Windows Settings → Proxy = `127.0.0.1:8080` |
-| Internet stuck after use | System proxy left on. Settings → Network → Proxy → turn **off**, or `Set-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings" ProxyEnable 0` |
-| `udid` not auto-detected | Save it to `data/udid.txt` (32 hex chars) |
-
-**Quick proxy test:** `mitmdump -s discover_addon.py --listen-port 8080 --set block_global=false`, then open the game — you should see `team_stadium/start`, `team_stadium/all_race_end` scrolling.
+Run the Trackside overlay, enable its **Team Trials** capture, and play a match.
+Then click **Import in-game** on the Team Trials tab — it reads the overlay's
+per-trial captures and merges them into your history. No proxy, no certificate.
 
 ---
 

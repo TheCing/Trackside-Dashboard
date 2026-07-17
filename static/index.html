@@ -175,11 +175,6 @@
   .setup-bg{position:fixed;inset:0;background:rgba(4,5,8,.88);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(8px);animation:overlay-in .2s ease}
   .setup-wrap{display:flex;align-items:center;gap:20px}
   .setup-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:24px 26px;width:480px;max-width:92vw;box-shadow:0 12px 60px rgba(0,0,0,.6);animation:modal-in .25s ease}
-  .setup-tabs{display:flex;gap:6px;margin:14px 0 0;border-bottom:1px solid var(--line)}
-  .setup-tab{background:none;border:none;color:var(--mut);padding:8px 14px;cursor:pointer;font:inherit;font-size:13px;border-bottom:2px solid transparent;font-weight:600;border-radius:0;transition:color .2s,border-color .2s,background .2s}
-  .setup-tab:hover{color:var(--txt);background:rgba(255,255,255,0.02)}
-  .setup-tab.active{color:var(--accent);border-bottom-color:var(--accent);background:rgba(90,159,212,0.04)}
-  .setup-tab small{font-size:10px;color:var(--ok);font-weight:700;margin-left:6px;letter-spacing:.05em}
   .setup-chibi-col{display:flex;flex-direction:column;align-items:center;gap:10px}
   .setup-chibi{width:240px;height:auto;filter:drop-shadow(0 8px 24px rgba(74,143,181,0.35))}
   .setup-chibi-msg{font-size:12px;color:var(--mut);text-align:center;font-style:italic;letter-spacing:.02em}
@@ -198,34 +193,6 @@
   .setup-msg{padding:10px 12px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;font-size:12px;color:var(--mut);margin-top:14px;white-space:pre-wrap;word-break:break-word;max-height:90px;overflow:auto}
   .setup-msg.err{color:#f99;border-color:#5a2222}
   .setup-actions{display:flex;gap:10px;margin-top:16px;justify-content:flex-end}
-  /* ---- Frida+Steam panel — visual redesign only (IDs/behaviour unchanged) ---- */
-  .fp-hero{display:flex;flex-direction:column;align-items:center;text-align:center;gap:9px;margin-top:16px;padding:14px 6px 2px}
-  .fp-badge{width:58px;height:58px;border-radius:16px;display:flex;align-items:center;justify-content:center;
-    background:radial-gradient(120% 120% at 30% 20%,rgba(255,182,39,.18),rgba(54,227,200,.10));
-    border:1px solid var(--line2);box-shadow:0 8px 24px -10px rgba(255,182,39,.55),inset 0 1px 0 rgba(255,255,255,.05)}
-  .fp-badge svg{width:28px;height:28px;stroke:var(--accent);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-  .fp-h{font-size:17px;font-weight:800;letter-spacing:-.01em;color:var(--txt)}
-  .fp-sub{font-size:12.5px;color:var(--mut);max-width:340px;line-height:1.5}
-  .fp-feats{display:flex;flex-direction:column;gap:8px;margin:16px 0 2px}
-  .fp-feat{display:flex;align-items:flex-start;gap:10px;font-size:12.5px;color:var(--txt);
-    background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;line-height:1.4}
-  .fp-feat .ic{flex:none;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-    background:rgba(92,219,122,.14);color:var(--ok);font-size:11px;font-weight:800;margin-top:1px}
-  .fp-feat span{color:var(--mut)}
-  .fp-field{margin-top:2px}
-  .fp-field .lab{display:block;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
-  .fp-input{position:relative;display:flex;align-items:center}
-  .fp-input>svg{position:absolute;left:12px;width:16px;height:16px;stroke:var(--mut);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
-  .fp-input input{width:100%;padding-left:38px !important;height:42px;background:var(--panel2);border:1px solid var(--line2);border-radius:10px}
-  .fp-input input:focus{border-color:var(--accent)}
-  .fp-2fa{margin-top:12px;padding:12px;border:1px dashed var(--line2);border-radius:10px;background:rgba(54,227,200,.04)}
-  .fp-2fa .lab{color:var(--cyan)}
-  .fp-2fa input{width:100%;letter-spacing:.5em;text-transform:uppercase;font-family:'JetBrains Mono',monospace;text-align:center;font-weight:700}
-  .fp-secure{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:11px;color:var(--mut);
-    background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 11px;line-height:1.4}
-  .fp-secure svg{flex:none;width:14px;height:14px;stroke:var(--ok);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-  .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp 0.8s linear infinite}
-  @keyframes sp{to{transform:rotate(360deg)}}
   /* ---- badges ---- */
   .port{width:46px;height:46px;border-radius:8px;object-fit:cover;border:1px solid var(--line);background:#080a0e;box-shadow:0 1px 4px rgba(0,0,0,0.3)}
   .port.sm{width:30px;height:30px;border-radius:6px} .port.lg{width:74px;height:74px;border-radius:12px}
@@ -485,16 +452,6 @@
   .tt-stat-chip.tt-accent{background:rgba(90,159,212,0.1);border-color:rgba(90,159,212,0.3);color:var(--accent)}
   .tt-stat-chip.tt-accent b{color:var(--accent)}
   .tt-hero-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
-
-  /* Capture badge */
-  .tt-capture-badge{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:#ff6e7e;
-    padding:6px 12px;border-radius:8px;background:rgba(255,110,126,0.12);border:1px solid rgba(255,110,126,0.35)}
-  .tt-capture-badge::before{content:"";width:8px;height:8px;border-radius:50%;background:#ff6e7e;animation:tt-pulse 1.2s ease-in-out infinite}
-  @keyframes tt-pulse{0%,100%{opacity:1}50%{opacity:0.3}}
-  .btn-capture{background:linear-gradient(135deg,var(--ok),#3fbf6f);border:1px solid transparent;color:#06210f;font-weight:700;padding:7px 16px;border-radius:8px;cursor:pointer;font:inherit;font-size:12px;
-               box-shadow:0 2px 8px rgba(67,201,138,0.25);transition:all .15s}
-  .btn-capture:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 4px 14px rgba(67,201,138,0.35)}
-  .btn-capture.recording{background:linear-gradient(135deg,#ff6e7e,#e0455a);color:#fff;box-shadow:0 2px 8px rgba(255,110,126,0.25)}
 
   /* TT player grid */
   .tt-player-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
@@ -972,7 +929,7 @@
       <button class="ghost" id="bkBtn" title="Restore your data from a dated backup, or make one now">Backups &#9662;</button>
       <div id="bkMenu" style="display:none;position:absolute;top:112%;left:0;z-index:1000;min-width:260px;max-height:380px;overflow:auto;background:var(--panel,#171a21);border:1px solid var(--line,#2a2e38);border-radius:8px;box-shadow:0 10px 28px rgba(0,0,0,.55);padding:4px"></div>
     </div>
-    <button class="ghost" id="refetch" title="Fetch fresh data from the game server">Refetch</button>
+    <button class="ghost" id="refetch" title="Import a fresh data.json to update your umas">Re-import</button>
     <button class="ghost" id="export" title="Download your umas as a data.json compatible with UmaExtractor / hakuraku.moe">Export</button>
     <button class="ghost" id="reload">Reload data</button>
     <button class="ghost" id="restart" title="git pull + restart the Python server. Picks up the latest code automatically.">Update &amp; restart</button>
@@ -992,12 +949,7 @@
     <h2 id="setupTitle">Set up Heir</h2>
     <div class="sub" id="setupSub">Connect your account once. Your data stays local.</div>
 
-    <div class="setup-tabs" id="setupTabs">
-      <button class="setup-tab active" type="button" data-stab="extractor">Memory dump <small>recommended</small></button>
-      <button class="setup-tab" type="button" data-stab="frida">Frida + Steam</button>
-    </div>
-
-    <!-- Tab 1: UmaExtractor (recommended) -->
+    <!-- Import a data.json (the only path — Frida/Steam capture was removed) -->
     <div id="setupTabExtractor">
       <p style="font-size:13px;color:var(--mut);margin:14px 0 10px">
         Dump <code>data.json</code> with
@@ -1017,72 +969,6 @@
       <div class="muted" id="setupExtractorStatus" style="font-size:12px;margin-top:8px"></div>
       <div style="margin-top:10px;font-size:11px;color:var(--mut);font-style:italic">
         Note: UmaExtractor only reads your own umas. Friends' borrowable parents won't be available with this mode.
-      </div>
-    </div>
-
-    <!-- Tab 2: Frida + Steam (advanced) -->
-    <div id="setupTabFrida" class="hide">
-      <div id="setupSteps" style="margin-top:14px">
-        <div class="setup-step" id="step-capture"><div class="dot">1</div><div>Capture in-game credentials (Frida)</div></div>
-        <div class="setup-step" id="step-steam"><div class="dot">2</div><div>Steam login (generates session ticket)</div></div>
-        <div class="setup-step" id="step-fetch"><div class="dot">3</div><div>Fetch your umas + borrowable parents</div></div>
-      </div>
-
-      <div id="setupCaptureView">
-        <div class="fp-hero">
-          <div class="fp-badge">
-            <svg viewBox="0 0 24 24"><path d="M12 2l7 4v5c0 4.5-3 8.5-7 9-4-.5-7-4.5-7-9V6l7-4z"/><path d="M9 12l2 2 4-4"/></svg>
-          </div>
-          <div class="fp-h">Connect your account</div>
-          <div class="fp-sub">Heaven reads your roster straight from the running game and refreshes your session — nothing is uploaded anywhere.</div>
-        </div>
-        <div class="fp-feats">
-          <div class="fp-feat"><div class="ic">&#10003;</div><div>Captures your in-game key locally via Frida. <span>No browser, no third-party server.</span></div></div>
-          <div class="fp-feat"><div class="ic">&#10003;</div><div>Pulls your full inventory <span>plus friends' borrowable parents.</span></div></div>
-          <div class="fp-feat"><div class="ic">&#10003;</div><div>Credentials encrypted with Windows DPAPI. <span>They never leave this PC.</span></div></div>
-        </div>
-        <div class="setup-actions" style="margin-top:16px">
-          <button class="ghost" id="setupCancel" type="button">Cancel</button>
-          <button id="setupStartCapture" type="button">Open game &amp; capture</button>
-        </div>
-      </div>
-
-      <div id="setupSteamView" class="hide">
-        <div class="fp-hero" style="padding-bottom:0">
-          <div class="fp-badge">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
-          </div>
-          <div class="fp-h">Steam sign-in</div>
-          <div class="fp-sub">Used once to mint a fresh session ticket. Stored encrypted on this PC only.</div>
-        </div>
-        <div class="setup-form" style="margin-top:16px">
-          <div class="fp-field">
-            <span class="lab">Steam username</span>
-            <div class="fp-input">
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
-              <input id="setupUser" autocomplete="username" placeholder="username">
-            </div>
-          </div>
-          <div class="fp-field">
-            <span class="lab">Steam password</span>
-            <div class="fp-input">
-              <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
-              <input id="setupPass" type="password" autocomplete="current-password" placeholder="password">
-            </div>
-          </div>
-          <div class="fp-2fa hide" id="setupCodeWrap">
-            <span class="lab">Steam Guard code (2FA)</span>
-            <input id="setupCode" maxlength="5" placeholder="ABCDE">
-          </div>
-        </div>
-        <div class="fp-secure">
-          <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
-          Encrypted locally with Windows DPAPI — never transmitted anywhere.
-        </div>
-        <div class="setup-actions">
-          <button class="ghost" id="setupSkip" type="button">Cancel</button>
-          <button id="setupFetch" type="button">Fetch data</button>
-        </div>
       </div>
     </div>
 
@@ -1348,10 +1234,7 @@
       <span class="tt-stat-chip" id="tt-stat-rows"><b>0</b>&nbsp;race entries</span>
     </div>
     <div class="tt-hero-actions">
-      <span id="tt-capture-status" class="tt-capture-badge" style="display:none"></span>
-      <button id="tt-capture-btn" class="btn-capture" onclick="ttToggleCapture()">▶ Start capture</button>
       <button class="ghost" onclick="ttImportNative()" title="Import Team Trials captured in-game by the Heaven overlay (no proxy needed). Enable 'Team Trials' capture in the overlay first." style="font-size:11px;padding:6px 12px">⬇ Import in-game</button>
-      <button class="ghost" onclick="ttProcessCaptures()" title="Process already-captured trials" style="font-size:11px;padding:6px 12px">↻ Process</button>
       <button class="ghost" onclick="ttLoad()" style="font-size:11px;padding:6px 12px">⟳ Refresh</button>
       <button class="ghost" onclick="dbExport()" title="Download ALL your data (Team Trials skills, activation %, and stadium) as one file to share with others" style="font-size:11px;padding:6px 12px">⬇ Export data</button>
       <button class="ghost" onclick="document.getElementById('db-import-file').click()" title="Import &amp; MERGE — a Heaven export, raw horseACT Team Trials JSONs, or UmaTTAnalyzer data files (team_trials_history.jsonl / stadium_observations.jsonl). Select many at once. Adds new data, never deletes or replaces" style="font-size:11px;padding:6px 12px">⬆ Import &amp; merge</button>
@@ -2606,7 +2489,7 @@ async function applyBreedStyle(){
   const dist  = $('#breedDistance').value;
   if(!style && !dist){ $('#breedStyleMsg').textContent='Pick a style and/or distance first.'; return; }
 
-  // Fetch act% data from TTAnalyzer (via proxy)
+  // Fetch act% data from the local skill-activation pool
   ACT_RATES = null;
   if(style && dist){
     try {
@@ -3170,32 +3053,17 @@ $('#restart').onclick=async()=>{
   setTimeout(probe, 800);
 };
 // ===== SETUP WIZARD =====
+// One path: import a data.json (UmaExtractor, or Trackside's veterans export).
+// The Frida + Steam capture path was removed — no injection, no credentials.
 const SETUP={polling:null, mode:null};
 
 function setupShow(){ $('#setupOverlay').classList.remove('hide'); }
 function setupHide(){ $('#setupOverlay').classList.add('hide'); if(SETUP.polling){clearInterval(SETUP.polling); SETUP.polling=null;} }
 
-function setupSetStep(active, status){
-  ['capture','steam','fetch'].forEach(k=>{
-    const el=$('#step-'+k); el.classList.remove('active','done','err');
-  });
-  if(active) $('#step-'+active).classList.add('active');
-  if(status==='done') ['capture','steam','fetch'].forEach(k=>$('#step-'+k).classList.add('done'));
-  if(status==='err' && active) $('#step-'+active).classList.add('err');
-}
-
 function setupShowView(view){
-  ['Capture','Steam','Done'].forEach(v=>$('#setup'+v+'View').classList.add('hide'));
-  if(view) $('#setup'+view+'View').classList.remove('hide');
-  // Capture and Steam live inside the Frida tab; if showing them, ensure the Frida tab is active.
-  // Done is global (outside tabs) so just hide both tab panes when showing it.
-  if(view==='Capture' || view==='Steam'){
-    setupShowTab('frida');
-  } else if(view==='Done'){
-    $('#setupTabExtractor').classList.add('hide');
-    $('#setupTabFrida').classList.add('hide');
-    document.querySelectorAll('.setup-tab').forEach(b=>b.classList.remove('active'));
-  }
+  const done = view==='Done';
+  $('#setupDoneView').classList.toggle('hide', !done);
+  $('#setupTabExtractor').classList.toggle('hide', done);
 }
 
 function setupMsg(text, err){
@@ -3209,90 +3077,27 @@ async function setupRefresh(){
     if(!r.ok) throw new Error('HTTP '+r.status);
     s=await r.json();
   }catch(e){
-    // server is old / endpoints missing — show capture view with a clear error
-    setupSetStep('capture','err'); setupShowView('Capture');
     setupMsg('Server outdated. Stop it (Ctrl+C) and run `python server.py` again after `git pull`.', true);
     return;
   }
-  const step=s.step;
-  // step transitions
-  if(step==='capturing'){
-    setupSetStep('capture'); setupShowView('Capture');
-    setupMsg(s.message||'Waiting for game...');
-    $('#setupStartCapture').textContent='Capturing...'; $('#setupStartCapture').disabled=true;
-  } else if(step==='captured'){
-    setupSetStep('steam'); setupShowView('Steam');
-    $('#step-capture').classList.add('done');
-    setupMsg(s.message||'Credentials captured. Enter your Steam account.');
-    if(/STEAM_GUARD|Guard|2FA|guard/i.test(s.message||'')){
-      $('#setupCodeWrap').classList.remove('hide');
-      $('#setupFetch').textContent='Fetch data'; $('#setupFetch').disabled=false;
-    }
-  } else if(step==='fetching'){
-    setupSetStep('fetch'); setupShowView('Steam');
-    $('#step-capture').classList.add('done'); $('#step-steam').classList.add('done');
-    setupMsg(s.message||'Fetching from server...');
-    $('#setupFetch').textContent='Fetching...'; $('#setupFetch').disabled=true;
-  } else if(step==='done'){
-    setupSetStep(null,'done'); setupShowView('Done');
+  if(s.step==='done'){
+    setupShowView('Done');
     setupMsg(s.message||'Done.');
     if(SETUP.polling){clearInterval(SETUP.polling); SETUP.polling=null;}
-  } else if(step==='error'){
-    setupSetStep(s.has_auth?'steam':'capture','err');
-    setupShowView(s.has_auth?'Steam':'Capture');
+  } else if(s.step==='error'){
+    setupShowView(null);
     setupMsg(s.message||'Error', true);
-    $('#setupStartCapture').textContent='Retry'; $('#setupStartCapture').disabled=false;
-    $('#setupFetch').textContent='Retry'; $('#setupFetch').disabled=false;
-    if(/STEAM_GUARD|Guard/.test(s.message||'')){ $('#setupCodeWrap').classList.remove('hide'); }
     if(SETUP.polling){clearInterval(SETUP.polling); SETUP.polling=null;}
   } else { // idle
-    if(s.has_auth){
-      setupSetStep('steam'); $('#step-capture').classList.add('done');
-      setupShowView('Steam');
-      $('#setupTitle').textContent = SETUP.mode==='refetch' ? 'Refetch data' : 'Welcome back';
-      $('#setupSub').textContent = SETUP.mode==='refetch'
-        ? 'Press Fetch to pull fresh data from the server.'
-        : 'Auth saved — re-fetch fresh data from the server.';
-    } else {
-      setupSetStep('capture');
-      setupShowView('Capture');
-      $('#setupTitle').textContent='Set up Heir';
-      $('#setupSub').textContent='First time on this PC. Capture credentials from the running game.';
-    }
+    setupShowView(null);
+    $('#setupTitle').textContent = SETUP.mode==='refetch' ? 'Re-import data' : 'Set up Heir';
+    $('#setupSub').textContent = SETUP.mode==='refetch'
+      ? 'Import a fresh data.json to update your umas.'
+      : 'Import your umas once. Your data stays local.';
     setupMsg('');
   }
 }
 
-async function setupStartCapture(){
-  setupMsg(''); $('#setupStartCapture').disabled=true; $('#setupStartCapture').textContent='Launching...';
-  try{
-    await fetch('/api/setup/start_capture',{method:'POST'});
-    SETUP.polling = setInterval(setupRefresh, 1200);
-  }catch(e){ setupMsg('Error: '+e, true); }
-}
-
-async function setupDoFetch(){
-  const u=$('#setupUser').value.trim(), p=$('#setupPass').value, c=$('#setupCode').value.trim();
-  if(!u || !p){ setupMsg('Username y password requeridos.', true); return; }
-  setupMsg(''); $('#setupFetch').disabled=true; $('#setupFetch').textContent='Fetching...';
-  try{
-    await fetch('/api/setup/fetch',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({username:u,password:p,code:c})});
-    SETUP.polling = setInterval(setupRefresh, 1200);
-  }catch(e){ setupMsg('Error: '+e, true); $('#setupFetch').disabled=false; $('#setupFetch').textContent='Fetch data'; }
-}
-
-function setupShowTab(name){
-  document.querySelectorAll('.setup-tab').forEach(b=>b.classList.toggle('active', b.dataset.stab===name));
-  $('#setupTabExtractor').classList.toggle('hide', name!=='extractor');
-  $('#setupTabFrida').classList.toggle('hide', name!=='frida');
-  setupMsg('');
-}
-document.querySelectorAll('.setup-tab').forEach(b=>{
-  b.addEventListener('click', ()=> setupShowTab(b.dataset.stab));
-});
-
-$('#setupStartCapture').onclick = setupStartCapture;
 $('#setupCancelExt').onclick = async ()=>{ await fetch('/api/setup/reset',{method:'POST'}); setupHide(); };
 $('#setupExtractorBtn').onclick = ()=> $('#setupExtractorFile').click();
 $('#setupExtractorFile').addEventListener('change', async (e)=>{
@@ -3315,9 +3120,6 @@ $('#setupExtractorFile').addEventListener('change', async (e)=>{
     $('#setupExtractorStatus').textContent='Error: '+err.message;
   }
 });
-$('#setupCancel').onclick = async ()=>{ await fetch('/api/setup/cancel_capture',{method:'POST'}); setupHide(); };
-$('#setupSkip').onclick   = async ()=>{ await fetch('/api/setup/reset',{method:'POST'}); setupHide(); };
-$('#setupFetch').onclick  = setupDoFetch;
 $('#setupClose').onclick  = async ()=>{ await fetch('/api/setup/reset',{method:'POST'}); window.location.reload(); };
 $('#refetch').onclick     = async ()=>{ SETUP.mode='refetch'; await fetch('/api/setup/reset',{method:'POST'}); await setupRefresh(); setupShow(); };
 
@@ -3459,7 +3261,6 @@ let TT_STADIUM_DATA = null;
 let TT_STADIUM_CAT = null;
 let TT_STADIUM_SORT_KEY = 'distance_category';
 let TT_STADIUM_SORT_DIR = 1;
-let TT_CAPTURING = false;
 
 const TT_DIST_LABEL = { 1:'Sprint', 2:'Mile', 3:'Mid', 4:'Long', 5:'Dirt' };
 const TT_CATEGORY_ORDER = { 'Sprint':0, 'Mile':1, 'Medium':2, 'Long':3, 'Dirt':4 };
@@ -4424,66 +4225,6 @@ async function ttImportStadiumCsv(input){
   finally{input.value='';}
 }
 
-// ── TT Capture control ───────────────────────────────
-function ttFmtElapsed(s){
-  const m=Math.floor(s/60),ss=String(s%60).padStart(2,'0');
-  return `${m}:${ss}`;
-}
-
-async function ttRefreshCaptureStatus(){
-  try{
-    const s=await fetch('/api/capture/status').then(r=>r.json());
-    TT_CAPTURING=!!s.capturing;
-    const btn=$('#tt-capture-btn');
-    const badge=$('#tt-capture-status');
-    if(TT_CAPTURING){
-      btn.textContent='⏸ Stop & process';
-      btn.classList.add('recording');
-      badge.style.display='';
-      badge.textContent=`Capturing ${ttFmtElapsed(s.elapsed||0)} — play your trials`;
-    } else {
-      btn.textContent='▶ Start capture';
-      btn.classList.remove('recording');
-      badge.style.display='none';
-    }
-  }catch(e){}
-}
-
-async function ttToggleCapture(){
-  const btn=$('#tt-capture-btn');
-  if(!TT_CAPTURING){
-    btn.disabled=true;btn.textContent='… starting';
-    const r=await fetch('/api/capture/start',{method:'POST'}).then(r=>r.json()).catch(e=>({ok:false,error:e.message}));
-    btn.disabled=false;
-    if(!r.ok) alert('Could not start capture:\n'+(r.error||'unknown'));
-    await ttRefreshCaptureStatus();
-    if(TT_CAPTURING){
-      const badge=$('#tt-capture-status');
-      badge.textContent='Capturing — now open Uma Musume and play. Click Stop when done.';
-    }
-  } else {
-    btn.disabled=true;btn.textContent='… stopping & processing';
-    const r=await fetch('/api/capture/stop',{method:'POST'}).then(r=>r.json()).catch(e=>({ok:false,error:e.message}));
-    btn.disabled=false;
-    await ttRefreshCaptureStatus();
-    const a=r.analyze||{};
-    if(a.added>0) alert(`Done! Added ${a.added} new trial(s).`);
-    else if(a.nothing_new) alert('Capture stopped. No new trials found.');
-    else if(a.error) alert('Capture stopped, but processing failed:\n'+a.error);
-    ttLoad();
-    ttLoadStadium();
-  }
-}
-
-async function ttProcessCaptures(){
-  const r=await fetch('/api/process',{method:'POST'}).then(r=>r.json()).catch(e=>({ok:false,error:e.message}));
-  if(r.added>0) alert(`Added ${r.added} new trial(s).`);
-  else if(r.nothing_new) alert('No new trials to add.');
-  else if(r.error) alert('Processing failed:\n'+r.error);
-  ttLoad();
-  ttLoadStadium();
-}
-
 async function ttImportNative(){
   const r=await fetch('/api/tt/import_native',{method:'POST'}).then(r=>r.json()).catch(e=>({ok:false,error:e.message}));
   if(!r.ok){ alert('In-game import failed:\n'+(r.error||'unknown')); return; }
@@ -4494,8 +4235,8 @@ async function ttImportNative(){
   ttLoadStadium();
 }
 
-// Start polling capture status (only when TT tabs are loaded)
-setInterval(()=>{ if(TT_LOADED){ ttRefreshCaptureStatus(); ttAutoRefresh(); } }, 5000);
+// Auto-refresh TT views while they're open
+setInterval(()=>{ if(TT_LOADED){ ttAutoRefresh(); } }, 5000);
 
 async function bootstrap(){
   // reset any stuck capturing/fetching from a previous tab/session

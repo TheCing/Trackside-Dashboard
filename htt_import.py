@@ -115,8 +115,8 @@ def _rows_for_trial(trial: dict) -> list[dict]:
             activated_extra = [s for s in activated if s not in owned_set]
 
             # Canonical per-horse results from the scenario (seconds, etc.) — keeps
-            # the schema identical to the mitmproxy analyzer's output. Fall back to
-            # the values the native side read directly if the scenario lacks them.
+            # the schema the dashboard already consumes. Fall back to the values
+            # the native side read directly if the scenario lacks them.
             hr = horse_results[hidx] if (hidx is not None and hidx < len(horse_results)) else {}
             finish_order = hr.get("finish_order", cr.get("finish_order"))
             finish_time = hr.get("finish_time", cr.get("finish_time"))
@@ -220,8 +220,8 @@ def import_dir(target: "Path | str | None" = None) -> dict:
     # Native captures now carry each round's start fields (race_instance_id,
     # weather, ground_condition, season, random_seed) + my umas' frame_order,
     # so we can rebuild the `race_start_params_array` shape stadium_tracker
-    # expects and re-populate observations without the mitmproxy path. Old
-    # captures (pre-DLL-update) lack these fields → they're skipped.
+    # expects and re-populate observations straight from the overlay's capture.
+    # Old captures (pre-DLL-update) lack these fields → they're skipped.
     stadium_saved = 0
     try:
         import stadium_tracker

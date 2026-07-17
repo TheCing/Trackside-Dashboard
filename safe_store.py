@@ -29,8 +29,11 @@ project `data/` folder, so behaviour is unchanged there.
 """
 from __future__ import annotations
 
+import json
 import os
 import shutil
+import time
+from datetime import datetime
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -174,6 +177,33 @@ def breeding_dir() -> Path:
     d = ensure_migrated() / "breeding"
     d.mkdir(parents=True, exist_ok=True)
     return d
+
+
+def write_trace(load_res, pre_res):
+    """Write a breeding trace (the shape heir.py reads) into the safe store.
+
+    Lives here, next to breeding_dir(), because it's a store concern. It used to
+    sit in fetch.py alongside the Frida/Steam capture; that module is gone, but
+    the data.json import path still needs this.
+    """
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    out = breeding_dir() / f"heir_capture_{ts}.jsonl"
+
+    def _default(o):
+        if isinstance(o, bytes):
+            return o.hex()
+        return str(o)
+
+    with open(out, "w", encoding="utf-8") as f:
+        f.write(json.dumps({
+            "ts": time.time(), "direction": "RES",
+            "endpoint": "load/index", "data": load_res,
+        }, ensure_ascii=False, default=_default) + "\n")
+        f.write(json.dumps({
+            "ts": time.time(), "direction": "RES",
+            "endpoint": "pre_single_mode/index", "data": pre_res,
+        }, ensure_ascii=False, default=_default) + "\n")
+    return out
 
 
 def notes_path() -> Path:

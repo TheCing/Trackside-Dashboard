@@ -1,5 +1,5 @@
 """
-Inheritance affinity / compatibility (相性) — EXACT formula confirmed via Frida hooks.
+Inheritance affinity / compatibility (相性) — EXACT formula, verified against the game.
 
 Formula:
   CalcRelationPoint(trainee, p1, p2) =
