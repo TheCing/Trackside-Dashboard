@@ -24,7 +24,29 @@ What that touched on disk:
 `%LOCALAPPDATA%\Trackside\datadir.txt` is a **two-sided handshake**: this app
 writes it (`server._publish_data_dir`), the overlay reads it (`paths.rs`). If you
 change the folder name, change both — `safe_store.APPDATA_NAME` and
-`paths.rs::localappdata_trackside()`.
+`paths.rs::resolve_appdata_root()`.
+
+### The Windows Store Python trap
+
+If you run this under the **Store** Python (`WindowsApps\python.exe` — the default
+`python` on a stock Windows box), Windows silently redirects every
+`%LOCALAPPDATA%` write into a per-package sandbox:
+
+```
+%LOCALAPPDATA%\Packages\PythonSoftwareFoundation.Python.<ver>_<hash>\LocalCache\Local\
+```
+
+So `datadir.txt` and all your data land *there*, while the overlay — a native
+process with no redirection — looks at the real `%LOCALAPPDATA%`. The two never
+meet and **Import in-game silently finds nothing**. Upstream has this bug today.
+
+Python can't escape its own sandbox, so the fix lives in the overlay:
+`paths.rs::resolve_appdata_root()` also searches those sandboxes, and
+`data_dir_for()` **ignores `datadir.txt`'s contents when the root is sandboxed** —
+under redirection the dashboard writes the path it *thinks* it used (the real
+`%LOCALAPPDATA%`), which is a lie, and one that often names a directory the overlay
+itself created, so an `is_dir()` check alone would happily follow it. The data is
+always the `data/` sibling of the pointer. Covered by unit tests in `paths.rs`.
 
 ## What changed
 
