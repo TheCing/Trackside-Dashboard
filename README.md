@@ -14,15 +14,16 @@ app on your own machine.
 
 | Data | How it's read |
 |------|---------------|
-| **Inventory / breeding** | A `data.json` you import — from the Trackside overlay's veterans export, or [UmaExtractor](https://github.com/xancia/UmaExtractor) |
+| **Inventory / breeding** | Sent automatically by the Trackside overlay as you play — including your friends' **borrowable parents**. Or import a `data.json` by hand (Trackside's veterans export, or [UmaExtractor](https://github.com/xancia/UmaExtractor)) |
 | **Team Trials** | Imported from the in-game Trackside overlay's own capture |
 
 > This fork removed the **Frida** (in-game credential capture) and **mitmproxy**
-> (HTTPS interception) paths that upstream uses. Both existed to reach data the
-> overlay now provides directly, and neither is worth the risk: Frida attaches a
-> debugger to the game and needs your Steam password, and mitmproxy re-routes
-> **all** of your machine's traffic through a local proxy. Nothing here injects,
-> hooks, or asks for credentials. See [FORK.md](FORK.md).
+> (HTTPS interception) paths that upstream uses — including for friends' borrowable
+> parents, which the Trackside overlay now reads passively from the game's own
+> traffic. Neither was worth the risk: Frida attaches a debugger to the game and
+> needs your Steam password, and mitmproxy re-routes **all** of your machine's
+> traffic through a local proxy. Nothing here injects, hooks, or asks for
+> credentials. See [FORK.md](FORK.md).
 
 ---
 
@@ -116,22 +117,31 @@ distribution, ground/surface/weather/season breakdowns and a full rounds table.
 
 ## Setup
 
-### 1) Import your account (Inventory / Breeding)
+### 1) Your account (Inventory / Breeding)
 
-Open **http://127.0.0.1:1620** → the setup dialog asks for a `data.json`. Get one
-either way:
+**Nothing to import.** With the Trackside overlay running and **Plugins → Feed
+Breed Optimizer** on (the default), it sends your umas here as you play:
 
-**From Trackside (recommended)** — in the overlay, open **Plugins → Export
-veterans (data.json)**. It writes `trackside_umas/data.json` next to the game.
+1. Open **Enhance → List** (Veteran List) once — that's your own umas.
+2. Open a **career start** screen — that's your friends' **borrowable parents**,
+   the rental half of the Breed Optimizer.
 
-**From UmaExtractor** — go to **Enhance → List** (Veteran List) in-game, run
-[UmaExtractor](https://github.com/xancia/UmaExtractor), and it writes `data.json`.
+Both come from packets the game already sends; the overlay just reads them and
+writes a trace into this app's data folder. No injection, no credentials, no
+proxy — this is what upstream needed Frida for.
 
-Either way, click **Import data.json** and pick the file.
+<details>
+<summary>Manual import instead (click to expand)</summary>
 
-> Both sources read only *your own* umas, so friends' borrowable parents aren't
-> available and the Breed Optimizer's rental pool will be empty. Upstream filled
-> that gap with the Frida path; this fork doesn't, on purpose.
+If you'd rather not run the overlay, the setup dialog accepts a `data.json`:
+from Trackside's **Plugins → Export veterans**, or from
+[UmaExtractor](https://github.com/xancia/UmaExtractor) with the game open at the
+Veteran List. Click **Import data.json** and pick the file.
+
+Note this route only carries *your own* umas — friends' borrowable parents come
+only from the overlay, so the optimizer's rental pool stays empty without it.
+
+</details>
 
 ### 2) Team Trials data
 

@@ -67,13 +67,18 @@ Both existed to reach data the overlay now provides directly:
 
 | Data | Was | Now |
 |------|-----|-----|
-| Inventory | Frida + Steam → game API | `data.json` (Trackside's veterans export, or UmaExtractor) |
+| Inventory | Frida + Steam → game API | Trackside's `breeding_trace` (automatic), or a `data.json` import |
+| Friends' borrowable parents | Frida + Steam → game API | Trackside's `breeding_trace` (automatic) |
 | Team Trials | mitmproxy capture | Trackside's own in-game capture → **Import in-game** |
 
-**Known gap:** friends' borrowable parents came *only* from the Frida path, so the
-Breed Optimizer's rental pool is empty here. The intended fix is to capture them
-passively in Trackside — it already hooks `DecompressResponse`, and that list
-arrives in a normal packet — rather than reintroduce injection.
+Friends' borrowable parents were the one real gap, since they came *only* from the
+Frida path. They're now read passively: they ride in on the career-start
+(`pre_single_mode/index`) response as `succession_trained_chara_data`, which the
+overlay's existing `DecompressResponse` hook already sees. It writes this app's own
+trace format straight into `breeding/`, so `find_trace()` picks it up with no import
+step. See `breeding_trace.rs` in the overlay.
+
+That closes the loop: **nothing here needs injection or credentials any more.**
 
 ## Files removed
 
